@@ -3,6 +3,7 @@
 import { useEffect } from 'react';
 import { useRouter } from "next/navigation";
 import { authStore } from "../../stores/auth.store";
+import ProtectedRoute from "../../components/ProtectedRouteProps";
 
 const Page = () => {
   const router = useRouter();
@@ -31,9 +32,11 @@ const Page = () => {
 
   // Пока идёт инициализация — показываем лоадер
   return (
-    <div className="flex items-center justify-center min-h-screen">
-      <div>Проверка авторизации...</div>
-    </div>
+    <ProtectedRoute>
+      <div className="flex items-center justify-center min-h-screen">
+        <div>Проверка авторизации...</div>
+      </div>
+    </ProtectedRoute>
   );
 };
 

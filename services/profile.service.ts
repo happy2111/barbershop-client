@@ -37,13 +37,12 @@ export const profileService = {
   },
 
   // Обновить личные данные
-  async updateProfile(data: {
-    name?: string;
-    photo?: string;
-    description?: string;
-    skills?: string;
-  }) {
-    return api.patch("/profile", data).then((res) => res.data);
+  // src/services/profile.service.ts
+  async updateProfile(data: FormData | { name?: string; photo?: string; description?: string; skills?: string }) {
+    const isFormData = data instanceof FormData;
+    return api.patch("/profile", data, {
+      headers: isFormData ? { "Content-Type": "multipart/form-data" } : {},
+    }).then((res) => res.data);
   },
 
   // Расписание

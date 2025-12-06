@@ -18,6 +18,8 @@ import {Calendar, Clock, Pencil, Trash2} from "lucide-react";
 
 import ProfilePersonalInfo from "@/components/profile/ProfilePersonalInfo";
 import ProfileServices from "@/components/profile/ProfileServices";
+import {toast} from "sonner";
+import ProtectedRoute from "@/components/ProtectedRouteProps";
 
 const daysOfWeek = [
   "Воскресенье", "Понедельник", "Вторник",
@@ -31,11 +33,14 @@ export default function SpecialistProfilePage() {
   const [editingInfo, setEditingInfo] = useState(false);
   const [editingSchedule, setEditingSchedule] = useState<number | null>(null);
 
+  const [isUploadingPhoto, setIsUploadingPhoto] = useState(false);
+
   const [formData, setFormData] = useState({
     name: "",
     photo: "",
     description: "",
-    skills: ""
+    skills: "",
+    photoFile: null as File | null, // ← НОВОЕ ПОЛЕ ДЛЯ ФАЙЛА
   });
 
   const [scheduleForm, setScheduleForm] = useState<ScheduleDto>({
@@ -69,6 +74,7 @@ export default function SpecialistProfilePage() {
         photo: prof.photo || "",
         description: prof.description || "",
         skills: prof.skills || "",
+        photoFile: null, // ← всегда null при загрузке
       });
 
     } catch {
@@ -78,15 +84,6 @@ export default function SpecialistProfilePage() {
     }
   };
 
-  const saveProfileInfo = async () => {
-    try {
-      await profileService.updateProfile(formData);
-      setProfile({...profile, ...formData});
-      setEditingInfo(false);
-    } catch {
-      alert("Ошибка сохранения профиля");
-    }
-  };
 
   const saveSchedule = async (day?: number) => {
     const dto = {...scheduleForm, ...(day !== undefined && {day_of_week: day})};
@@ -235,19 +232,48 @@ export default function SpecialistProfilePage() {
 
   // --------------------------
 
+
+// Обнови saveProfileInfo
+  const saveProfileInfo = async () => {
+    setIsUploadingPhoto(true);
+    try {
+      const payload = new FormData();
+      payload.append("name", formData.name);
+      if (formData.description) payload.append("description", formData.description);
+      if (formData.skills) payload.append("skills", formData.skills);
+      if (formData.photoFile) {
+        payload.append("photo", formData.photoFile); // ← отправляем файл
+      }
+
+      await profileService.updateProfile(payload);
+      await loadData();
+      setEditingInfo(false);
+      toast.success("Профиль обновлён!");
+    } catch (err: any) {
+      toast.error(err.response?.data?.message || "Ошибка сохранения");
+    } finally {
+      setIsUploadingPhoto(false);
+    }
+  };
+
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-black py-8 px-4">
+      <div className="min-h-screen bg-gray-50 dark:bg-black py-8 px-4">
       <div className="max-w-5xl mx-auto space-y-8">
 
         <ProfilePersonalInfo
           profile={profile}
           editingInfo={editingInfo}
           setEditingInfo={setEditingInfo}
-          formData={formData}
-          setFormData={setFormData}
+          formData={{
+            name: formData.name,
+            description: formData.description,
+            skills: formData.skills,
+            photoFile: formData.photoFile, // ← передаём файл
+          }}
+          setFormData={(data) => setFormData({ ...formData, ...data })}
           handleSaveInfo={saveProfileInfo}
+          isUploadingPhoto={isUploadingPhoto}
         />
-
         <ProfileServices profile={profile}/>
 
         {/* Расписание */}
@@ -381,5 +407,6 @@ export default function SpecialistProfilePage() {
 
       </div>
     </div>
+
   );
 }
