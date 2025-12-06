@@ -124,7 +124,7 @@ export default observer(function BookingPage() {
                     ? "border-primary shadow-xl ring-2 ring-primary/30"
                     : "border-border hover:border-primary/50"}`}
                 >
-                  <img src={s.photo || "/placeholder.jpg"} alt={s.name} className="w-full h-48 object-cover" />
+                  <img src={`http://localhost:5000${s.photo}`} alt={s.name} className="w-full h-48 object-cover" />
                   <div className="p-4">
                     <h3 className="font-medium text-lg">{s.name}</h3>
                     <p className="text-sm text-muted-foreground">{s.duration_min} мин</p>

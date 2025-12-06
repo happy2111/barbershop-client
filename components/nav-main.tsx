@@ -1,8 +1,5 @@
 "use client"
 
-import { IconCirclePlusFilled, IconMail, type Icon } from "@tabler/icons-react"
-
-import { Button } from "@/components/ui/button"
 import {
   SidebarGroup,
   SidebarGroupContent,
@@ -18,7 +15,7 @@ export function NavMain({
   items: {
     title: string
     url: string
-    icon: Icon
+    icon: React.ComponentType<any>
   }[]
 }) {
   return (

@@ -37,6 +37,7 @@ import { Label } from "@/components/ui/label";
 
 import { serviceCategoryService, ServiceCategory } from "@/services/service-category.service";
 import { FolderOpen, Edit, Trash2, Plus, Search } from "lucide-react";
+import ProtectedAdminRoute from "@/components/ProtectedAdminRoute";
 
 export default function ServiceCategoriesPage() {
   const [categories, setCategories] = useState<ServiceCategory[]>([]);
@@ -168,14 +169,14 @@ export default function ServiceCategoriesPage() {
   });
 
   return (
-    <>
+    <ProtectedAdminRoute>
       <div className="container mx-auto py-8 px-4">
         <Card>
           <CardHeader>
             <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
               <CardTitle className="text-2xl font-bold">Категории услуг</CardTitle>
 
-              <div className="flex items-center gap-4">
+              <div className="flex flex-wrap flex-wrap items-center gap-4">
                 <div className="relative">
                   <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                   <Input
@@ -286,6 +287,6 @@ export default function ServiceCategoriesPage() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
-    </>
+    </ProtectedAdminRoute>
   );
 }

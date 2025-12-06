@@ -42,6 +42,7 @@ import { serviceService, Service } from "@/services/service.service";
 import { specialistServiceService } from "@/services/specialist-service.service";
 
 import { ArrowLeft, Scissors, Clock, DollarSign, Search, Plus, Trash2 } from "lucide-react";
+import ProtectedAdminRoute from "@/components/ProtectedAdminRoute";
 
 export default function SpecialistServicesPage() {
   const params = useParams();
@@ -210,7 +211,7 @@ export default function SpecialistServicesPage() {
   }
 
   return (
-    <>
+    <ProtectedAdminRoute>
       <div className="container mx-auto py-8 px-4">
         <div className="mb-8">
           <Button variant="ghost" onClick={() => router.back()} className="mb-4">
@@ -320,6 +321,6 @@ export default function SpecialistServicesPage() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
-    </>
+    </ProtectedAdminRoute>
   );
 }

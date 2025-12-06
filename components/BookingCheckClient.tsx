@@ -3,10 +3,13 @@
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Copy, Share2, ImageDown } from "lucide-react";
-import html2canvas from "html2canvas";
 import {useEffect, useState} from "react";
 import {bookingService} from "@/services/booking.service";
 import domtoimage from 'dom-to-image-more';
+
+import { format, parseISO } from "date-fns";
+import { uz } from "date-fns/locale";
+
 
 export default function BookingCheckClient({ id }: { id: number }) {
   const [booking, setBooking] = useState<any>(null);
@@ -96,7 +99,8 @@ export default function BookingCheckClient({ id }: { id: number }) {
             <span className="font-medium !border-none">{booking.specialist?.name}</span>
 
             <span className="text-muted-foreground !border-none">Дата:</span>
-            <span className="font-medium !border-none">{booking.date}</span>
+            {booking.date ? format(parseISO(booking.date), "dd MMMM yyyy", { locale: uz }) : "-"}
+
 
             <span className="text-muted-foreground !border-none">Время:</span>
             <span className="font-medium !border-none">

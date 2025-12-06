@@ -44,7 +44,15 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { toast } from "sonner";
 
 import { bookingService, Booking, BookingStatus } from "@/services/booking.service";
-import { MoreHorizontal, Search, Calendar, Clock, User, Scissors } from "lucide-react";
+import {
+  MoreHorizontal,
+  Search,
+  Calendar,
+  Clock,
+  User,
+  Scissors,
+  PhoneCall
+} from "lucide-react";
 import ProtectedAdminRoute from "@/components/ProtectedAdminRoute";
 
 export default function BookingsPage() {
@@ -129,6 +137,17 @@ export default function BookingsPage() {
         <div className="flex items-center gap-2">
           <User className="w-4 h-4 text-muted-foreground" />
           {row.original.client?.name || "Имя не указано"}
+
+        </div>
+      ),
+    },
+    {
+      accessorKey: "client",
+      header: "Телефон",
+      cell: ({ row }: {row: any}) => (
+        <div className="flex items-center gap-2">
+          <PhoneCall className="w-4 h-4 text-muted-foreground" />
+          {row.original.client?.phone || "Имя не указано"}
         </div>
       ),
     },
@@ -215,7 +234,7 @@ export default function BookingsPage() {
           <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
             <CardTitle className="text-2xl font-bold">Управление бронированиями</CardTitle>
 
-            <div className="flex items-center gap-4">
+            <div className="flex flex-wrap items-center gap-4">
               <div className="relative">
                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
                 <Input
