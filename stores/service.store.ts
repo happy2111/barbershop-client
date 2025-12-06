@@ -44,6 +44,22 @@ class ServiceStore {
       this.services = this.services.filter(s => s.id !== id);
     });
   }
+
+
+  async fetchByCategory(categoryId: number) {
+    this.loading = true;
+    try {
+      const data = await serviceService.getByCategory(categoryId);
+      runInAction(() => {
+        this.services = data;
+      });
+    } finally {
+      runInAction(() => {
+        this.loading = false;
+      });
+    }
+  }
+
 }
 
 export const serviceStore = new ServiceStore();

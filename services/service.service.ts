@@ -35,11 +35,12 @@ export const serviceService = {
   getAll() {
     return api.get<Service[]>("/service").then(res => res.data);
   },
-
   getById(id: number) {
     return api.get<Service>(`/service/${id}`).then(res => res.data);
   },
-
+  getByCategory(categoryId: any) {
+    return api.get<Service[]>(`/service/by-category/${categoryId}`).then(res => res.data);
+  },
   create(data: CreateServiceDto) {
     return api.post<Service>("/service", data).then(res => res.data);
   },

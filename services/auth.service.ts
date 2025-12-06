@@ -6,7 +6,7 @@ export const authService = {
   },
 
   refresh() {
-    return api.get("/auth/refresh"); // refresh token берётся из cookie
+    return api.post("/auth/refresh"); // refresh token берётся из cookie
   },
 
   logout() {

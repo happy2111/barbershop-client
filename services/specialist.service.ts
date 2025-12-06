@@ -60,6 +60,9 @@ export const specialistService = {
   update(id: number, data: UpdateSpecialistDto) {
     return api.patch<Specialist>(`/specialist/${id}`, data).then(res => res.data);
   },
+  getByService(serviceId: any) {
+    return api.get<Specialist[]>(`/specialist/by-service/${serviceId}`).then(res => res.data);
+  },
 
   remove(id: number) {
     return api.delete<void>(`/specialist/${id}`).then(res => res.data);

@@ -45,5 +45,11 @@ export const scheduleService = {
 
   remove(id: number) {
     return api.delete<void>(`/schedule/${id}`).then(res => res.data);
-  }
+  },
+
+  async getFreeSlots(specialistId: number, serviceId: number, date: string) {
+    return api.get<{ start: string; end: string }[]>(
+      `/schedule/${specialistId}/free-slots?serviceId=${serviceId}&date=${date}`
+    ).then(res => res.data);
+  },
 };

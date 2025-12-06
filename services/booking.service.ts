@@ -1,6 +1,5 @@
 import api from "./axiosInstance";
 
-// Используем enum, как в Prisma
 export enum BookingStatus {
   PENDING = "PENDING",
   CONFIRMED = "CONFIRMED",
@@ -65,5 +64,13 @@ export const bookingService = {
 
   remove(id: number) {
     return api.delete<void>(`/booking/${id}`).then(res => res.data);
+  },
+
+  getFreeSlots(specialistId: number, serviceId: number, date: string) {
+    return api
+      .get(`/schedule/${specialistId}/free-slots`, {
+        params: { serviceId, date }
+      })
+      .then((res) => res.data);
   }
 };

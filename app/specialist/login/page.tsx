@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { authStore } from "@/stores/auth.store";
+
 import {
   Card,
   CardContent,
@@ -31,45 +32,61 @@ export default function SpecialistLoginPage() {
 
     if (ok) {
       toast.success("Успешный вход!");
-      router.push("/specialist/dashboard");
+      router.push("/specialist/profile");
     } else {
       toast.error("Неверный телефон или пароль");
     }
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50">
-      <Card className="w-full max-w-md">
+    <div className="min-h-screen flex items-center justify-center bg-background text-foreground">
+      <Card className="w-full max-w-md bg-card text-card-foreground border border-border shadow-sm">
         <CardHeader>
-          <CardTitle>Вход для специалиста</CardTitle>
+          <CardTitle className="text-xl font-bold text-foreground">
+            Вход для специалиста
+          </CardTitle>
         </CardHeader>
+
         <CardContent>
           <form className="space-y-4" onSubmit={handleSubmit}>
+            {/* PHONE */}
             <div className="space-y-1">
-              <Label htmlFor="phone">Телефон</Label>
+              <Label htmlFor="phone" className="text-foreground">
+                Телефон
+              </Label>
               <Input
                 id="phone"
                 type="text"
                 placeholder="+998901234567"
                 value={phone}
                 onChange={(e) => setPhone(e.target.value)}
+                className="bg-input border border-input text-foreground"
                 required
               />
             </div>
 
+            {/* PASSWORD */}
             <div className="space-y-1">
-              <Label htmlFor="password">Пароль</Label>
+              <Label htmlFor="password" className="text-foreground">
+                Пароль
+              </Label>
               <Input
                 id="password"
                 type="password"
                 placeholder="••••••"
                 value={password}
-                onChange={(e: any) => setPassword(e.target.value)}
+                onChange={(e) => setPassword(e.target.value)}
+                className="bg-input border border-input text-foreground"
                 required
               />
             </div>
 
-            <Button type="submit" className="w-full" disabled={loading}>
+            {/* BUTTON */}
+            <Button
+              type="submit"
+              className="w-full bg-primary text-primary-foreground hover:bg-primary/90"
+              disabled={loading}
+            >
               {loading ? "Вход..." : "Войти"}
             </Button>
           </form>
