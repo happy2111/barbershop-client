@@ -153,7 +153,7 @@ export default observer(function BookingPage() {
                     : "border-border hover:border-primary/50 hover:shadow-lg"}`}
                 >
                   <img
-                    src={sp.photo || "/placeholder.jpg"}
+                    src={`http://localhost:5000${sp.photo}`}
                     alt={sp.name}
                     className="w-full h-48 object-cover bg-muted"
                   />

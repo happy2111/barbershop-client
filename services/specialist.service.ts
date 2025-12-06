@@ -53,12 +53,16 @@ export const specialistService = {
     return api.get<Specialist>(`/specialist/${id}`).then(res => res.data);
   },
 
-  create(data: CreateSpecialistDto) {
-    return api.post<Specialist>("/specialist", data).then(res => res.data);
+  create(data: CreateSpecialistDto | FormData) {
+    return api.post<Specialist>("/specialist", data, {
+      headers: data instanceof FormData ? { "Content-Type": "multipart/form-data" } : {},
+    }).then(res => res.data);
   },
 
-  update(id: number, data: UpdateSpecialistDto) {
-    return api.patch<Specialist>(`/specialist/${id}`, data).then(res => res.data);
+  update(id: number, data: UpdateSpecialistDto | FormData) {
+    return api.patch<Specialist>(`/specialist/${id}`, data, {
+      headers: data instanceof FormData ? { "Content-Type": "multipart/form-data" } : {},
+    }).then(res => res.data);
   },
   getByService(serviceId: any) {
     return api.get<Specialist[]>(`/specialist/by-service/${serviceId}`).then(res => res.data);

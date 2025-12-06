@@ -35,11 +35,30 @@ const data = {
   },
   navMain: [
     {
-      title: "Playground",
-      url: "#",
+      title: "Bookings",
+      url: "/admin/bookings",
       icon: SquareTerminal,
     },
-
+    {
+      title: "Clients",
+      url: "/admin/clients",
+      icon: SquareTerminal,
+    },
+    {
+      title: "Services",
+      url: "/admin/services",
+      icon: SquareTerminal,
+    },
+    {
+      title: "Services Categories",
+      url: "/admin/services-categories",
+      icon: SquareTerminal,
+    },
+    {
+      title: "Specialists",
+      url: "/admin/specialists",
+      icon: SquareTerminal,
+    },
   ],
 }
 
