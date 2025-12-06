@@ -113,9 +113,6 @@ export default function SpecialistProfilePage() {
 
   if (loading) return <div className="p-8 text-center">Загрузка...</div>;
 
-  // --------------------------
-  // UI Handlers
-  // --------------------------
 
   const renderScheduleRow = (sch: any) => (
     <div

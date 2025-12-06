@@ -17,7 +17,9 @@ import { Label } from "@/components/ui/label";
 
 export default function SpecialistLoginPage() {
   const router = useRouter();
+
   const login = authStore((state) => state.login);
+  const { isLoading, accessToken, user } = authStore();
 
   const [phone, setPhone] = useState("");
   const [password, setPassword] = useState("");
@@ -27,15 +29,28 @@ export default function SpecialistLoginPage() {
     e.preventDefault();
     setLoading(true);
 
-    const ok = await login(phone, password);
-    setLoading(false);
 
-    if (ok) {
-      toast.success("Успешный вход!");
-      router.push("/specialist/profile");
-    } else {
+    const ok = await login(phone, password);
+
+    if (!ok) {
       toast.error("Неверный телефон или пароль");
+      return;
     }
+
+    setLoading(false);
+    toast.success("Успешный вход!");
+
+    const unsubscribe = authStore.subscribe((state) => {
+      if (state.user && state.accessToken) {
+        unsubscribe(); // отписываемся сразу
+
+        if (state.user.role === "ADMIN") {
+          router.replace("/admin");
+        } else {
+          router.replace("/specialist/profile");
+        }
+      }
+    });
   };
 
   return (
