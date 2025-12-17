@@ -44,7 +44,7 @@ export const serviceService = {
     return api.get<Service[]>(`/service/by-category/${categoryId}`).then(res => res.data);
   },
 
-  create(data: FormData) {
+  create(data: CreateServiceDto | FormData) {
     return api.post<Service>("/service", data, {
       headers: { "Content-Type": "multipart/form-data" },
     }).then(res => res.data);
