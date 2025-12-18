@@ -33,9 +33,9 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       enableSystem
       disableTransitionOnChange
     >
-        <div className="w-full">
-          <ModeToggle />
+        <div className="w-full mb-8">
           {children}
+          <ModeToggle />
         </div>
         <Toaster />
     </ThemeProvider>
