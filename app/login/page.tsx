@@ -29,29 +29,26 @@ export default function SpecialistLoginPage() {
     e.preventDefault();
     setLoading(true);
 
-
     const ok = await login(phone, password);
+
+    setLoading(false);
 
     if (!ok) {
       toast.error("Неверный телефон или пароль");
       return;
     }
 
-    setLoading(false);
     toast.success("Успешный вход!");
 
-    const unsubscribe = authStore.subscribe((state) => {
-      if (state.user && state.accessToken) {
-        unsubscribe(); // отписываемся сразу
+    const { user } = authStore.getState(); // получаем актуального пользователя
 
-        if (state.user.role === "ADMIN") {
-          router.replace("/admin");
-        } else {
-          router.replace("/specialist/profile");
-        }
-      }
-    });
+    if (user?.role === "ADMIN") {
+      router.replace("/admin");
+    } else {
+      router.replace("/specialist/profile");
+    }
   };
+
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-background text-foreground">

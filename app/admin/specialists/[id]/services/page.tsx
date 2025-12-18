@@ -133,7 +133,7 @@ export default function SpecialistServicesPage() {
       cell: ({ row }) => (
         <div className="w-12 h-12 rounded-md overflow-hidden border">
           {row.original.photo ? (
-            <img src={row.original.photo} alt="" className="w-full h-full object-cover" />
+            <img src={`${process.env.NEXT_PUBLIC_API_URL}${row.original.photo}`} alt="" className="w-full h-full object-cover" />
           ) : (
             <div className="w-full h-full bg-muted flex items-center justify-center">
               <Scissors className="w-6 h-6 text-muted-foreground" />

@@ -194,7 +194,7 @@ export default function ServicesPage() {
       cell: ({ row }) => (
         <div className="w-16 h-16 rounded-md overflow-hidden border">
           {row.original.photo ? (
-            <img src={`http://localhost:5000${row.original.photo}`} alt="" className="w-full h-full object-cover" />
+            <img src={`${process.env.NEXT_PUBLIC_API_URL}${row.original.photo}`} alt="" className="w-full h-full object-cover" />
           ) : (
             <div className="w-full h-full bg-muted flex items-center justify-center">
               <ImageIcon className="w-6 h-6 text-muted-foreground" />
@@ -220,8 +220,7 @@ export default function ServicesPage() {
       header: "Цена",
       cell: ({ row }) => (
         <div className="flex items-center gap-1 font-medium">
-          <DollarSign className="w-4 h-4" />
-          {row.original.price.toLocaleString()}
+          {row.original.price.toLocaleString()} сум
         </div>
       ),
     },

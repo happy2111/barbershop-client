@@ -27,7 +27,7 @@ const ProfileServices = ({
               className="border rounded-lg p-4 flex items-start gap-4"
             >
               {s.photo && <img
-                src={s.photo}
+                src={`${process.env.NEXT_PUBLIC_API_URL}${s.photo}`}
                 alt={s.name}
                 className="w-16 h-16 object-cover rounded"
               />}

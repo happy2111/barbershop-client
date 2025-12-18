@@ -1,4 +1,3 @@
-// app/admin/specialists/page.tsx
 "use client";
 
 import { useEffect, useState } from "react";
@@ -175,7 +174,7 @@ export default function SpecialistsPage() {
       cell: ({ row }) => (
         <div className="w-14 h-14 rounded-full overflow-hidden border-2 border-background">
           {row.original.photo ? (
-            <img src={`http://localhost:5000${row.original.photo}`} alt={row.original.name} className="w-full h-full object-cover" />
+            <img src={`${process.env.NEXT_PUBLIC_API_URL}${row.original.photo}`} alt={row.original.name} className="w-full h-full object-cover" />
           ) : (
             <div className="w-full h-full bg-muted flex items-center justify-center">
               <User className="w-8 h-8 text-muted-foreground" />

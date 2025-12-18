@@ -46,7 +46,7 @@ const ProfilePersonalInfo = ({
     }
   };
 
-  const currentPhoto = photoPreview || (profile.photo ? `http://localhost:5000${profile.photo}` : null);
+  const currentPhoto = photoPreview || (profile.photo ? `${process.env.NEXT_PUBLIC_API_URL}${profile.photo}` : null);
 
   return (
     <Card>

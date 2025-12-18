@@ -87,20 +87,23 @@ export default observer(function BookingPage() {
   return (
     <div className="min-h-screen bg-background py-8 px-4 text-foreground transition-colors">
       <div className="max-w-2xl mx-auto">
-        <div className="mb-8">
-          <div className="flex items-center justify-between">
-            {[1, 2, 3, 4, 5].map((s) => (
-              <div key={s} className="flex items-center">
+        <div className="mb-8 flex justify-center">
+          <div className="flex items-center w-full max-w-md">
+            {[1, 2, 3, 4, 5].map((s, idx) => (
+              <div key={s} className="flex items-center flex-1">
+                {/* Круг */}
                 <div
                   className={`w-10 h-10 rounded-full flex items-center justify-center text-primary-foreground font-bold transition-all shadow
-                  ${step >= s ? "bg-primary" : "bg-primary/20"}`}
+            ${step >= s ? "bg-primary" : "bg-primary/20"}`}
                 >
                   {s}
                 </div>
-                {s < 5 && (
+
+                {/* Полоска */}
+                {idx < 4 && (
                   <div
-                    className={`w-16 h-1 transition-all rounded-full mx-1
-                    ${step > s ? "bg-primary" : "bg-primary/20"}`}
+                    className={`h-1 flex-1 transition-all rounded-full mx-1
+              ${step > s ? "bg-primary" : "bg-primary/20"}`}
                   />
                 )}
               </div>
@@ -124,7 +127,7 @@ export default observer(function BookingPage() {
                     ? "border-primary shadow-xl ring-2 ring-primary/30"
                     : "border-border hover:border-primary/50"}`}
                 >
-                  <img src={`http://localhost:5000${s.photo}`} alt={s.name} className="w-full h-48 object-cover" />
+                  <img src={`${process.env.NEXT_PUBLIC_API_URL}${s.photo}`} alt={s.name} className="w-full h-48 object-cover" />
                   <div className="p-4">
                     <h3 className="font-medium text-lg">{s.name}</h3>
                     <p className="text-sm text-muted-foreground">{s.duration_min} мин</p>
@@ -153,7 +156,7 @@ export default observer(function BookingPage() {
                     : "border-border hover:border-primary/50 hover:shadow-lg"}`}
                 >
                   <img
-                    src={`http://localhost:5000${sp.photo}`}
+                    src={`${process.env.NEXT_PUBLIC_API_URL}${sp.photo}`}
                     alt={sp.name}
                     className="w-full h-48 object-cover bg-muted"
                   />
@@ -169,7 +172,7 @@ export default observer(function BookingPage() {
               ))}
             </div>
             <div className="flex gap-3 mt-8">
-              <Button variant="outline" onClick={prevStep} className="flex-1">
+              <Button variant="outline" onClick={prevStep} className="flex-1 py-6">
                 <ChevronLeft className="mr-2 h-4 w-4" /> Назад
               </Button>
             </div>
@@ -194,7 +197,7 @@ export default observer(function BookingPage() {
               />
             </div>
             <div className="flex gap-3 mt-8">
-              <Button variant="outline" onClick={prevStep} className="flex-1">
+              <Button variant="outline" onClick={prevStep} className="flex-1 py-6">
                 <ChevronLeft className="mr-2 h-4 w-4" /> Назад
               </Button>
             </div>
@@ -230,7 +233,7 @@ export default observer(function BookingPage() {
             )}
 
             <div className="flex gap-3 mt-8">
-              <Button variant="outline" onClick={prevStep} className="flex-1">
+              <Button variant="outline" onClick={prevStep} className="flex-1 py-6">
                 <ChevronLeft className="mr-2 h-4 w-4" /> Назад
               </Button>
             </div>
@@ -263,8 +266,8 @@ export default observer(function BookingPage() {
             </div>
 
             <div className="flex gap-3 mt-8">
-              <Button variant="outline" onClick={prevStep} className="flex-1">
-                <ChevronLeft className="mr-2 h-4 w-4" /> Назад
+              <Button variant="outline" onClick={prevStep} className="flex-1 py-6">
+                <ChevronLeft className="mr-2 h-4 w-4 " /> Назад
               </Button>
               <Button
                 onClick={handleCreateBooking}
