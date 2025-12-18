@@ -2,7 +2,7 @@
 
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Copy, Share2, ImageDown } from "lucide-react";
+import {Copy, Share2, ImageDown, X} from "lucide-react";
 import {useEffect, useState} from "react";
 import {bookingService} from "@/services/booking.service";
 import domtoimage from 'dom-to-image-more';
@@ -10,11 +10,52 @@ import domtoimage from 'dom-to-image-more';
 import { format, parseISO } from "date-fns";
 import { uz } from "date-fns/locale";
 
-
+interface StatusMeta {
+  label: string;
+  note: string;
+  color: string;
+}
 export default function BookingCheckClient({ id }: { id: number }) {
   const [booking, setBooking] = useState<any>(null);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
+  const [hasNote, setHasNote] = useState<boolean>(true);
+  const statusMap = new Map<string, StatusMeta>([
+    [
+      "PENDING",
+      {
+        label: "В ожидании",
+        note: "Ваша бронь находится в ожидании подтверждения. Пожалуйста, дождитесь изменения статуса или свяжитесь с барбером.",
+        color: "bg-yellow-900/10",
+      },
+    ],
+    [
+      "CONFIRMED",
+      {
+        label: "Подтверждена",
+        note: "Ваша бронь подтверждена. Пожалуйста, приходите в назначенное время.",
+        color: "bg-blue-900/10",
+      },
+    ],
+    [
+      "COMPLETED",
+      {
+        label: "Завершена",
+        note: "Услуга успешно оказана. Спасибо, что выбрали наш барбершоп!",
+        color: "bg-green-900/10",
+      },
+    ],
+    [
+      "CANCELLED",
+      {
+        label: "Отменена",
+        note: "Бронь была отменена. Вы можете создать новую запись в любое время.",
+        color: "bg-red-900/10",
+      },
+    ],
+  ]);
+
+
 
   useEffect(() => {
     bookingService
@@ -28,7 +69,7 @@ export default function BookingCheckClient({ id }: { id: number }) {
         setError("Не удалось загрузить бронь");
         setLoading(false);
       });
-  }, [id]); // ← не забываем зависимость!
+  }, [id]);
 
   console.log("data", booking);
 
@@ -77,6 +118,9 @@ export default function BookingCheckClient({ id }: { id: number }) {
   if (loading) return <div>Загрузка...</div>;
   if (error) return <div className="text-red-500">{error}</div>;
   if (!booking) return <div>Бронь не найдена</div>;
+
+  const status = statusMap.get(booking.status);
+
   return (
     <div className="w-full min-h-screen flex items-center justify-center p-4 !border-none">
       <Card id="booking-check" className="max-w-lg w-full h-full p-4 shadow-xl rounded-2xl">
@@ -108,7 +152,17 @@ export default function BookingCheckClient({ id }: { id: number }) {
             </span>
 
             <span className="text-muted-foreground !border-none">Статус:</span>
-            <span className="font-medium !border-none">{booking.status}</span>
+            <span className="font-medium !border-none">{status?.label}</span>
+
+            {hasNote && (
+              <span className={`${status?.color} relative col-span-2 p-3 rounded-md flex flex-col gap-1 !border-none`}>
+                <span className="absolute left-[calc(100%-40px)]" onClick={()=> setHasNote(false)}><X/></span>
+                <span className="text-muted-foreground !border-none">Примечание:</span>
+                <span className="font-medium !border-none">
+                  {status?.note}
+                </span>
+              </span>
+            )}
           </div>
 
           <div className="flex gap-3 flex-wrap justify-center pt-4 !border-none ">
