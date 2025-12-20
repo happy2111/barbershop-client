@@ -2,7 +2,15 @@
 
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import {Copy, Share2, ImageDown, X} from "lucide-react";
+import {
+  Copy,
+  Share2,
+  ImageDown,
+  X,
+  Check,
+  ChevronsLeft,
+  House
+} from "lucide-react";
 import React, {useEffect, useState} from "react";
 import {bookingService} from "@/services/booking.service";
 import domtoimage from 'dom-to-image-more';
@@ -10,6 +18,7 @@ import domtoimage from 'dom-to-image-more';
 import { format, parseISO } from "date-fns";
 import { uz } from "date-fns/locale";
 import Link from "next/link";
+import {useRouter} from "next/navigation";
 
 interface StatusMeta {
   label: string;
@@ -21,6 +30,9 @@ export default function BookingCheckClient({ id }: { id: number }) {
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
   const [hasNote, setHasNote] = useState<boolean>(true);
+  const [copied, setCopied] = useState(false);
+  const router = useRouter()
+
   const statusMap = new Map<string, StatusMeta>([
     [
       "PENDING",
@@ -102,6 +114,8 @@ export default function BookingCheckClient({ id }: { id: number }) {
   };
 
   const handleCopyLink = async () => {
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
     await navigator.clipboard.writeText(window.location.href);
   };
 
@@ -123,8 +137,15 @@ export default function BookingCheckClient({ id }: { id: number }) {
   const status = statusMap.get(booking.status);
 
   return (
-    <div className="w-full min-h-screen flex flex-col gap-6 items-center justify-center p-4 !border-none">
-      <Card id="booking-check" className="max-w-lg w-full h-full p-4 shadow-xl rounded-2xl">
+    <div className="w-full min-h-screen relative flex flex-col gap-6 items-center justify-center p-4 !border-none">
+     <div className={"max-w-lg w-full flex items-center justify-between mb-4 !border-none"}>
+       <Link href="/" className="text-2xl font-bold">
+         Ramitan Barbershop
+       </Link>
+       <Button onClick={() => router.push("/")}> <House /> Главная страница</Button>
+     </div>
+
+      <Card id="booking-check" className="max-w-lg w-full h-full p-4 shadow-xl rounded-2xl relative">
         <CardHeader className="!border-none">
           <CardTitle className="text-center text-2xl !border-none">Подтверждение брони</CardTitle>
         </CardHeader>
@@ -157,7 +178,7 @@ export default function BookingCheckClient({ id }: { id: number }) {
 
             {hasNote && (
               <span className={`${status?.color} relative col-span-2 p-3 rounded-md flex flex-col gap-1 !border-none`}>
-                <span className="absolute left-[calc(100%-40px)]" onClick={()=> setHasNote(false)}><X/></span>
+                <span className="absolute left-[calc(100%-40px)] flex gap-2 !border-none transform transition-transform duration-150 active:scale-95 active:opacity-80" onClick={()=> setHasNote(false)}><X/></span>
                 <span className="text-muted-foreground !border-none">Примечание:</span>
                 <span className="font-medium !border-none">
                   {status?.note}
@@ -166,26 +187,40 @@ export default function BookingCheckClient({ id }: { id: number }) {
             )}
           </div>
 
-          <div className="flex gap-3 flex-wrap justify-center pt-4 !border-none ">
-            <Button onClick={handleScreenshot} className="flex gap-2 !border-none">
+          <div className="flex gap-3 flex-wrap justify-center pt-4 !border-none">
+            <Button
+              onClick={handleScreenshot}
+              className="flex gap-2 !border-none transform transition-transform duration-150 active:scale-95 active:opacity-80"
+            >
               <ImageDown className="!border-none" size={18} /> PNG
             </Button>
 
-            <Button variant="secondary" onClick={handleCopyLink} className="flex gap-2 !border-none">
-              <Copy className="!border-none" size={18} /> Копировать
+            <Button
+              variant="secondary"
+              onClick={handleCopyLink}
+              className="flex gap-2 !border-none transform transition-transform duration-150 active:scale-95 active:opacity-80"
+            >
+              {copied ? <Check size={18} /> : <Copy size={18} />}
+              {copied ? "Скопировано" : "Копировать"}
             </Button>
 
-            <Button variant="outline" onClick={handleShare} className="flex gap-2 !border-none">
+            <Button
+              variant="outline"
+              onClick={handleShare}
+              className="flex gap-2 !border-none transform transition-transform duration-150 active:scale-95 active:opacity-80"
+            >
               <Share2 className="!border-none" size={18} /> Поделиться
             </Button>
           </div>
+
         </CardContent>
       </Card>
-      <h1 className="text-2xl font-bold">
-        Ramitan Barbershop
-      </h1>
-      <Card className="max-w-lg w-full h-full p-4 shadow-xl rounded-2xl">
 
+
+      <Card className="max-w-lg w-full h-full p-4 shadow-xl rounded-2xl">
+        <CardHeader className="!border-none">
+          <CardTitle className="text-center text-2xl !border-none">Наш Адрес</CardTitle>
+        </CardHeader>
 
 
         <div
@@ -243,6 +278,10 @@ export default function BookingCheckClient({ id }: { id: number }) {
       </Card>
 
       <Card className="max-w-lg w-full h-full p-4 shadow-xl rounded-2xl">
+        <CardHeader className="!border-none">
+          <CardTitle className="text-center text-2xl !border-none">Наши отзывы</CardTitle>
+        </CardHeader>
+
 
         <div
           style={{
