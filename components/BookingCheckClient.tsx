@@ -3,12 +3,13 @@
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import {Copy, Share2, ImageDown, X} from "lucide-react";
-import {useEffect, useState} from "react";
+import React, {useEffect, useState} from "react";
 import {bookingService} from "@/services/booking.service";
 import domtoimage from 'dom-to-image-more';
 
 import { format, parseISO } from "date-fns";
 import { uz } from "date-fns/locale";
+import Link from "next/link";
 
 interface StatusMeta {
   label: string;
@@ -122,7 +123,7 @@ export default function BookingCheckClient({ id }: { id: number }) {
   const status = statusMap.get(booking.status);
 
   return (
-    <div className="w-full min-h-screen flex items-center justify-center p-4 !border-none">
+    <div className="w-full min-h-screen flex flex-col gap-6 items-center justify-center p-4 !border-none">
       <Card id="booking-check" className="max-w-lg w-full h-full p-4 shadow-xl rounded-2xl">
         <CardHeader className="!border-none">
           <CardTitle className="text-center text-2xl !border-none">Подтверждение брони</CardTitle>
@@ -180,6 +181,120 @@ export default function BookingCheckClient({ id }: { id: number }) {
           </div>
         </CardContent>
       </Card>
+      <h1 className="text-2xl font-bold">
+        Ramitan Barbershop
+      </h1>
+      <Card className="max-w-lg w-full h-full p-4 shadow-xl rounded-2xl">
+
+
+
+        <div
+          style={{
+            position: 'relative',
+            overflow: 'hidden',
+            borderRadius: '8px', // скругление всего контейнера
+            width: '100%',
+            maxWidth: '560px', // адаптивная ширина
+          }}
+        >
+          <a
+            href="https://yandex.uz/maps/org/197913283981/?utm_medium=mapframe&utm_source=maps"
+            style={{
+              color: '#eee',
+              fontSize: '12px',
+              position: 'absolute',
+              top: 0,
+              left: '8px', // чтобы текст не прилегал к краю
+              zIndex: 2,
+              borderRadius: '8px',
+            }}
+          >
+            Pdp University
+          </a>
+
+          <a
+            href="https://yandex.uz/maps/10335/tashkent/category/university/184106140/?utm_medium=mapframe&utm_source=maps"
+            style={{
+              color: '#eee',
+              fontSize: '12px',
+              position: 'absolute',
+              top: '24px', // чуть ниже первого
+              left: '8px',
+              zIndex: 2,
+            }}
+          >
+            ВУЗ в Ташкенте
+          </a>
+
+          <iframe
+            src="https://yandex.uz/map-widget/v1/?ll=69.213544%2C41.231232&mode=search&oid=197913283981&ol=biz&z=16"
+            width="100%"
+            height="400"
+            frameBorder={0}
+            allowFullScreen
+            style={{
+              display: 'block',
+              border: '1px solid #e6e6e6',
+              borderRadius: '8px', // скругление iframe
+              boxSizing: 'border-box',
+            }}
+          ></iframe>
+        </div>
+      </Card>
+
+      <Card className="max-w-lg w-full h-full p-4 shadow-xl rounded-2xl">
+
+        <div
+          style={{
+            width: '100%',
+            maxWidth: '560px',
+            aspectRatio: '560 / 800', // сохраняет пропорции
+            overflow: 'hidden',
+            position: 'relative',
+          }}
+        >
+          <iframe
+            style={{
+              width: '100%',
+              height: '100%',
+              border: '1px solid #e6e6e6',
+              borderRadius: '8px',
+              boxSizing: 'border-box',
+            }}
+            src="https://yandex.ru/maps-reviews-widget/197913283981?comments"
+            title="Yandex Reviews"
+          ></iframe>
+
+          <a
+            href="https://yandex.uz/maps/org/197913283981/"
+            target="_blank"
+            rel="noopener noreferrer"
+            style={{
+              textDecoration: 'none',
+              color: '#b3b3b3',
+              fontSize: '10px',
+              fontFamily: 'YS Text, sans-serif',
+              position: 'absolute',
+              bottom: '8px',
+              width: '100%',
+              textAlign: 'center',
+              left: 0,
+              overflow: 'hidden',
+              textOverflow: 'ellipsis',
+              display: 'block',
+              maxHeight: '14px',
+              whiteSpace: 'nowrap',
+              padding: '0 16px',
+              boxSizing: 'border-box',
+            }}
+          >
+            Pdp University на карте Ташкента — Яндекс Карты
+          </a>
+        </div>
+
+
+      </Card>
+
     </div>
   );
 }

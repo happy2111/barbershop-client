@@ -51,7 +51,7 @@ export default function SpecialistLoginPage() {
 
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-background text-foreground">
+    <div className="min-h-screen flex items-center justify-center bg-background text-foreground p-4">
       <Card className="w-full max-w-md bg-card text-card-foreground border border-border shadow-sm">
         <CardHeader>
           <CardTitle className="text-xl font-bold text-foreground">

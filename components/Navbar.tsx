@@ -2,8 +2,8 @@
 
 import React, { useState } from 'react'
 import { Button } from "@/components/ui/button"
-import { ChevronUp, Menu } from "lucide-react"
-import { useRouter } from "next/navigation"
+import {ChevronUp, LogIn, Menu, User} from "lucide-react"
+import {usePathname, useRouter} from "next/navigation"
 import Link from "next/link"
 import { authStore } from "@/stores/auth.store"
 
@@ -13,6 +13,12 @@ const Navbar = () => {
 
   const isAuthenticated = authStore(state => state.isAuth())
   const user = authStore(state => state.user)
+
+  const pathname = usePathname()
+
+  if (pathname !== '/' && !pathname.startsWith('/specialist') && !pathname.startsWith('/login')) {
+    return null
+  }
 
   return (
     <div className="bg-background py-8 px-4 text-foreground">
@@ -45,6 +51,7 @@ const Navbar = () => {
                   setIsMenuOpen(false)
                 }}
               >
+                <User/>
                 Профиль мастера
               </Button>
             ) : (
@@ -54,6 +61,7 @@ const Navbar = () => {
                   setIsMenuOpen(false)
                 }}
               >
+                <LogIn/>
                 Войти (только для мастеров)
               </Button>
             )}

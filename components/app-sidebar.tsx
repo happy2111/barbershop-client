@@ -4,7 +4,7 @@ import * as React from "react"
 import {
   BookOpen,
   Bot,
-  Frame,
+  Frame, Scissors,
   Settings2,
   SquareTerminal,
   User
@@ -22,11 +22,11 @@ import {
 
 export function AppSidebar(props: React.ComponentProps<typeof Sidebar>) {
   const navMain = [
-    { title: "Bookings", url: "/admin/bookings", icon: BookOpen },
-    { title: "Clients", url: "/admin/clients", icon: Bot },
-    { title: "Services", url: "/admin/services", icon: Frame },
-    { title: "Service Categories", url: "/admin/services-categories", icon: Settings2 },
-    { title: "Specialists", url: "/admin/specialists", icon: User },
+    { title: "Бронирование", url: "/admin/bookings", icon: BookOpen },
+    { title: "Клиенты", url: "/admin/clients", icon: User },
+    { title: "Услуги", url: "/admin/services", icon: Frame },
+    { title: "Категории услуг", url: "/admin/services-categories", icon: Settings2 },
+    { title: "Специалисты", url: "/admin/specialists", icon: Scissors  },
   ]
 
   return (
