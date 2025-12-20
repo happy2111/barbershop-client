@@ -30,14 +30,14 @@ const Page = () => {
     init();
   }, [router]);
 
-  // Пока идёт инициализация — показываем лоадер
   return (
     <ProtectedRoute>
-      <div className="flex items-center justify-center min-h-screen">
-        <div>Проверка авторизации...</div>
+      <div className="flex flex-col items-center justify-center min-h-screen gap-4">
+        <div className="h-4 w-40 rounded bg-muted animate-pulse" />
+        <div className="h-4 w-24 rounded bg-muted animate-pulse" />
       </div>
     </ProtectedRoute>
-  );
+  )
 };
 
 export default Page;

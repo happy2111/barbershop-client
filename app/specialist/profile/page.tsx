@@ -257,8 +257,8 @@ export default function SpecialistProfilePage() {
   };
 
   return (
-      <div className="min-h-screen bg-gray-50 dark:bg-black py-8 px-4">
-      <div className="max-w-5xl mx-auto space-y-8">
+      <div className="min-h-screen bg-backgroud py-8 px-4">
+      <div className="max-w-2xl mx-auto space-y-8">
 
         <ProfilePersonalInfo
           profile={profile}

@@ -6,6 +6,9 @@ import { Toaster } from "@/components/ui/sonner"
 import {ThemeProvider} from "@/components/theme-provider";
 import {ModeToggle} from "@/components/ModeToggle";
 import {authStore} from "@/stores/auth.store";
+import {Nav} from "react-day-picker";
+import Navbar from "@/components/Navbar";
+import Footer from "@/components/Footer";
 
 
 const geistSans = Geist({
@@ -34,8 +37,10 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       disableTransitionOnChange
     >
         <div className="w-full mb-8">
+          <Navbar/>
           {children}
           <ModeToggle />
+          <Footer/>
         </div>
         <Toaster />
     </ThemeProvider>
