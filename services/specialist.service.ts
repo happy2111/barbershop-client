@@ -65,7 +65,8 @@ export const specialistService = {
     }).then(res => res.data);
   },
   getByService(serviceId: any) {
-    return api.get<Specialist[]>(`/specialist/by-service/${serviceId}`).then(res => res.data);
+    const hostname: string = window.location.hostname;
+    return api.get<Specialist[]>(`/specialist/by-service/${serviceId}` , {params: {hostname}}).then(res => res.data);
   },
 
   remove(id: number) {

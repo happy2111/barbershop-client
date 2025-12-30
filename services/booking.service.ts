@@ -51,7 +51,8 @@ export const bookingService = {
   },
 
   create(data: CreateBookingDto) {
-    return api.post<Booking>("/booking", data).then(res => res.data);
+    const hostname: string = window.location.hostname;
+    return api.post<Booking>("/booking", data, {params: {hostname}}).then(res => res.data);
   },
 
   update(id: number, data: UpdateBookingDto) {
@@ -67,9 +68,10 @@ export const bookingService = {
   },
 
   getFreeSlots(specialistId: number, serviceId: number, date: string) {
+    const hostname: string = window.location.hostname;
     return api
       .get(`/schedule/${specialistId}/free-slots`, {
-        params: { serviceId, date }
+        params: { serviceId, date, hostname }
       })
       .then((res) => res.data);
   }

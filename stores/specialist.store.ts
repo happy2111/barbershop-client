@@ -25,6 +25,8 @@ class SpecialistStore {
 
   async fetchByService(serviceId: number) {
     this.loading = true;
+    const hostname = window.location.hostname;
+
     try {
       const data = await specialistService.getByService(serviceId);
       runInAction(() => {
