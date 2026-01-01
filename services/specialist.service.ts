@@ -46,7 +46,8 @@ export const specialistService = {
   // Admin CRUD
   // =====================
   getAll() {
-    return api.get<Specialist[]>("/specialist").then(res => res.data);
+    const hostname: string = window.location.hostname;
+    return api.get<Specialist[]>("/specialist/public", {params: {hostname}}).then(res => res.data);
   },
 
   getById(id: number) {

@@ -39,7 +39,8 @@ export const serviceService = {
   },
 
   getById(id: number) {
-    return api.get<Service>(`/service/${id}`).then(res => res.data);
+    const hostname = window.location.hostname;
+    return api.get<Service>(`/service/${id}`, {params: {hostname}}).then(res => res.data);
   },
 
   getByCategory(categoryId: number) {

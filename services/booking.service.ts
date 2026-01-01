@@ -43,7 +43,8 @@ export interface UpdateBookingDto {
 
 export const bookingService = {
   getAll() {
-    return api.get<Booking[]>("/booking").then(res => res.data);
+    const hostname: string = window.location.hostname;
+    return api.get<Booking[]>("/booking", {params: {hostname}}).then(res => res.data);
   },
 
   getById(id: number) {
