@@ -3,7 +3,6 @@ import Cookies from "js-cookie";
 import { authService } from "@/services/auth.service";
 import {number} from "zod";
 
-// Добавляем тип для пользователя
 interface User {
   id: number;
   phone: string;
@@ -83,16 +82,18 @@ export const authStore = create<AuthState>((set, get) => ({
     }
   },
 
+  // Внутри authStore
   async refresh() {
+    if (get().isLoading && get().accessToken) return false; // Защита
+
     try {
       const res = await authService.refresh();
-      const { accessToken, user } = res.data; // <-- предполагаем, что refresh тоже возвращает user
-
+      const { accessToken, user } = res.data;
       get().setAuthData(accessToken, user);
-
       return true;
     } catch (e) {
       Cookies.remove("refresh_token");
+      // Сбрасываем всё, чтобы Middleware понял: сессия мертва
       set({ accessToken: null, user: null, isLoading: false });
       return false;
     }

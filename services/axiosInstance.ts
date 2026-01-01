@@ -66,35 +66,44 @@ api.interceptors.request.use((config: InternalAxiosRequestConfig) => {
 // ==========================================
 // Response interceptor (errors + refresh)
 // ==========================================
+// api.ts
+
 api.interceptors.response.use(
   (res) => res,
-
   async (error: AxiosError<any>) => {
     const originalRequest: any = error.config;
 
+    // 1. Извлекаем сообщение об ошибке
     const data = error.response?.data;
     const msg = toErrorMessage(data);
 
-    // Don't show toast for refresh
+    // 2. Если это ошибка логина — просто выводим тост и выходим
+    // Добавьте проверку на URL логина
+    if (originalRequest?.url?.includes("/auth/login")) {
+      toast.error(msg);
+      return Promise.reject(error);
+    }
+
     if (originalRequest?.url !== "/auth/refresh") {
       toast.error(msg);
     }
 
-    // ==========================
-    // REFRESH TOKEN LOGIC
-    // ==========================
-    if (error.response?.status === 401 && !originalRequest?._retry) {
+    // 3. REFRESH TOKEN LOGIC
+    // Добавляем условие: не пытаться рефрешить, если мы и так на странице логина
+    // или если это сам запрос рефреша
+    if (
+      error.response?.status === 401 &&
+      !originalRequest?._retry &&
+      !originalRequest?.url?.includes("/auth/refresh")
+    ) {
       originalRequest._retry = true;
 
       try {
         const ok = await authStore.getState().refresh();
-
         if (ok) {
-          // retry original request with new token
           return api(originalRequest);
         }
       } catch (e) {
-        // fail → logout completely
         authStore.getState().logout();
       }
     }
