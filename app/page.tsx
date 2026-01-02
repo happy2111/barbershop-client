@@ -11,11 +11,23 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Calendar } from "@/components/ui/calendar";
-import { ChevronLeft, ChevronRight } from "lucide-react";
+import {CheckCircle2, ChevronLeft, ChevronRight } from "lucide-react";
 import { format } from "date-fns";
 import {useRouter} from "next/navigation";
+import {PatternFormat} from "react-number-format";
+import { Label } from "@radix-ui/react-dropdown-menu";
+import {z} from "zod";
+import {toast} from "sonner";
 
 type Step = 1 | 2 | 3 | 4 | 5;
+
+const clientSchema = z.object({
+  name: z.string().min(2, "Имя слишком короткое"),
+  // Проверяем, что введено ровно 9 цифр после кода страны (+998)
+  phone: z.string().refine((val) => val.replace(/\D/g, "").length === 12, {
+    message: "Введите полный номер телефона",
+  }),
+});
 
 export default observer(function BookingPage() {
   const router = useRouter();
@@ -29,6 +41,28 @@ export default observer(function BookingPage() {
 
   const [timeSlots, setTimeSlots] = useState<{ start: string; end: string }[]>([]);
   const [loadingSlots, setLoadingSlots] = useState(false);
+
+  const [errors, setErrors] = useState<{ name?: string; phone?: string }>({});
+  const [createLoading, setCreateLoading] = useState(false)
+  const validate = () => {
+    const result = clientSchema.safeParse({ name: clientName, phone: clientPhone });
+    if (!result.success) {
+      const formattedErrors = result.error.flatten().fieldErrors;
+      setErrors({
+        name: formattedErrors.name?.[0],
+        phone: formattedErrors.phone?.[0],
+      });
+      return false;
+    }
+    setErrors({});
+    return true;
+  };
+
+  const onFinalSubmit = () => {
+    if (validate()) {
+      handleCreateBooking();
+    }
+  };
 
   useEffect(() => {
     serviceStore.fetchAll();
@@ -62,6 +96,7 @@ export default observer(function BookingPage() {
       return;
     }
 
+    setCreateLoading(true);
     try {
       const client: any = await clientStore.create({ name: clientName, phone: clientPhone });
       const res = await bookingService.create({
@@ -75,9 +110,11 @@ export default observer(function BookingPage() {
       });
 
       router.replace('booking/'+res.id);
-      alert("Запись успешно создана!");
+      toast.success("Запись успешно создался!")
     } catch (err) {
       alert("Ошибка при создании записи");
+    } finally {
+      setCreateLoading(false);
     }
   };
 
@@ -241,40 +278,89 @@ export default observer(function BookingPage() {
         )}
 
         {step === 5 && selectedTime && (
-          <Card className="p-6 shadow-xl bg-card border-border">
-            <h2 className="text-2xl font-semibold mb-6">Ваши данные</h2>
-
-            <div className="space-y-4 mb-8">
-              <Input
-                placeholder="Ваше имя"
-                value={clientName}
-                onChange={(e) => setClientName(e.target.value)}
-                className="h-12 text-lg"
-              />
-              <Input
-                placeholder="Телефон"
-                value={clientPhone}
-                onChange={(e) => setClientPhone(e.target.value)}
-                className="h-12 text-lg"
-              />
+          <Card className="p-8 shadow-2xl bg-card border-none animate-in fade-in slide-in-from-bottom-4 duration-500">
+            <div className="mb-8">
+              <h2 className="text-3xl font-bold tracking-tight">Ваши данные</h2>
+              <p className="text-muted-foreground mt-2">Оставьте контакты для подтверждения записи</p>
             </div>
 
-            <div className="bg-muted rounded-lg p-4 space-y-2 text-sm">
-              <p><strong>Услуга:</strong> {serviceStore.services.find((s) => s.id === selectedService)?.name}</p>
-              <p><strong>Специалист:</strong> {specialistStore.specialists.find((s) => s.id === selectedSpecialist)?.name}</p>
-              <p><strong>Дата и время:</strong> {format(new Date(selectedDate!), "dd.MM.yyyy")} {selectedTime.start} – {selectedTime.end}</p>
+            <div className="space-y-6 mb-8">
+              {/* Имя */}
+              <div className="space-y-2">
+                <Label htmlFor="name" className="text-sm font-semibold ml-1">Как к вам обращаться?</Label>
+                <Input
+                  id="name"
+                  placeholder="Александр"
+                  value={clientName}
+                  onChange={(e) => {
+                    setClientName(e.target.value);
+                    if (errors.name) setErrors({ ...errors, name: undefined });
+                  }}
+                  className={`h-14 text-lg rounded-2xl px-5 transition-all ${errors.name ? 'border-destructive ring-destructive/20' : 'focus:ring-primary/20'}`}
+                />
+                {errors.name && <p className="text-destructive text-xs ml-2 font-medium">{errors.name}</p>}
+              </div>
+
+              {/* Телефон с Маской */}
+              <div className="space-y-2">
+                <Label htmlFor="phone" className="text-sm font-semibold ml-1">Номер телефона</Label>
+                <PatternFormat
+                  id="phone"
+                  format="+998 (##) ###-##-##"
+                  mask="_"
+                  customInput={Input} // Используем ваш UI-компонент
+                  value={clientPhone}
+                  onValueChange={(values) => {
+                    setClientPhone(values.formattedValue);
+                    if (errors.phone) setErrors({ ...errors, phone: undefined });
+                  }}
+                  placeholder="+998 (__) ___-__-__"
+                  className={`h-14 text-xl rounded-2xl px-5 tracking-wider font-medium ${errors.phone ? 'border-destructive ring-destructive/20' : ''}`}
+                />
+                {errors.phone && <p className="text-destructive text-xs ml-2 font-medium">{errors.phone}</p>}
+              </div>
             </div>
 
-            <div className="flex gap-3 mt-8">
-              <Button variant="outline" onClick={prevStep} className="flex-1 py-6">
-                <ChevronLeft className="mr-2 h-4 w-4 " /> Назад
+            {/* Итоговая сводка */}
+            <div className="bg-muted/50 border border-border rounded-3xl p-6 mb-8 space-y-3 relative overflow-hidden">
+              <div className="absolute top-0 right-0 p-4 opacity-5">
+                <CheckCircle2 className="w-20 h-20" />
+              </div>
+              <div className="flex justify-between items-center">
+                <span className="text-muted-foreground">Услуга</span>
+                <span className="font-bold">{serviceStore.services.find((s) => s.id === selectedService)?.name}</span>
+              </div>
+              <div className="flex justify-between items-center">
+                <span className="text-muted-foreground">Мастер</span>
+                <span className="font-bold">{specialistStore.specialists.find((s) => s.id === selectedSpecialist)?.name}</span>
+              </div>
+              <div className="flex justify-between items-center pt-2 border-t border-dashed">
+                <span className="text-muted-foreground">Время</span>
+                <span className="text-primary font-black">
+            {format(new Date(selectedDate!), "dd.MM.yyyy")} | {selectedTime.start}
+        </span>
+              </div>
+            </div>
+
+            <div className="flex flex-col sm:flex-row gap-4">
+              <Button variant="ghost" onClick={prevStep} className="h-14 rounded-2xl flex-1 text-muted-foreground">
+                <ChevronLeft className="mr-2 h-5 w-5" /> Назад
               </Button>
               <Button
-                onClick={handleCreateBooking}
-                disabled={!clientName.trim() || !clientPhone.trim()}
-                className="flex-1 bg-primary hover:bg-primary/90 text-primary-foreground py-6 text-lg font-semibold"
+                disabled={createLoading}
+                onClick={onFinalSubmit}
+                className={"h-14 rounded-2xl flex-[2] bg-primary text-primary-foreground text-lg font-bold shadow-lg shadow-primary/20 hover:shadow-primary/40 transition-all"
+                  + `${createLoading && 'opacity-50'}`
+                }
               >
-                <ChevronRight className="ml-2 h-5 w-5" /> Записаться
+                {
+                  !createLoading ?
+                    ( <p className="flex items-center">Подтвердить запись <ChevronRight className="ml-2 h-5 w-5" /></p>) :
+                    (<p>Загружается...</p>)
+
+                }
+
+
               </Button>
             </div>
           </Card>
