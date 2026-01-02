@@ -4,6 +4,7 @@ import * as React from "react"
 import {
   BookOpen,
   Bot,
+  Cable,
   Frame, Scissors,
   Settings2,
   SquareTerminal,
@@ -27,6 +28,8 @@ export function AppSidebar(props: React.ComponentProps<typeof Sidebar>) {
     { title: "Услуги", url: "/admin/services", icon: Frame },
     { title: "Категории услуг", url: "/admin/services-categories", icon: Settings2 },
     { title: "Специалисты", url: "/admin/specialists", icon: Scissors  },
+    { title: "Интеграции", url: "/admin/integrations", icon: Cable  },
+
   ]
 
   return (
