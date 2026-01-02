@@ -66,4 +66,8 @@ export const profileService = {
   async getPastBookings() {
     return api.get("/profile/bookings/past").then((res) => res.data);
   },
+
+  async changePassword(oldPassword: string, newPassword?: string) {
+    return api.patch("/profile/change-password", {oldPassword, newPassword}).then((res) => res.data);
+  }
 };

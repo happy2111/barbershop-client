@@ -20,6 +20,7 @@ import ProfilePersonalInfo from "@/components/profile/ProfilePersonalInfo";
 import ProfileServices from "@/components/profile/ProfileServices";
 import {toast} from "sonner";
 import ProtectedRoute from "@/components/ProtectedRouteProps";
+import ChangePassword from "@/components/profile/ChangePassword";
 
 const daysOfWeek = [
   "Воскресенье", "Понедельник", "Вторник",
@@ -275,6 +276,8 @@ export default function SpecialistProfilePage() {
           isUploadingPhoto={isUploadingPhoto}
         />
         <ProfileServices profile={profile}/>
+
+        <ChangePassword/>
 
         {/* Расписание */}
         <Card>

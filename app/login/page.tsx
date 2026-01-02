@@ -76,8 +76,8 @@ export default function SpecialistLoginPage() {
           </CardTitle>
         </CardHeader>
 
-        <CardContent>
-          <form className="space-y-4" onSubmit={handleSubmit}>
+        <CardContent className="">
+          <form className="space-y-4 px-3" onSubmit={handleSubmit}>
             {/* PHONE */}
             <div className="space-y-1">
               <Label htmlFor="phone" className="text-foreground">
