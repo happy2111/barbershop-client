@@ -1,24 +1,34 @@
 "use client";
 
-import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
+import {Card, CardContent, CardHeader, CardTitle} from "@/components/ui/card";
+import {Button} from "@/components/ui/button";
 import {
-  Copy,
-  Share2,
-  ImageDown,
-  X,
+  ArrowLeft,
   Check,
-  ChevronsLeft,
-  House
+  Copy,
+  House,
+  ImageDown,
+  Share2,
+  X,
+  XCircle
 } from "lucide-react";
 import React, {useEffect, useState} from "react";
-import {bookingService} from "@/services/booking.service";
+import {bookingService, BookingStatus} from "@/services/booking.service";
 import domtoimage from 'dom-to-image-more';
 
-import { format, parseISO } from "date-fns";
-import { uz } from "date-fns/locale";
+import {format, parseISO} from "date-fns";
+import {uz} from "date-fns/locale";
 import Link from "next/link";
 import {useRouter} from "next/navigation";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle
+} from "@/components/ui/dialog";
+import {toast} from "sonner";
 
 interface StatusMeta {
   label: string;
@@ -31,7 +41,9 @@ export default function BookingCheckClient({ id }: { id: number }) {
   const [error, setError] = useState<string | null>(null);
   const [hasNote, setHasNote] = useState<boolean>(true);
   const [copied, setCopied] = useState(false);
-  const router = useRouter()
+  const router = useRouter();
+  const [showDialog, setShowDialog] = useState(false);
+
 
   const statusMap = new Map<string, StatusMeta>([
     [
@@ -129,10 +141,47 @@ export default function BookingCheckClient({ id }: { id: number }) {
     }
   };
 
+  const handleCancelBooking = async () => {
+    try {
+      await bookingService.updateStatus(id, BookingStatus.CANCELLED)
+      setShowDialog(false)
+      router.push("/")
+      toast.success("")
+    } catch (e) {
+      console.log(e)
+    }
+  }
+
 
   if (loading) return <div>Загрузка...</div>;
   if (error) return <div className="text-red-500">{error}</div>;
   if (!booking) return <div>Бронь не найдена</div>;
+  if (booking.status === BookingStatus.CANCELLED) {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-[80vh] p-6 text-center">
+        {/* Иконка с мягким красным фоном */}
+        <div className="flex items-center justify-center w-20 h-20 mb-6 rounded-full bg-red-50">
+          <XCircle className="w-12 h-12 text-red-500" />
+        </div>
+
+        {/* Текстовый блок */}
+        <h1 className="mb-2 text-2xl font-bold tracking-tight ">
+          Бронирование отменено
+        </h1>
+        <p className="max-w-xs mb-8 text-muted-foreground">
+          Данная запись была аннулирована. Если это ошибка, пожалуйста, свяжитесь с поддержкой.
+        </p>
+
+        {/* Действие */}
+        <Button asChild variant="outline" className="gap-2">
+          <Link href="/">
+            <ArrowLeft className="w-4 h-4" />
+            Вернуться на главную
+          </Link>
+        </Button>
+      </div>
+    );
+  }
 
   const status = statusMap.get(booking.status);
 
@@ -215,6 +264,10 @@ export default function BookingCheckClient({ id }: { id: number }) {
 
         </CardContent>
       </Card>
+
+      <Button onClick={() => {
+        setShowDialog(true)
+      }} className='bg-destructive active:scale-95  hover:bg-red-800 text-white'><X/> Отменить Бронь</Button>
 
 
       <Card className="max-w-lg w-full h-full p-4 shadow-xl rounded-2xl">
@@ -333,6 +386,34 @@ export default function BookingCheckClient({ id }: { id: number }) {
 
 
       </Card>
+
+
+      <Dialog open={showDialog} onOpenChange={setShowDialog}>
+        <DialogContent className="sm:max-w-[425px]">
+          <DialogHeader>
+            <DialogTitle>Отменить бронирование?</DialogTitle>
+            <DialogDescription>
+              Это действие необратимо. Вы не сможете восстановить запись после подтверждения.
+            </DialogDescription>
+          </DialogHeader>
+
+          <DialogFooter className="flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
+            <Button
+              variant="ghost"
+              onClick={() => setShowDialog(false)}
+            >
+              Назад
+            </Button>
+
+            <Button
+              variant="destructive"
+              onClick={handleCancelBooking}
+            >
+              Подтвердить отмену
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
 
     </div>
   );

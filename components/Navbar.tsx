@@ -46,23 +46,27 @@ const Navbar = () => {
 
             {isAuthenticated ? (
               <Button
+                variant="ghost" // Кнопка в меню лучше смотрится без заливки
+                className="justify-start gap-2 w-full"
                 onClick={() => {
                   router.push('/specialist/profile')
                   setIsMenuOpen(false)
                 }}
               >
-                <User/>
-                Профиль мастера
+                <User className="h-4 w-4" />
+                Личный кабинет
               </Button>
             ) : (
               <Button
+                variant="default"
+                className="justify-start gap-2 w-full"
                 onClick={() => {
                   router.push('/login')
                   setIsMenuOpen(false)
                 }}
               >
-                <LogIn/>
-                Войти (только для мастеров)
+                <LogIn className="h-4 w-4" />
+                Вход для мастеров
               </Button>
             )}
 
