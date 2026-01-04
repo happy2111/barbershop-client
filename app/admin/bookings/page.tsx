@@ -53,6 +53,7 @@ import {
   PhoneCall,
 } from "lucide-react";
 import ProtectedAdminRoute from "@/components/ProtectedAdminRoute";
+import {AdminBookingModal} from "@/components/BookingModal";
 
 export default function BookingsPage() {
   const [bookings, setBookings] = useState<Booking[]>([]);
@@ -60,6 +61,7 @@ export default function BookingsPage() {
   const [sorting, setSorting] = useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
   const [globalFilter, setGlobalFilter] = useState("");
+  const [showModal, setShowModal] = useState(false);
 
   useEffect(() => {
     loadBookings();
@@ -344,6 +346,7 @@ export default function BookingsPage() {
                     <SelectItem value="COMPLETED">Завершено</SelectItem>
                   </SelectContent>
                 </Select>
+                <Button onClick={() => setShowModal(true)}>Добавить</Button>
               </div>
             </div>
           </CardHeader>
@@ -424,6 +427,8 @@ export default function BookingsPage() {
           </CardContent>
         </Card>
       </div>
+
+      <AdminBookingModal isOpen={showModal} onClose={() => setShowModal(false)}/>
     </ProtectedAdminRoute>
   );
 }

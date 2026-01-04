@@ -16,6 +16,8 @@ export interface Booking {
   start_time: string; // "HH:MM"
   end_time: string;   // "HH:MM"
   status: BookingStatus;
+  isSystem: boolean;
+  reason?: string;
   client?: any;
   specialist?: any;
   service?: any;
@@ -75,5 +77,13 @@ export const bookingService = {
         params: { serviceId, date, hostname }
       })
       .then((res) => res.data);
+  },
+
+  block(date: string, start_time: string, end_time: string, reason?: string) {
+    return api.post(`/booking/block`, { date, start_time, end_time, reason }).then((res) => res.data);
+  },
+
+  getBlockedTimes() {
+    return api.get(`/booking/blocked`).then((res) => res.data);
   }
 };
