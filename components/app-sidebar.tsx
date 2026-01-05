@@ -5,7 +5,7 @@ import {
   BookOpen,
   Bot,
   Cable,
-  Frame, Scissors,
+  Frame, LayoutDashboard, NotebookPen, Scissors,
   Settings2,
   SquareTerminal,
   User
@@ -23,7 +23,8 @@ import {
 
 export function AppSidebar(props: React.ComponentProps<typeof Sidebar>) {
   const navMain = [
-    { title: "Бронирование", url: "/admin/bookings", icon: BookOpen },
+    { title: "Дашборд", url: "/admin/dashboard", icon: LayoutDashboard  },
+    { title: "Бронирование", url: "/admin/bookings", icon: NotebookPen },
     { title: "Клиенты", url: "/admin/clients", icon: User },
     { title: "Услуги", url: "/admin/services", icon: Frame },
     { title: "Категории услуг", url: "/admin/services-categories", icon: Settings2 },
