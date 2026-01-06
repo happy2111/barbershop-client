@@ -6,6 +6,7 @@ export interface TelegramStatus {
   chatId?: string;
   groupName?: string;
   linkedAt?: string;
+  enabled?: boolean;
 }
 
 export interface TelegramTokenResponse {

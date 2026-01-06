@@ -305,7 +305,7 @@ export default function ServicesPage() {
 
           </div>
         </div>
-        <div className="flex gap-2">
+        <div className="flex flex-wrap gap-2 mt-2">
           <Button
             variant="outline"
             size="sm"
