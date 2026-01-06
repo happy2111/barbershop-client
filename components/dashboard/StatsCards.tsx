@@ -12,7 +12,7 @@ import {
 } from "lucide-react";
 
 // Утилита для форматирования валюты UZS
-const formatUZS = (value: number | undefined) => {
+const formatUZS = (value: number | null | undefined) => {
   if (value === undefined || value === null) return "—";
   return new Intl.NumberFormat('ru-RU', {
     style: 'currency',
@@ -93,8 +93,6 @@ export function StatsCards() {
           value={card.value}
           subtitle={card.subtitle}
           icon={card.icon}
-          // Мы можем передать вариант стиля, если ваш MetricCard это поддерживает
-          className="hover:shadow-md transition-shadow duration-200"
           isLoading={isLoading[card.loadingKey] || false}
         />
       ))}

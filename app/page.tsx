@@ -287,7 +287,7 @@ export default observer(function BookingPage() {
             <div className="space-y-6 mb-8">
               {/* Имя */}
               <div className="space-y-2">
-                <Label htmlFor="name" className="text-sm font-semibold ml-1">Как к вам обращаться?</Label>
+                <Label className="text-sm font-semibold ml-1">Как к вам обращаться?</Label>
                 <Input
                   id="name"
                   placeholder="Александр"
@@ -303,7 +303,7 @@ export default observer(function BookingPage() {
 
               {/* Телефон с Маской */}
               <div className="space-y-2">
-                <Label htmlFor="phone" className="text-sm font-semibold ml-1">Номер телефона</Label>
+                <Label className="text-sm font-semibold ml-1">Номер телефона</Label>
                 <PatternFormat
                   id="phone"
                   format="+998 (##) ###-##-##"
