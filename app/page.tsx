@@ -24,7 +24,7 @@ type Step = 1 | 2 | 3 | 4 | 5;
 
 const clientSchema = z.object({
   name: z.string().min(2, "Имя слишком короткое"),
-  phone: z.string().length(13, "Введите полный номер телефона"), // Ровно 12 цифр
+  phone: z.string().length(9, "Введите полный номер телефона"), // Ровно 12 цифр
 });
 
 export default observer(function BookingPage() {
@@ -110,7 +110,7 @@ export default observer(function BookingPage() {
       // 1. Создаем (или получаем) клиента с данными Telegram
       const client = await clientStore.create({
         name: clientName,
-        phone: `+${clientPhone}`,
+        phone: `+998${clientPhone}`,
         telegramId: user?.id?.toString(),
         telegramUsername: user?.username,
         telegramFirstName: user?.first_name,
