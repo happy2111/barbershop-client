@@ -58,7 +58,6 @@ export function SpecialistsLoad() {
                 <Progress
                   value={spec.load}
                   className="h-2 bg-muted"
-                  // Если у вас кастомный прогресс-бар, можно менять цвет заливки в зависимости от нагрузки
                 />
               </div>
             );
