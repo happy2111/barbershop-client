@@ -32,7 +32,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           enableSystem
           disableTransitionOnChange
         >
-          <div className="w-full mb-8">
+          <div className="w-full mb-8 tg-safe-top">
             <Navbar/>
             {children}
             <ModeToggle />
