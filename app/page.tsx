@@ -24,10 +24,7 @@ type Step = 1 | 2 | 3 | 4 | 5;
 
 const clientSchema = z.object({
   name: z.string().min(2, "Имя слишком короткое"),
-  // Проверяем, что введено ровно 9 цифр после кода страны (+998)
-  phone: z.string().refine((val) => val.replace(/\D/g, "").length === 12, {
-    message: "Введите полный номер телефона",
-  }),
+  phone: z.string().length(12, "Введите полный номер телефона"), // Ровно 12 цифр
 });
 
 export default observer(function BookingPage() {
@@ -113,8 +110,7 @@ export default observer(function BookingPage() {
       // 1. Создаем (или получаем) клиента с данными Telegram
       const client = await clientStore.create({
         name: clientName,
-        phone: clientPhone,
-        // Мапим данные из объекта user, который предоставил Telegram
+        phone: `+${clientPhone}`,
         telegramId: user?.id?.toString(),
         telegramUsername: user?.username,
         telegramFirstName: user?.first_name,
@@ -333,14 +329,17 @@ export default observer(function BookingPage() {
                   id="phone"
                   format="+998 (##) ###-##-##"
                   mask="_"
-                  customInput={Input} // Используем ваш UI-компонент
+                  customInput={Input}
                   value={clientPhone}
                   onValueChange={(values) => {
-                    setClientPhone(values.formattedValue);
+                    // values.value — это только цифры, например "998901234567"
+                    setClientPhone(values.value);
                     if (errors.phone) setErrors({ ...errors, phone: undefined });
                   }}
                   placeholder="+998 (__) ___-__-__"
-                  className={`h-14 text-xl rounded-2xl px-5 tracking-wider font-medium ${errors.phone ? 'border-destructive ring-destructive/20' : ''}`}
+                  className={`h-14 text-xl rounded-2xl px-5 tracking-wider font-medium ${
+                    errors.phone ? 'border-destructive ring-destructive/20' : ''
+                  }`}
                 />
                 {errors.phone && <p className="text-destructive text-xs ml-2 font-medium">{errors.phone}</p>}
               </div>
