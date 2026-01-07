@@ -55,6 +55,11 @@ const api = axios.create({
 // ==========================================
 api.interceptors.request.use((config: InternalAxiosRequestConfig) => {
   const token = authStore.getState().accessToken;
+  const initData = window.Telegram?.WebApp?.initData;
+
+  if (initData) {
+    config.headers['x-telegram-init-data'] = initData;
+  }
 
   if (token) {
     config.headers.Authorization = `Bearer ${token}`;

@@ -10,6 +10,12 @@ export interface Client {
 export interface CreateClientDto {
   name?: string;
   phone: string;
+  // Добавляем поля Telegram
+  telegramId?: string;
+  telegramUsername?: string;
+  telegramFirstName?: string;
+  telegramLastName?: string;
+  telegramLang?: string;
 }
 
 export interface UpdateClientDto {

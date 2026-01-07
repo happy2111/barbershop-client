@@ -18,15 +18,13 @@ import {PatternFormat} from "react-number-format";
 import { Label } from "@radix-ui/react-dropdown-menu";
 import {z} from "zod";
 import {toast} from "sonner";
+import {useTelegram} from "@/context/TelegramContext";
 
 type Step = 1 | 2 | 3 | 4 | 5;
 
 const clientSchema = z.object({
   name: z.string().min(2, "Имя слишком короткое"),
-  // Проверяем, что введено ровно 9 цифр после кода страны (+998)
-  phone: z.string().refine((val) => val.replace(/\D/g, "").length === 12, {
-    message: "Введите полный номер телефона",
-  }),
+  phone: z.string().length(9, "Введите полный номер телефона"), // Ровно 12 цифр
 });
 
 export default observer(function BookingPage() {
@@ -44,6 +42,17 @@ export default observer(function BookingPage() {
 
   const [errors, setErrors] = useState<{ name?: string; phone?: string }>({});
   const [createLoading, setCreateLoading] = useState(false)
+
+  const { user, webApp, initData } = useTelegram();
+
+  useEffect(() => {
+    if (initData) {
+      console.log("Данные получены:", user, webApp, initData);
+    } else {
+      console.log("Ждем инициализации Telegram...");
+    }
+  }, [initData, user, webApp]); // Следим за изменениями
+
   const validate = () => {
     const result = clientSchema.safeParse({ name: clientName, phone: clientPhone });
     if (!result.success) {
@@ -92,13 +101,24 @@ export default observer(function BookingPage() {
 
   const handleCreateBooking = async () => {
     if (!selectedService || !selectedSpecialist || !selectedTime || !clientName || !clientPhone) {
-      alert("Заполните все поля");
+      toast.error("Заполните все поля"); // Используем toast вместо alert для красоты
       return;
     }
 
     setCreateLoading(true);
     try {
-      const client: any = await clientStore.create({ name: clientName, phone: clientPhone });
+      // 1. Создаем (или получаем) клиента с данными Telegram
+      const client = await clientStore.create({
+        name: clientName,
+        phone: `+998${clientPhone}`,
+        telegramId: user?.id?.toString(),
+        telegramUsername: user?.username,
+        telegramFirstName: user?.first_name,
+        telegramLastName: user?.last_name,
+        telegramLang: user?.language_code,
+      });
+
+      // 2. Создаем бронь
       const res = await bookingService.create({
         clientId: client.id,
         specialistId: selectedSpecialist,
@@ -109,10 +129,11 @@ export default observer(function BookingPage() {
         status: BookingStatus.PENDING,
       });
 
-      router.replace('booking/'+res.id);
-      toast.success("Запись успешно создался!")
-    } catch (err) {
-      alert("Ошибка при создании записи");
+      toast.success("Запись успешно создана!");
+      router.replace('/booking/' + res.id);
+    } catch (err: any) {
+      console.error(err);
+      toast.error(err.response?.data?.message || "Ошибка при создании записи");
     } finally {
       setCreateLoading(false);
     }
@@ -308,14 +329,17 @@ export default observer(function BookingPage() {
                   id="phone"
                   format="+998 (##) ###-##-##"
                   mask="_"
-                  customInput={Input} // Используем ваш UI-компонент
+                  customInput={Input}
                   value={clientPhone}
                   onValueChange={(values) => {
-                    setClientPhone(values.formattedValue);
+                    // values.value — это только цифры, например "998901234567"
+                    setClientPhone(values.value);
                     if (errors.phone) setErrors({ ...errors, phone: undefined });
                   }}
                   placeholder="+998 (__) ___-__-__"
-                  className={`h-14 text-xl rounded-2xl px-5 tracking-wider font-medium ${errors.phone ? 'border-destructive ring-destructive/20' : ''}`}
+                  className={`h-14 text-xl rounded-2xl px-5 tracking-wider font-medium ${
+                    errors.phone ? 'border-destructive ring-destructive/20' : ''
+                  }`}
                 />
                 {errors.phone && <p className="text-destructive text-xs ml-2 font-medium">{errors.phone}</p>}
               </div>
