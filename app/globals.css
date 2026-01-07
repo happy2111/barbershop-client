@@ -114,7 +114,7 @@
 }
 
 .tg-safe-top {
-  padding-top: calc(var(--tg-safe-top) + 10px);
+  padding-top: calc(var(--tg-safe-top) + 20px);
 }
 
 @layer base {
