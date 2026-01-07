@@ -18,6 +18,7 @@ import {PatternFormat} from "react-number-format";
 import { Label } from "@radix-ui/react-dropdown-menu";
 import {z} from "zod";
 import {toast} from "sonner";
+import {useTelegram} from "@/context/TelegramContext";
 
 type Step = 1 | 2 | 3 | 4 | 5;
 
@@ -44,6 +45,12 @@ export default observer(function BookingPage() {
 
   const [errors, setErrors] = useState<{ name?: string; phone?: string }>({});
   const [createLoading, setCreateLoading] = useState(false)
+
+  const { user, webApp, initData } = useTelegram();
+  useEffect(() => {
+    console.log(user, webApp, initData)
+  }, []);
+
   const validate = () => {
     const result = clientSchema.safeParse({ name: clientName, phone: clientPhone });
     if (!result.success) {

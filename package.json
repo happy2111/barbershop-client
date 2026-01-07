@@ -23,6 +23,8 @@
     "@radix-ui/react-tooltip": "^1.2.8",
     "@tabler/icons-react": "^3.35.0",
     "@tanstack/react-table": "^8.21.3",
+    "@telegram-apps/sdk": "^3.11.8",
+    "@telegram-apps/sdk-react": "^3.3.9",
     "axios": "^1.13.2",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
@@ -50,6 +52,8 @@
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4",
+    "@telegram-apps/types": "^2.0.3",
+    "@tma.js/types": "^1.0.2",
     "@types/js-cookie": "^3.0.6",
     "@types/node": "^20",
     "@types/react": "^19",
