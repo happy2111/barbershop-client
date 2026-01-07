@@ -24,7 +24,7 @@ type Step = 1 | 2 | 3 | 4 | 5;
 
 const clientSchema = z.object({
   name: z.string().min(2, "Имя слишком короткое"),
-  phone: z.string().length(12, "Введите полный номер телефона"), // Ровно 12 цифр
+  phone: z.string().length(13, "Введите полный номер телефона"), // Ровно 12 цифр
 });
 
 export default observer(function BookingPage() {
