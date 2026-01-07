@@ -16,6 +16,8 @@ export interface Booking {
   start_time: string; // "HH:MM"
   end_time: string;   // "HH:MM"
   status: BookingStatus;
+  isSystem: boolean;
+  reason?: string;
   client?: any;
   specialist?: any;
   service?: any;
@@ -43,7 +45,8 @@ export interface UpdateBookingDto {
 
 export const bookingService = {
   getAll() {
-    return api.get<Booking[]>("/booking").then(res => res.data);
+    const hostname: string = window.location.hostname;
+    return api.get<Booking[]>("/booking", {params: {hostname}}).then(res => res.data);
   },
 
   getById(id: number) {
@@ -51,7 +54,8 @@ export const bookingService = {
   },
 
   create(data: CreateBookingDto) {
-    return api.post<Booking>("/booking", data).then(res => res.data);
+    const hostname: string = window.location.hostname;
+    return api.post<Booking>("/booking", data, {params: {hostname}}).then(res => res.data);
   },
 
   update(id: number, data: UpdateBookingDto) {
@@ -67,10 +71,19 @@ export const bookingService = {
   },
 
   getFreeSlots(specialistId: number, serviceId: number, date: string) {
+    const hostname: string = window.location.hostname;
     return api
       .get(`/schedule/${specialistId}/free-slots`, {
-        params: { serviceId, date }
+        params: { serviceId, date, hostname }
       })
       .then((res) => res.data);
+  },
+
+  block(date: string, start_time: string, end_time: string, reason?: string) {
+    return api.post(`/booking/block`, { date, start_time, end_time, reason }).then((res) => res.data);
+  },
+
+  getBlockedTimes() {
+    return api.get(`/booking/blocked`).then((res) => res.data);
   }
 };

@@ -16,11 +16,13 @@ export interface UpdateServiceCategoryDto {
 
 export const serviceCategoryService = {
   getAll() {
-    return api.get<ServiceCategory[]>("/service-category").then(res => res.data);
+    const hostname: string = window.location.hostname;
+    return api.get<ServiceCategory[]>("/service-category", {params: {hostname}}).then(res => res.data);
   },
 
   getById(id: number) {
-    return api.get<ServiceCategory>(`/service-category/${id}`).then(res => res.data);
+    const hostname: string = window.location.hostname;
+    return api.get<ServiceCategory>(`/service-category/${id}`, {params: {hostname}}).then(res => res.data);
   },
 
   create(data: CreateServiceCategoryDto) {

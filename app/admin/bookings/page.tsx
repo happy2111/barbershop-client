@@ -1,4 +1,3 @@
-// app/admin/bookings/page.tsx
 "use client";
 
 import { useEffect, useState } from "react";
@@ -35,7 +34,7 @@ import {
 import {
   DropdownMenu,
   DropdownMenuContent,
-  DropdownMenuItem,
+  DropdownMenuItem, DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Badge } from "@/components/ui/badge";
@@ -51,9 +50,10 @@ import {
   Clock,
   User,
   Scissors,
-  PhoneCall
+  PhoneCall,
 } from "lucide-react";
 import ProtectedAdminRoute from "@/components/ProtectedAdminRoute";
+import {AdminBookingModal} from "@/components/BookingModal";
 
 export default function BookingsPage() {
   const [bookings, setBookings] = useState<Booking[]>([]);
@@ -61,6 +61,7 @@ export default function BookingsPage() {
   const [sorting, setSorting] = useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
   const [globalFilter, setGlobalFilter] = useState("");
+  const [showModal, setShowModal] = useState(false);
 
   useEffect(() => {
     loadBookings();
@@ -101,16 +102,13 @@ export default function BookingsPage() {
     return <Badge variant={variant}>{label}</Badge>;
   };
 
-  const columns: ColumnDef<Booking>[] = [
-    {
-      accessorKey: "id",
-      header: "ID",
-      size: 70,
-    },
+  // ─── Desktop Table Columns ────────────────────────────────────────────────
+  const desktopColumns: ColumnDef<Booking>[] = [
+    { accessorKey: "id", header: "ID", size: 70 },
     {
       accessorKey: "date",
       header: "Дата",
-      cell: ({ row }: {row: any}) => {
+      cell: ({ row }) => {
         const date = new Date(row.original.date);
         return (
           <div className="flex items-center gap-2">
@@ -123,7 +121,7 @@ export default function BookingsPage() {
     {
       accessorKey: "start_time",
       header: "Время",
-      cell: ({ row }: {row: any}) => (
+      cell: ({ row }) => (
         <div className="flex items-center gap-2">
           <Clock className="w-4 h-4 text-muted-foreground" />
           {row.original.start_time} – {row.original.end_time}
@@ -133,48 +131,47 @@ export default function BookingsPage() {
     {
       accessorKey: "client",
       header: "Клиент",
-      cell: ({ row }: {row: any}) => (
+      cell: ({ row }) => (
         <div className="flex items-center gap-2">
           <User className="w-4 h-4 text-muted-foreground" />
-          {row.original.client?.name || "Имя не указано"}
-
+          {row.original.client?.name || "—"}
         </div>
       ),
     },
     {
-      accessorKey: "client",
+      accessorKey: "client.phone",
       header: "Телефон",
-      cell: ({ row }: {row: any}) => (
+      cell: ({ row }) => (
         <div className="flex items-center gap-2">
           <PhoneCall className="w-4 h-4 text-muted-foreground" />
-          {row.original.client?.phone || "Имя не указано"}
+          {row.original.client?.phone || "—"}
         </div>
       ),
     },
     {
       accessorKey: "specialist",
       header: "Специалист",
-      cell: ({ row }: {row: any}) => row.original.specialist?.name || "-",
+      cell: ({ row }) => row.original.specialist?.name || "—",
     },
     {
       accessorKey: "service",
       header: "Услуга",
-      cell: ({ row }: {row: any}) => (
+      cell: ({ row }) => (
         <div className="flex items-center gap-2">
           <Scissors className="w-4 h-4 text-muted-foreground" />
-          {row.original.service?.name || "-"}
+          {row.original.service?.name || "—"}
         </div>
       ),
     },
     {
       accessorKey: "status",
       header: "Статус",
-      cell: ({ row }: {row: any}) => getStatusBadge(row.original.status),
+      cell: ({ row }) => getStatusBadge(row.original.status),
     },
     {
       id: "actions",
       size: 80,
-      cell: ({ row }: {row: any}) => {
+      cell: ({ row }) => {
         const booking = row.original;
         return (
           <DropdownMenu>
@@ -212,13 +209,12 @@ export default function BookingsPage() {
 
   const table = useReactTable({
     data: bookings,
-    columns,
+    columns: desktopColumns,
     getCoreRowModel: getCoreRowModel(),
     getSortedRowModel: getSortedRowModel(),
     getFilteredRowModel: getFilteredRowModel(),
     onSortingChange: setSorting,
     onColumnFiltersChange: setColumnFilters,
-    onGlobalFilterChange: setGlobalFilter,
     state: {
       sorting,
       columnFilters,
@@ -226,101 +222,213 @@ export default function BookingsPage() {
     },
   });
 
-  return (
-    <ProtectedAdminRoute>
-      <div className="container mx-auto py-8 px-4">
-      <Card>
-        <CardHeader>
-          <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-            <CardTitle className="text-2xl font-bold">Управление бронированиями</CardTitle>
+  // ─── Mobile Card ───────────────────────────────────────────────────────────
+  const BookingCard = ({ booking }: { booking: Booking }) => {
+    return (
+      <Card className="mb-4 overflow-hidden border-none shadow-sm hover:shadow-md transition-all">
+        <CardContent className="p-0">
+          <div className="flex flex-col sm:flex-row">
 
-            <div className="flex flex-wrap items-center gap-4">
-              <div className="relative">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
-                <Input
-                  placeholder="Поиск по клиенту, телефону..."
-                  value={globalFilter ?? ""}
-                  onChange={(e) => setGlobalFilter(e.target.value)}
-                  className="pl-10 w-64"
-                />
+            {/* Левая часть: Время и Статус (Акцент) */}
+            <div className="bg-muted/30 p-4 sm:w-48 flex flex-col justify-center items-center border-b sm:border-b-0 sm:border-r border-dashed border-muted-foreground/20">
+              <div className="text-2xl font-bold text-primary">
+                {booking.start_time}
+              </div>
+              <div className="text-xs text-muted-foreground font-medium mb-2">
+                до {booking.end_time}
+              </div>
+              {getStatusBadge(booking.status)}
+            </div>
+
+            {/* Правая часть: Основная информация */}
+            <div className="flex-1 p-4 flex flex-col justify-between">
+              <div className="flex justify-between items-start gap-2 mb-3">
+                <div className="min-w-0">
+                  <h3 className="font-bold text-lg leading-tight truncate">
+                    {booking.client?.name || "Клиент не указан"}
+                  </h3>
+                  <p className="text-sm text-muted-foreground font-mono">
+                    {booking.client?.phone || "—"}
+                  </p>
+                </div>
+
+                {/* Кнопка действий вынесена в угол */}
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button variant="ghost" size="icon" className="h-8 w-8 rounded-full">
+                      <MoreHorizontal className="h-4 w-4" />
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end" className="w-48">
+                    <DropdownMenuItem
+                      onClick={() => updateStatus(booking.id, BookingStatus.CONFIRMED)}
+                      disabled={booking.status === BookingStatus.CONFIRMED}
+                    >
+                      Подтвердить
+                    </DropdownMenuItem>
+                    <DropdownMenuItem
+                      onClick={() => updateStatus(booking.id, BookingStatus.COMPLETED)}
+                      disabled={booking.status === BookingStatus.COMPLETED}
+                    >
+                      Завершить
+                    </DropdownMenuItem>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem
+                      onClick={() => updateStatus(booking.id, BookingStatus.CANCELLED)}
+                      className="text-destructive focus:bg-destructive/10"
+                      disabled={booking.status === BookingStatus.CANCELLED}
+                    >
+                      Отменить
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
               </div>
 
-              <Select
-                onValueChange={(value) =>
-                  table.getColumn("status")?.setFilterValue(value === "all" ? "" : value)
-                }
-              >
-                <SelectTrigger className="w-48">
-                  <SelectValue placeholder="Фильтр по статусу" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">Все статусы</SelectItem>
-                  <SelectItem value="PENDING">Ожидает</SelectItem>
-                  <SelectItem value="CONFIRMED">Подтверждено</SelectItem>
-                  <SelectItem value="CANCELLED">Отменено</SelectItem>
-                  <SelectItem value="COMPLETED">Завершено</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-          </div>
-        </CardHeader>
+              {/* Детали записи */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-y-2 gap-x-4 pt-3 border-t">
+                <div className="flex items-center gap-2 text-sm">
+                  <Calendar className="w-4 h-4 text-muted-foreground/60" />
+                  <span className="font-medium">
+                  {format(new Date(booking.date), "d MMMM", { locale: ru })}
+                </span>
+                </div>
 
-        <CardContent>
-          {loading ? (
-            <div className="space-y-4">
-              {[...Array(5)].map((_, i) => (
-                <Skeleton key={i} className="h-12 w-full" />
-              ))}
-            </div>
-          ) : (
-            <div className="rounded-md border">
-              <Table>
-                <TableHeader>
-                  {table.getHeaderGroups().map((headerGroup: any) => (
-                    <TableRow key={headerGroup.id}>
-                      {headerGroup.headers.map((header: any) => (
-                        <TableHead
-                          key={header.id}
-                          style={{ width: header.getSize() }}
-                          className="font-semibold"
-                        >
-                          {header.isPlaceholder
-                            ? null
-                            : flexRender(header.column.columnDef.header, header.getContext())}
-                        </TableHead>
-                      ))}
-                    </TableRow>
-                  ))}
-                </TableHeader>
-                <TableBody>
-                  {table.getRowModel().rows?.length ? (
-                    table.getRowModel().rows.map((row: any) => (
-                      <TableRow key={row.id} className="hover:bg-muted/50">
-                        {row.getVisibleCells().map((cell: any) => (
-                          <TableCell key={cell.id}>
-                            {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                          </TableCell>
-                        ))}
-                      </TableRow>
-                    ))
-                  ) : (
-                    <TableRow>
-                      <TableCell colSpan={columns.length} className="h-24 text-center text-muted-foreground">
-                        Нет бронирований
-                      </TableCell>
-                    </TableRow>
-                  )}
-                </TableBody>
-              </Table>
-            </div>
-          )}
+                <div className="flex items-center gap-2 text-sm">
+                  <User className="w-4 h-4 text-muted-foreground/60" />
+                  <span className="truncate">Мастер: <span className="font-medium">{booking.specialist?.name || "—"}</span></span>
+                </div>
 
-          <div className="mt-4 text-sm text-muted-foreground">
-            Всего бронирований: {bookings.length}
+                <div className="flex items-center gap-2 text-sm col-span-1 md:col-span-2">
+                  <Scissors className="w-4 h-4 text-muted-foreground/60" />
+                  <span className="truncate italic text-muted-foreground">
+                  {booking.service?.name || "Услуга не выбрана"}
+                </span>
+                </div>
+              </div>
+            </div>
           </div>
         </CardContent>
       </Card>
-    </div>
+    );
+  };
+  return (
+    <ProtectedAdminRoute>
+      <div className="container mx-auto py-6 px-4">
+        <Card>
+          <CardHeader>
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+              <CardTitle className="text-2xl font-bold">Бронирования</CardTitle>
+
+              <div className="flex flex-wrap items-center gap-3">
+                <div className="relative w-full sm:w-auto">
+                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground w-4 h-4" />
+                  <Input
+                    placeholder="Поиск по имени, телефону..."
+                    value={globalFilter ?? ""}
+                    onChange={(e) => setGlobalFilter(e.target.value)}
+                    className="pl-10 w-full sm:w-64"
+                  />
+                </div>
+
+                <Select
+                  onValueChange={(value) =>
+                    table.getColumn("status")?.setFilterValue(value === "all" ? "" : value)
+                  }
+                >
+                  <SelectTrigger className="w-full sm:w-44">
+                    <SelectValue placeholder="Статус" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">Все</SelectItem>
+                    <SelectItem value="PENDING">Ожидает</SelectItem>
+                    <SelectItem value="CONFIRMED">Подтверждено</SelectItem>
+                    <SelectItem value="CANCELLED">Отменено</SelectItem>
+                    <SelectItem value="COMPLETED">Завершено</SelectItem>
+                  </SelectContent>
+                </Select>
+                <Button onClick={() => setShowModal(true)}>Добавить</Button>
+              </div>
+            </div>
+          </CardHeader>
+
+          <CardContent>
+            {loading ? (
+              <div className="space-y-4">
+                {[...Array(5)].map((_, i) => (
+                  <Skeleton key={i} className="h-32 w-full rounded-lg" />
+                ))}
+              </div>
+            ) : (
+              <>
+                {/* Desktop Table */}
+                <div className="hidden md:block rounded-md border">
+                  <Table>
+                    <TableHeader>
+                      {table.getHeaderGroups().map((headerGroup) => (
+                        <TableRow key={headerGroup.id}>
+                          {headerGroup.headers.map((header) => (
+                            <TableHead
+                              key={header.id}
+                              style={{ width: header.getSize() }}
+                              className="font-semibold"
+                            >
+                              {header.isPlaceholder
+                                ? null
+                                : flexRender(header.column.columnDef.header, header.getContext())}
+                            </TableHead>
+                          ))}
+                        </TableRow>
+                      ))}
+                    </TableHeader>
+                    <TableBody>
+                      {table.getRowModel().rows?.length ? (
+                        table.getRowModel().rows.map((row) => (
+                          <TableRow key={row.id} className="hover:bg-muted/50">
+                            {row.getVisibleCells().map((cell) => (
+                              <TableCell key={cell.id}>
+                                {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                              </TableCell>
+                            ))}
+                          </TableRow>
+                        ))
+                      ) : (
+                        <TableRow>
+                          <TableCell
+                            colSpan={desktopColumns.length}
+                            className="h-32 text-center text-muted-foreground"
+                          >
+                            Бронирования не найдены
+                          </TableCell>
+                        </TableRow>
+                      )}
+                    </TableBody>
+                  </Table>
+                </div>
+
+                {/* Mobile Cards */}
+                <div className="md:hidden space-y-4">
+                  {bookings.length > 0 ? (
+                    bookings
+                      .filter(
+                        (b) =>
+                          globalFilter === "" ||
+                          b.client?.name?.toLowerCase().includes(globalFilter.toLowerCase()) ||
+                          b.client?.phone?.includes(globalFilter)
+                      )
+                      .map((booking) => <BookingCard key={booking.id} booking={booking} />)
+                  ) : (
+                    <div className="text-center py-12 text-muted-foreground">
+                      Бронирования не найдены
+                    </div>
+                  )}
+                </div>
+              </>
+            )}
+          </CardContent>
+        </Card>
+      </div>
+
+      <AdminBookingModal isOpen={showModal} onClose={() => setShowModal(false)}/>
     </ProtectedAdminRoute>
   );
 }

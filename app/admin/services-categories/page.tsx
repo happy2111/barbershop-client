@@ -1,4 +1,3 @@
-// app/admin/services-categories/page.tsx
 "use client";
 
 import { useEffect, useState } from "react";
@@ -45,7 +44,6 @@ export default function ServiceCategoriesPage() {
   const [sorting, setSorting] = useState<SortingState>([]);
   const [globalFilter, setGlobalFilter] = useState("");
 
-  // Модалка
   const [open, setOpen] = useState(false);
   const [editingCategory, setEditingCategory] = useState<ServiceCategory | null>(null);
   const [name, setName] = useState("");
@@ -89,7 +87,7 @@ export default function ServiceCategoriesPage() {
   };
 
   const handleDelete = async (id: number) => {
-    if (!confirm("Удалить категорию? Все услуги в ней останутся без категории.")) return;
+    if (!confirm("Удалить категорию? Все связанные услуги останутся без категории.")) return;
 
     try {
       await serviceCategoryService.remove(id);
@@ -111,12 +109,9 @@ export default function ServiceCategoriesPage() {
     setOpen(true);
   };
 
-  const columns: ColumnDef<ServiceCategory>[] = [
-    {
-      accessorKey: "id",
-      header: "ID",
-      size: 80,
-    },
+  // ─── Desktop Columns ───────────────────────────────────────────────────────
+  const desktopColumns: ColumnDef<ServiceCategory>[] = [
+    { accessorKey: "id", header: "ID", size: 80 },
     {
       accessorKey: "name",
       header: "Название категории",
@@ -140,17 +135,17 @@ export default function ServiceCategoriesPage() {
       id: "actions",
       size: 100,
       cell: ({ row }) => (
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-1">
           <Button size="sm" variant="ghost" onClick={() => openEdit(row.original)}>
-            <Edit className="w-4 h-4" />
+            <Edit className="h-4 w-4" />
           </Button>
           <Button
             size="sm"
             variant="ghost"
-            className="text-destructive hover:text-destructive"
+            className="text-destructive hover:text-destructive/90"
             onClick={() => handleDelete(row.original.id)}
           >
-            <Trash2 className="w-4 h-4" />
+            <Trash2 className="h-4 w-4" />
           </Button>
         </div>
       ),
@@ -159,35 +154,80 @@ export default function ServiceCategoriesPage() {
 
   const table = useReactTable({
     data: categories,
-    columns,
+    columns: desktopColumns,
     getCoreRowModel: getCoreRowModel(),
     getSortedRowModel: getSortedRowModel(),
     getFilteredRowModel: getFilteredRowModel(),
     onSortingChange: setSorting,
-    onGlobalFilterChange: setGlobalFilter,
     state: { sorting, globalFilter },
   });
 
+  // ─── Mobile Card ───────────────────────────────────────────────────────────
+  const CategoryCard = ({ category }: { category: ServiceCategory }) => (
+    <Card className="mb-4">
+      <CardContent className="pt-6">
+        <div className="flex justify-between items-start mb-4">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-full bg-muted flex items-center justify-center">
+              <FolderOpen className="w-5 h-5 text-muted-foreground" />
+            </div>
+            <div>
+              <div className="font-medium text-lg">{category.name}</div>
+              <div className="text-sm text-muted-foreground mt-0.5">
+                {category.services?.length || 0} услуг
+              </div>
+            </div>
+          </div>
+
+          <Badge variant="secondary" className="text-base px-3 py-1">
+            {category.services?.length || 0}
+          </Badge>
+        </div>
+
+        <div className="flex gap-3 mt-4 flex-wrap">
+          <Button
+            variant="outline"
+            size="sm"
+            className="flex-1"
+            onClick={() => openEdit(category)}
+          >
+            <Edit className="h-4 w-4 mr-2" />
+            Редактировать
+          </Button>
+          <Button
+            variant="outline"
+            size="sm"
+            className="flex-1 text-destructive hover:text-destructive/90 border-destructive/30"
+            onClick={() => handleDelete(category.id)}
+          >
+            <Trash2 className="h-4 w-4 mr-2" />
+            Удалить
+          </Button>
+        </div>
+      </CardContent>
+    </Card>
+  );
+
   return (
     <ProtectedAdminRoute>
-      <div className="container mx-auto py-8 px-4">
+      <div className="container mx-auto py-6 px-4">
         <Card>
           <CardHeader>
-            <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
               <CardTitle className="text-2xl font-bold">Категории услуг</CardTitle>
 
-              <div className="flex flex-wrap flex-wrap items-center gap-4">
-                <div className="relative">
+              <div className="flex flex-col sm:flex-row gap-3 w-full sm:w-auto">
+                <div className="relative flex-1 sm:flex-none">
                   <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                   <Input
                     placeholder="Поиск по названию..."
                     value={globalFilter ?? ""}
                     onChange={(e) => setGlobalFilter(e.target.value)}
-                    className="pl-10 w-64"
+                    className="pl-10 w-full sm:w-64"
                   />
                 </div>
 
-                <Button onClick={() => openEdit()} className="gap-2">
+                <Button onClick={() => openEdit()} className="gap-2 w-full sm:w-auto">
                   <Plus className="w-4 h-4" />
                   Новая категория
                 </Button>
@@ -197,96 +237,122 @@ export default function ServiceCategoriesPage() {
 
           <CardContent>
             {loading ? (
-              <div className="space-y-3">
-                {[...Array(6)].map((_, i) => (
-                  <Skeleton key={i} className="h-12 w-full" />
+              <div className="space-y-4">
+                {[...Array(5)].map((_, i) => (
+                  <Skeleton key={i} className="h-32 w-full rounded-lg" />
                 ))}
               </div>
             ) : (
-              <div className="rounded-md border">
-                <Table>
-                  <TableHeader>
-                    {table.getHeaderGroups().map((headerGroup) => (
-                      <TableRow key={headerGroup.id}>
-                        {headerGroup.headers.map((header) => (
-                          <TableHead
-                            key={header.id}
-                            className="font-semibold cursor-pointer select-none"
-                            onClick={header.column.getToggleSortingHandler()}
-                          >
-                            {flexRender(header.column.columnDef.header, header.getContext())}
-                            {header.column.getIsSorted() && (
-                              <span className="ml-2">
-                                {header.column.getIsSorted() === "asc" ? "↑" : "↓"}
-                              </span>
-                            )}
-                          </TableHead>
-                        ))}
-                      </TableRow>
-                    ))}
-                  </TableHeader>
-                  <TableBody>
-                    {table.getRowModel().rows?.length ? (
-                      table.getRowModel().rows.map((row) => (
-                        <TableRow key={row.id} className="hover:bg-muted/50">
-                          {row.getVisibleCells().map((cell) => (
-                            <TableCell key={cell.id}>
-                              {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                            </TableCell>
+              <>
+                {/* Desktop Table */}
+                <div className="hidden md:block rounded-md border">
+                  <Table>
+                    <TableHeader>
+                      {table.getHeaderGroups().map((headerGroup) => (
+                        <TableRow key={headerGroup.id}>
+                          {headerGroup.headers.map((header) => (
+                            <TableHead
+                              key={header.id}
+                              className="font-semibold cursor-pointer select-none"
+                              onClick={header.column.getToggleSortingHandler()}
+                              style={{ width: header.getSize() }}
+                            >
+                              {flexRender(header.column.columnDef.header, header.getContext())}
+                              {header.column.getIsSorted() && (
+                                <span className="ml-2">
+                                  {header.column.getIsSorted() === "asc" ? "↑" : "↓"}
+                                </span>
+                              )}
+                            </TableHead>
                           ))}
                         </TableRow>
-                      ))
-                    ) : (
-                      <TableRow>
-                        <TableCell colSpan={columns.length} className="h-32 text-center text-muted-foreground">
-                          Категорий пока нет
-                        </TableCell>
-                      </TableRow>
-                    )}
-                  </TableBody>
-                </Table>
-              </div>
+                      ))}
+                    </TableHeader>
+                    <TableBody>
+                      {table.getRowModel().rows?.length ? (
+                        table.getRowModel().rows.map((row) => (
+                          <TableRow key={row.id} className="hover:bg-muted/50">
+                            {row.getVisibleCells().map((cell) => (
+                              <TableCell key={cell.id}>
+                                {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                              </TableCell>
+                            ))}
+                          </TableRow>
+                        ))
+                      ) : (
+                        <TableRow>
+                          <TableCell
+                            colSpan={desktopColumns.length}
+                            className="h-32 text-center text-muted-foreground"
+                          >
+                            Категорий пока нет
+                          </TableCell>
+                        </TableRow>
+                      )}
+                    </TableBody>
+                  </Table>
+                </div>
+
+                {/* Mobile Cards */}
+                <div className="md:hidden space-y-4">
+                  {categories.length > 0 ? (
+                    categories
+                      .filter((c) =>
+                        globalFilter === ""
+                          ? true
+                          : c.name.toLowerCase().includes(globalFilter.toLowerCase())
+                      )
+                      .map((category) => <CategoryCard key={category.id} category={category} />)
+                  ) : (
+                    <div className="text-center py-12 text-muted-foreground">
+                      Категорий пока нет
+                    </div>
+                  )}
+                </div>
+              </>
             )}
 
-            <div className="mt-4 text-sm text-muted-foreground">
-              Всего категорий: {categories.length}
-            </div>
+            {!loading && (
+              <div className="mt-6 text-sm text-muted-foreground text-center md:text-left">
+                Всего категорий: {categories.length}
+              </div>
+            )}
           </CardContent>
         </Card>
-      </div>
 
-      {/* Модальное окно */}
-      <Dialog open={open} onOpenChange={setOpen}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>
-              {editingCategory ? "Редактировать категорию" : "Новая категория"}
-            </DialogTitle>
-          </DialogHeader>
+        {/* Модальное окно */}
+        <Dialog open={open} onOpenChange={setOpen}>
+          <DialogContent className="sm:max-w-[425px]">
+            <DialogHeader>
+              <DialogTitle>
+                {editingCategory ? "Редактировать категорию" : "Новая категория"}
+              </DialogTitle>
+            </DialogHeader>
 
-          <div className="space-y-4 py-4">
-            <div className="space-y-2">
-              <Label htmlFor="name">Название категории</Label>
-              <Input
-                id="name"
-                placeholder="Например: Стрижки, Окрашивание, Уход"
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-                autoFocus
-              />
+            <div className="grid gap-4 py-4">
+              <div className="grid gap-2">
+                <Label htmlFor="name">Название категории</Label>
+                <Input
+                  id="name"
+                  placeholder="Например: Стрижки, Окрашивание, Уход"
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                  autoFocus
+                />
+              </div>
             </div>
-          </div>
 
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setOpen(false)}>
-              Отмена
-            </Button>
-            <Button onClick={handleSave}>
-              {editingCategory ? "Сохранить" : "Создать"}
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setOpen(false)}>
+                Отмена
+              </Button>
+              <Button onClick={handleSave}>
+                {editingCategory ? "Сохранить" : "Создать"}
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+      </div>
     </ProtectedAdminRoute>
   );
 }

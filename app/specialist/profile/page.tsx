@@ -20,6 +20,9 @@ import ProfilePersonalInfo from "@/components/profile/ProfilePersonalInfo";
 import ProfileServices from "@/components/profile/ProfileServices";
 import {toast} from "sonner";
 import ProtectedRoute from "@/components/ProtectedRouteProps";
+import ChangePassword from "@/components/profile/ChangePassword";
+import ProfileBlockedTime from "@/components/profile/ProfileBlockedTime";
+import {AdminBookingModal} from "@/components/BookingModal";
 
 const daysOfWeek = [
   "Воскресенье", "Понедельник", "Вторник",
@@ -51,6 +54,8 @@ export default function SpecialistProfilePage() {
 
   const [upcoming, setUpcoming] = useState<any[]>([]);
   const [past, setPast] = useState<any[]>([]);
+
+  const [showModal, setShowModal] = useState(false)
 
   useEffect(() => {
     loadData();
@@ -170,9 +175,9 @@ export default function SpecialistProfilePage() {
       className="border rounded-lg p-5 flex flex-col sm:flex-row justify-between gap-4"
     >
       <div className="flex-1">
-        <p className="text-lg font-semibold">{b.client.name}</p>
-        <p className="text-gray-600">{b.client.phone}</p>
-        <p className="text-sm mt-1">{b.service.name} • {b.service.price} сум</p>
+        <p className="text-lg font-semibold">{b.client?.name}</p>
+        <p className="text-gray-600">{b.client?.phone}</p>
+        <p className="text-sm mt-1">{b.service?.name} • {b.service?.price} сум</p>
 
         <p className="text-sm text-gray-600 flex items-center gap-2 mt-2">
           <Calendar className="w-4 h-4" />
@@ -276,6 +281,12 @@ export default function SpecialistProfilePage() {
         />
         <ProfileServices profile={profile}/>
 
+        <ChangePassword/>
+
+        <ProfileBlockedTime/>
+
+
+
         {/* Расписание */}
         <Card>
           <CardHeader>
@@ -359,6 +370,8 @@ export default function SpecialistProfilePage() {
 
         {/* Записи */}
         <Tabs defaultValue="upcoming" className="w-full">
+          <Button onClick={() => setShowModal(true)}>Забронировать</Button>
+
           <TabsList className="grid grid-cols-2 w-full">
             <TabsTrigger value="upcoming">Предстоящие</TabsTrigger>
             <TabsTrigger value="past">Прошедшие</TabsTrigger>
@@ -391,8 +404,8 @@ export default function SpecialistProfilePage() {
                   <div className="space-y-4">
                     {past.map((b) => (
                       <div key={b.id} className="border rounded-lg p-4">
-                        <p className="font-semibold">{b.client.name}</p>
-                        <p className="text-sm">{b.service.name}</p>
+                        <p className="font-semibold">{b.client?.name}</p>
+                        <p className="text-sm">{b.service?.name}</p>
                         <p className="text-sm text-gray-600">
                           {format(new Date(b.date), "dd MMMM yyyy", {locale: ru})} • {b.start_time} – {b.end_time}
                         </p>
@@ -406,6 +419,13 @@ export default function SpecialistProfilePage() {
         </Tabs>
 
       </div>
+
+
+        <AdminBookingModal
+          isOpen={showModal}
+          onClose={() => setShowModal(false)}
+          specialistId={profile.id}
+        />
     </div>
 
   );

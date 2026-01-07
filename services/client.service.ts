@@ -37,7 +37,8 @@ export const clientService = {
 
   // Создать нового клиента
   create(data: CreateClientDto) {
-    return api.post<Client>("/client", data).then(res => res.data);
+    const hostname: string = window.location.hostname;
+    return api.post<Client>("/client", data, {params: {hostname}}).then(res => res.data);
   },
 
   // Обновить существующего клиента

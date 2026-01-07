@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import {useEffect, useState} from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { authStore } from "@/stores/auth.store";
@@ -25,6 +25,16 @@ export default function SpecialistLoginPage() {
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
 
+  useEffect(() => {
+    if (!isLoading && accessToken) {
+      if (user?.role === "ADMIN") {
+        router.replace("/admin");
+      } else {
+        router.replace("/specialist/profile");
+      }
+    }
+  }, [isLoading, accessToken, user, router]);
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
@@ -47,6 +57,13 @@ export default function SpecialistLoginPage() {
     } else {
       router.replace("/specialist/profile");
     }
+    if (!isLoading && accessToken) {
+      if (user?.role === "ADMIN") {
+        router.replace("/admin");
+      } else {
+        router.replace("/specialist/profile");
+      }
+    }
   };
 
 
@@ -59,8 +76,8 @@ export default function SpecialistLoginPage() {
           </CardTitle>
         </CardHeader>
 
-        <CardContent>
-          <form className="space-y-4" onSubmit={handleSubmit}>
+        <CardContent className="">
+          <form className="space-y-4 px-3" onSubmit={handleSubmit}>
             {/* PHONE */}
             <div className="space-y-1">
               <Label htmlFor="phone" className="text-foreground">

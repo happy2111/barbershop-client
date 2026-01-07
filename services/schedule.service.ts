@@ -48,8 +48,9 @@ export const scheduleService = {
   },
 
   async getFreeSlots(specialistId: number, serviceId: number, date: string) {
+    const hostname: string = window.location.hostname;
     return api.get<{ start: string; end: string }[]>(
-      `/schedule/${specialistId}/free-slots?serviceId=${serviceId}&date=${date}`
+      `/schedule/${specialistId}/free-slots?serviceId=${serviceId}&date=${date}&hostname=${hostname}`
     ).then(res => res.data);
   },
 };
