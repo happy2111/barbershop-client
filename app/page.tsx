@@ -47,9 +47,14 @@ export default observer(function BookingPage() {
   const [createLoading, setCreateLoading] = useState(false)
 
   const { user, webApp, initData } = useTelegram();
+
   useEffect(() => {
-    console.log(user, webApp, initData)
-  }, []);
+    if (initData) {
+      console.log("Данные получены:", user, webApp, initData);
+    } else {
+      console.log("Ждем инициализации Telegram...");
+    }
+  }, [initData, user, webApp]); // Следим за изменениями
 
   const validate = () => {
     const result = clientSchema.safeParse({ name: clientName, phone: clientPhone });
