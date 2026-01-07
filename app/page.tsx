@@ -104,13 +104,25 @@ export default observer(function BookingPage() {
 
   const handleCreateBooking = async () => {
     if (!selectedService || !selectedSpecialist || !selectedTime || !clientName || !clientPhone) {
-      alert("Заполните все поля");
+      toast.error("Заполните все поля"); // Используем toast вместо alert для красоты
       return;
     }
 
     setCreateLoading(true);
     try {
-      const client: any = await clientStore.create({ name: clientName, phone: clientPhone });
+      // 1. Создаем (или получаем) клиента с данными Telegram
+      const client = await clientStore.create({
+        name: clientName,
+        phone: clientPhone,
+        // Мапим данные из объекта user, который предоставил Telegram
+        telegramId: user?.id?.toString(),
+        telegramUsername: user?.username,
+        telegramFirstName: user?.first_name,
+        telegramLastName: user?.last_name,
+        telegramLang: user?.language_code,
+      });
+
+      // 2. Создаем бронь
       const res = await bookingService.create({
         clientId: client.id,
         specialistId: selectedSpecialist,
@@ -121,10 +133,11 @@ export default observer(function BookingPage() {
         status: BookingStatus.PENDING,
       });
 
-      router.replace('booking/'+res.id);
-      toast.success("Запись успешно создался!")
-    } catch (err) {
-      alert("Ошибка при создании записи");
+      toast.success("Запись успешно создана!");
+      router.replace('/booking/' + res.id);
+    } catch (err: any) {
+      console.error(err);
+      toast.error(err.response?.data?.message || "Ошибка при создании записи");
     } finally {
       setCreateLoading(false);
     }

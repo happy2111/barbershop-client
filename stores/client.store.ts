@@ -22,11 +22,16 @@ class ClientStore {
   }
 
   async create(dto: CreateClientDto): Promise<Client> {
-    const created = await clientService.create(dto);
-    runInAction(() => {
-      this.clients.push(created);
-    });
-    return created;
+    try {
+      const created = await clientService.create(dto);
+      runInAction(() => {
+        this.clients.push(created);
+      });
+      return created;
+    } catch (error) {
+      console.error("Store create client error:", error);
+      throw error;
+    }
   }
 
   async update(id: number, dto: UpdateClientDto) {
