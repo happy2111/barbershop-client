@@ -113,9 +113,16 @@
   --sidebar-ring: oklch(0.556 0 0);
 }
 
-.tg-safe-top {
-  padding-top: calc(var(--tg-safe-top) + 25px);
+
+@media (max-width: 768px) {
+  .tg-safe-top {
+    padding-top: calc(var(--tg-safe-top) + 25px);
+  }
+  .tg-safe-top-sidebar {
+    padding-top: calc(var(--tg-safe-top) + 32px);
+  }
 }
+
 
 @layer base {
   * {
