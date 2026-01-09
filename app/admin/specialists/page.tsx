@@ -72,7 +72,7 @@ export default function SpecialistsPage() {
 
   const loadSpecialists = async () => {
     try {
-      const data = await specialistService.getAll();
+      const data = await specialistService.getAllPrivate();
       setSpecialists(data);
     } catch {
       toast.error("Не удалось загрузить специалистов");

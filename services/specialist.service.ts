@@ -50,6 +50,10 @@ export const specialistService = {
     return api.get<Specialist[]>("/specialist/public", {params: {hostname}}).then(res => res.data);
   },
 
+  getAllPrivate() {
+    return api.get<Specialist[]>("/specialist/private").then(res => res.data);
+  },
+
   getById(id: number) {
     return api.get<Specialist>(`/specialist/${id}`).then(res => res.data);
   },
