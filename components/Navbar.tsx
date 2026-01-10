@@ -24,7 +24,7 @@ const Navbar = () => {
     <div className="bg-background py-8 px-4 text-foreground">
       <div className="max-w-2xl mx-auto flex items-center justify-between">
         <Link href="/" className="text-2xl font-bold">
-          Ramitan Barbershop
+          {process.env.NEXT_PUBLIC_TITLE || "Название по умолчанию"}
         </Link>
 
         <Button

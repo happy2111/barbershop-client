@@ -137,14 +137,17 @@ const ProfilePersonalInfo = ({
           <div className="space-y-4">
             {profile.description && (
               <div>
-                <p className="text-gray-700 leading-relaxed">{profile.description}</p>
+                <p className="text-sm">
+                  <strong className="text-foreground">Описание:</strong>{' '}
+                  <span className="">{profile.description}</span>
+                </p>
               </div>
             )}
             {profile.skills && (
               <div>
                 <p className="text-sm">
-                  <strong className="text-gray-900">Навыки:</strong>{' '}
-                  <span className="text-gray-600">{profile.skills}</span>
+                  <strong className="text-foreground">Навыки:</strong>{' '}
+                  <span className="">{profile.skills}</span>
                 </p>
               </div>
             )}

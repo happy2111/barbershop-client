@@ -1,10 +1,25 @@
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell } from "recharts";
-import { useDashboardStore } from "@/stores/dashboard.store";
-import { Skeleton } from "@/components/ui/skeleton";
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+  CardDescription
+} from "@/components/ui/card";
+import {
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  ResponsiveContainer,
+  Cell
+} from "recharts";
+import {useDashboardStore} from "@/stores/dashboard.store";
+import {Skeleton} from "@/components/ui/skeleton";
 
 export function PopularServicesChart() {
-  const { popularServices, isLoading } = useDashboardStore();
+  const {popularServices, isLoading} = useDashboardStore();
   // Предполагаем, что ключ загрузки соответствует вашим параметрам
   const loading = isLoading["popularServices_count_5"];
 
@@ -24,11 +39,14 @@ export function PopularServicesChart() {
         {loading || !popularServices ? (
           <Skeleton className="w-full h-full rounded-xl" />
         ) : (
-          <ResponsiveContainer width="100%" height="100%">
+          <ResponsiveContainer
+            width="100%"
+            height="100%"
+          >
             <BarChart
               data={popularServices}
               layout="vertical" // Горизонтальные бары удобнее для длинных названий
-              margin={{ top: 5, right: 30, left: 40, bottom: 5 }}
+              margin={{top: 5, right: 30, left: 40, bottom: 5}}
             >
               <CartesianGrid
                 horizontal={false}
@@ -52,14 +70,19 @@ export function PopularServicesChart() {
                 tickFormatter={(value) => value.length > 15 ? `${value.substring(0, 15)}...` : value}
               />
               <Tooltip
-                cursor={{ fill: "var(--muted)", opacity: 0.3 }}
+                cursor={{fill: "var(--muted)", opacity: 0.3}}
                 contentStyle={{
                   backgroundColor: "var(--card)",
                   border: "1px solid var(--border)",
                   borderRadius: "var(--radius)",
-                  boxShadow: "0 4px 12px rgba(0,0,0,0.1)"
+                  boxShadow: "0 4px 12px rgba(0,0,0,0.1)",
                 }}
                 formatter={(value: any) => [formatValue(Number(value)), "Популярность"]}
+                itemStyle={
+                  {
+                    color: `var(--chart-5})`
+                  }
+                }
               />
               <Bar
                 dataKey="value"
