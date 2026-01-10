@@ -98,6 +98,9 @@ export default function SpecialistsPage() {
     fd.append("name", form.name.trim());
     fd.append("phone", form.phone.trim());
     if (!editingSpecialist) fd.append("password", form.password.trim());
+    if (editingSpecialist && form.password.trim() !== "") {
+      fd.append("password", form.password.trim())
+    }
     fd.append("role", form.role);
     if (form.description.trim()) fd.append("description", form.description.trim());
     if (form.skills.trim()) fd.append("skills", form.skills.trim());
