@@ -544,9 +544,15 @@ export default function SpecialistsPage() {
                     />
                   </div>
 
-                  {!editingSpecialist && (
+                  {/*{!editingSpecialist && (*/}
                     <div className="space-y-2">
-                      <Label className="text-sm font-medium">Пароль для входа *</Label>
+                      {!editingSpecialist ?
+                        (
+                          <Label className="text-sm font-medium">Пароль для входа *</Label>
+                        ):
+                        (
+                          <Label className="text-sm font-medium">Изменить пароль</Label>
+                        )}
                       <div className="relative">
                         <Input
                           type={showPassword ? "text" : "password"} // Переключаем тип поля
@@ -568,7 +574,6 @@ export default function SpecialistsPage() {
                         </button>
                       </div>
                     </div>
-                  )}
 
                   <div className="space-y-2">
                     <Label className="text-sm font-medium">Роль в системе</Label>
