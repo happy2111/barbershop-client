@@ -332,36 +332,55 @@ export default function SpecialistProfilePage() {
             )}
 
             {editingSchedule !== null && (
-              <div className="border rounded-lg p-4 bg-gray-50">
-                <p className="font-semibold mb-3">{daysOfWeek[editingSchedule]}</p>
+              <div className="border-[var(--border)] rounded-[var(--radius)] p-4 bg-[var(--card)] text-[var(--card-foreground)] border shadow-sm">
+                <p className="font-semibold mb-3 text-[var(--foreground)]">
+                  {daysOfWeek[editingSchedule]}
+                </p>
 
-                <div className="flex gap-3 items-end">
-                  <div>
-                    <Label>Начало</Label>
+                <div className="flex flex-wrap gap-4 items-end">
+                  <div className="flex-1 min-w-[120px]">
+                    <Label className="text-[var(--muted-foreground)] mb-1.5 block">
+                      Начало
+                    </Label>
                     <Input
                       type="time"
+                      className="bg-[var(--input)] border-[var(--border)] text-[var(--foreground)] focus:ring-[var(--ring)]"
                       value={scheduleForm.start_time}
                       onChange={(e) =>
-                        setScheduleForm({...scheduleForm, start_time: e.target.value})
+                        setScheduleForm({ ...scheduleForm, start_time: e.target.value })
                       }
                     />
                   </div>
 
-                  <div>
-                    <Label>Конец</Label>
+                  <div className="flex-1 min-w-[120px]">
+                    <Label className="text-[var(--muted-foreground)] mb-1.5 block">
+                      Конец
+                    </Label>
                     <Input
                       type="time"
+                      className="bg-[var(--input)] border-[var(--border)] text-[var(--foreground)] focus:ring-[var(--ring)]"
                       value={scheduleForm.end_time}
                       onChange={(e) =>
-                        setScheduleForm({...scheduleForm, end_time: e.target.value})
+                        setScheduleForm({ ...scheduleForm, end_time: e.target.value })
                       }
                     />
                   </div>
 
-                  <Button onClick={() => saveSchedule(editingSchedule)}>Сохранить</Button>
-                  <Button variant="outline" onClick={() => setEditingSchedule(null)}>
-                    Отмена
-                  </Button>
+                  <div className="flex gap-2 w-full sm:w-auto">
+                    <Button
+                      onClick={() => saveSchedule(editingSchedule)}
+                      className="bg-[var(--primary)] text-[var(--primary-foreground)] hover:opacity-90 transition-opacity"
+                    >
+                      Сохранить
+                    </Button>
+                    <Button
+                      variant="outline"
+                      onClick={() => setEditingSchedule(null)}
+                      className="border-[var(--border)] text-[var(--foreground)] hover:bg-[var(--accent)]"
+                    >
+                      Отмена
+                    </Button>
+                  </div>
                 </div>
               </div>
             )}
