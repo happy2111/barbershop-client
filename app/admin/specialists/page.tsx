@@ -240,7 +240,6 @@ export default function SpecialistsPage() {
             >
               <Scissors className="h-4 w-4" />
             </Button>
-            {spec.role !== "ADMIN" && (
               <Button
                 size="sm"
                 variant="ghost"
@@ -249,7 +248,6 @@ export default function SpecialistsPage() {
               >
                 <Trash2 className="h-4 w-4" />
               </Button>
-            )}
           </div>
         );
       },
