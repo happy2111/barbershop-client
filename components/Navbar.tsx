@@ -6,6 +6,7 @@ import {ChevronUp, LogIn, Menu, User} from "lucide-react"
 import {usePathname, useRouter} from "next/navigation"
 import Link from "next/link"
 import { authStore } from "@/stores/auth.store"
+import LocaleSwitcher from "@/components/LocaleSwitcher";
 
 const Navbar = () => {
   const router = useRouter()
@@ -16,23 +17,37 @@ const Navbar = () => {
 
   const pathname = usePathname()
 
-  if (pathname !== '/' && !pathname.startsWith('/specialist') && !pathname.startsWith('/login')) {
+  // Locale-aware visibility: show on "/{locale}", "/{locale}/specialist*" and "/{locale}/login"
+  const segments = pathname.split('/').filter(Boolean)
+  const locale = segments[0]
+  const isHome = segments.length === 1 // e.g. "/ru"
+  const secondSeg = segments[1] // segment after locale
+  const isSpecialist = secondSeg === 'specialist'
+  const isLogin = secondSeg === 'login'
+
+  if (!isHome && !isSpecialist && !isLogin) {
     return null
   }
 
   return (
     <div className="bg-background py-8 px-4 text-foreground">
       <div className="max-w-2xl mx-auto flex items-center justify-between">
-        <Link href="/" className="text-2xl font-bold">
+        <Link href={`/${locale || ''}`} className="text-2xl font-bold">
           {process.env.NEXT_PUBLIC_TITLE || "Название по умолчанию"}
         </Link>
 
-        <Button
-          onClick={() => setIsMenuOpen(p => !p)}
-          variant="outline"
-        >
-          {isMenuOpen ? <ChevronUp /> : <Menu />}
-        </Button>
+        <div className="flex gap-2">
+          <LocaleSwitcher />
+
+          <Button
+            onClick={() => setIsMenuOpen(p => !p)}
+            variant="outline"
+          >
+            {isMenuOpen ? <ChevronUp /> : <Menu />}
+          </Button>
+        </div>
+
+
       </div>
 
       <div
@@ -46,7 +61,7 @@ const Navbar = () => {
 
             {isAuthenticated ? (
               <Button
-                variant="ghost" // Кнопка в меню лучше смотрится без заливки
+                variant="ghost"
                 className="justify-start gap-2 w-full"
                 onClick={() => {
                   router.push('/specialist/profile')

@@ -1,0 +1,56 @@
+{
+  "actions": {
+    "back": "Orqaga",
+    "confirm": "Yozuvni tasdiqlash",
+    "loading": "Yuklanmoqda...",
+    "loading_slots": "Yuklanmoqda...",
+    "no_slots": "Bo'sh vaqt yo'q"
+  },
+  "booking": {
+    "confirm_booking": "Ro'yxatni tasdiqlash",
+    "home": {
+      "step1": {
+        "title": "Xizmatni tanlang\n"
+      },
+      "step2": {
+        "title": "Mutaxassisni tanlang"
+      },
+      "step3": {
+        "title": "Sana tanlang\n"
+      },
+      "step4": {
+        "title": "Vaqtni tanlang"
+      },
+      "step5": {
+        "nameLabel": "Sizga qanday murojaat qilishim kerak?",
+        "namePlaceholder": "Aleksandr",
+        "phoneLabel": "Telefon raqami",
+        "subtitle": "Ro'yxatni tasdiqlash uchun aloqa ma'lumotlarini qoldiring",
+        "title": "Sizning ma'lumotlaringiz"
+      }
+    },
+    "loading_slots": "Yuklanmoqda...",
+    "no_available_time": "Bo'sh vaqt yo'q"
+  },
+  "booking_summary": {
+    "service": "Xizmat",
+    "specialist": "Usta",
+    "time": "Vaqt",
+    "title": "Sizning ma'lumotlaringiz"
+  },
+  "common": {
+    "back": "Orqaga",
+    "duration": "{minutes} daqiqa",
+    "loading": "Yuklanmoqda...",
+    "master": "Usta",
+    "no_description": "Tavsif mavjud emas",
+    "price": "{amount} so'm",
+    "service": "Xizmat",
+    "time": "Vaqt"
+  },
+  "errors": {
+    "booking_error": "Yozuvni yaratishda xato",
+    "booking_success": "Yozuv muvaffaqiyatli yaratildi!",
+    "fill_all_fields": "Barcha maydonlarni to'ldiring"
+  }
+}

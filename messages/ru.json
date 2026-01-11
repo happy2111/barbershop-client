@@ -1,0 +1,56 @@
+{
+  "actions": {
+    "back": "Назад",
+    "confirm": "Подтвердить запись",
+    "loading": "Загружается...",
+    "loading_slots": "Загрузка...",
+    "no_slots": "Нет свободного времени"
+  },
+  "booking": {
+    "confirm_booking": "Подтвердить запись",
+    "home": {
+      "step1": {
+        "title": "Выберите услугу"
+      },
+      "step2": {
+        "title": "Выберите специалиста"
+      },
+      "step3": {
+        "title": "Выберите дату"
+      },
+      "step4": {
+        "title": "Выберите время"
+      },
+      "step5": {
+        "nameLabel": "Как к вам обращаться?",
+        "namePlaceholder": "Александр",
+        "phoneLabel": "Номер телефона",
+        "subtitle": "Оставьте контакты для подтверждения записи",
+        "title": "Ваши данные"
+      }
+    },
+    "loading_slots": "Загрузка...",
+    "no_available_time": "Нет свободного времени"
+  },
+  "booking_summary": {
+    "service": "Услуга",
+    "specialist": "Мастер",
+    "time": "Время",
+    "title": "Ваши данные"
+  },
+  "common": {
+    "back": "Назад",
+    "duration": "{minutes} мин",
+    "loading": "Загружается...",
+    "master": "Мастер",
+    "no_description": "Описание отсутствует",
+    "price": "{amount} сум",
+    "service": "Услуга",
+    "time": "Время"
+  },
+  "errors": {
+    "booking_error": "Ошибка при создании записи",
+    "booking_success": "Запись успешно создана!",
+    "fill_all_fields": "Заполните все поля"
+  }
+}
