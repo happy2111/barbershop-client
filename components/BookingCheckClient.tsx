@@ -159,12 +159,10 @@ export default function BookingCheckClient({ id }: { id: number }) {
   if (booking.status === BookingStatus.CANCELLED) {
     return (
       <div className="flex flex-col items-center justify-center min-h-[80vh] p-6 text-center">
-        {/* Иконка с мягким красным фоном */}
         <div className="flex items-center justify-center w-20 h-20 mb-6 rounded-full bg-red-50">
           <XCircle className="w-12 h-12 text-red-500" />
         </div>
 
-        {/* Текстовый блок */}
         <h1 className="mb-2 text-2xl font-bold tracking-tight ">
           Бронирование отменено
         </h1>
