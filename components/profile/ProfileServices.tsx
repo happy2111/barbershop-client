@@ -1,46 +1,67 @@
-import React from 'react'
-import {Card, CardContent, CardHeader, CardTitle} from "@/components/ui/card";
+// components/profile/ProfileServices.tsx
+import React from 'react';
+import { useTranslations } from 'next-intl';
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
-const ProfileServices = ({
-  profile,
-}: {
+interface Service {
+  id: string;
+  name: string;
+  duration_min: number;
+  price: number;
+  photo?: string | null;
+}
+
+interface ProfileServicesProps {
   profile: {
-    services: Array<{
-      id: string
-      name: string
-      duration_min: number
-      price: number
-      photo?: string
-    }>
-  }
-                         }) => {
+    services: Service[];
+  };
+}
+
+const ProfileServices = ({ profile }: ProfileServicesProps) => {
+  const t = useTranslations('profile.services');
+
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Мои услуги</CardTitle>
+        <CardTitle>{t('title')}</CardTitle>
       </CardHeader>
       <CardContent>
-        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
-          {profile.services.map((s: any) => (
-            <div
-              key={s.id}
-              className="border rounded-lg p-4 flex items-start gap-4"
-            >
-              {s.photo && <img
-                src={`${process.env.NEXT_PUBLIC_API_URL}${s.photo}`}
-                alt={s.name}
-                className="w-16 h-16 object-cover rounded"
-              />}
-              <div>
-                <h4 className="font-semibold">{s.name}</h4>
-                <p className="text-sm text-gray-600">{s.duration_min} мин</p>
-                <p className="text-lg font-bold text-primary">{s.price} сум</p>
+        {profile.services.length === 0 ? (
+          <p className="text-center text-muted-foreground py-8">
+            {t('no_services')}
+          </p>
+        ) : (
+          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            {profile.services.map((service) => (
+              <div
+                key={service.id}
+                className="border rounded-lg p-4 flex items-start gap-4 hover:shadow-sm transition-shadow"
+              >
+                {service.photo && (
+                  <img
+                    src={`${process.env.NEXT_PUBLIC_API_URL}${service.photo}`}
+                    alt={service.name}
+                    className="w-16 h-16 object-cover rounded-md"
+                  />
+                )}
+                <div className="flex-1 min-w-0">
+                  <h4 className="font-semibold text-base truncate">
+                    {service.name}
+                  </h4>
+                  <p className="text-sm text-muted-foreground">
+                    {t('duration', { minutes: service.duration_min })}
+                  </p>
+                  <p className="text-lg font-bold text-primary mt-1">
+                    {t('price', { amount: service.price })}
+                  </p>
+                </div>
               </div>
-            </div>
-          ))}
-        </div>
+            ))}
+          </div>
+        )}
       </CardContent>
     </Card>
-  )
-}
-export default ProfileServices
+  );
+};
+
+export default ProfileServices;

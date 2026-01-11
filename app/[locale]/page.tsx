@@ -174,7 +174,7 @@ export default observer(function BookingPage() {
         </div>
 
         {step === 1 && (
-          <Card className="p-6 shadow-xl bg-card border-border">
+          <Card className="p-6 shadow-xl bg-card border-border animate-in fade-in zoom-in-98 duration-500 ease-out">
             <h2 className="text-2xl font-semibold mb-6">{t("booking.home.step1.title")}</h2>
             <div className="grid grid-cols-1 gap-4">
               {serviceStore.services.map((s) => (
@@ -206,7 +206,7 @@ export default observer(function BookingPage() {
         )}
 
         {step === 2 && selectedService && (
-          <Card className="p-6 shadow-xl bg-card border-border">
+          <Card className="p-6 shadow-xl bg-card border-border animate-in fade-in zoom-in-98 duration-500 ease-out">
             <h2 className="text-2xl font-semibold mb-6">{t("booking.home.step2.title")}</h2>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
               {specialistStore.specialists.map((sp) => (
@@ -248,7 +248,7 @@ export default observer(function BookingPage() {
         )}
 
         {step === 3 && selectedSpecialist && (
-          <Card className="p-6 shadow-xl bg-card border-border">
+          <Card className="p-6 shadow-xl bg-card border-border animate-in fade-in zoom-in-98 duration-500 ease-out">
             <h2 className="text-2xl font-semibold mb-6">{t("booking.home.step3.title")}</h2>
             <div className="flex justify-center">
               <Calendar
@@ -273,7 +273,7 @@ export default observer(function BookingPage() {
         )}
 
         {step === 4 && selectedDate && (
-          <Card className="p-6 shadow-xl bg-card border-border">
+          <Card className="p-6 shadow-xl bg-card border-border animate-in fade-in zoom-in-98 duration-500 ease-out">
             <h2 className="text-2xl font-semibold mb-6">{t("booking.home.step4.title")}</h2>
 
             {loadingSlots && (
@@ -315,7 +315,7 @@ export default observer(function BookingPage() {
         )}
 
         {step === 5 && selectedTime && (
-          <Card className="p-8 shadow-2xl bg-card border-none animate-in fade-in slide-in-from-bottom-4 duration-500">
+          <Card className="p-8 shadow-2xl bg-card border-none  animate-in fade-in zoom-in-98 duration-500 ease-out">
             <div className="mb-8">
               <h2 className="text-3xl font-bold tracking-tight">
                 {t("booking.home.step5.title")}

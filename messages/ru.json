@@ -6,6 +6,20 @@
     "loading_slots": "Загрузка...",
     "no_slots": "Нет свободного времени"
   },
+  "auth": {
+    "login": {
+      "description": "Введите данные для доступа в личный кабинет",
+      "hide_password": "Скрыть пароль",
+      "loading_button": "Вход...",
+      "password_label": "Пароль",
+      "password_placeholder": "••••••••",
+      "phone_label": "Телефон",
+      "phone_placeholder": "+998 90 123 45 67",
+      "show_password": "Показать пароль",
+      "submit_button": "Войти",
+      "title": "Вход в систему"
+    }
+  },
   "booking": {
     "confirm_booking": "Подтвердить запись",
     "home": {
@@ -46,11 +60,204 @@
     "no_description": "Описание отсутствует",
     "price": "{amount} сум",
     "service": "Услуга",
-    "time": "Время"
+    "time": "Время",
+    "error": "Ошибка загрузки данных",
+    "unknown_client": "Клиент",
+    "price_value": "{price} сум",
+    "minutes": "мин"
   },
   "errors": {
     "booking_error": "Ошибка при создании записи",
     "booking_success": "Запись успешно создана!",
     "fill_all_fields": "Заполните все поля"
+  },
+  "navbar": {
+    "menu": {
+      "home": "Главная Страница",
+      "logout": "Выход из аккаунта",
+      "login_for_specialists": "Вход для мастеров",
+      "personal_cabinet": "Личный кабинет"
+    },
+    "title": "Название"
+  },
+  "toast": {
+    "login_error": "Неверный телефон или пароль",
+    "login_success": "Успешный вход!"
+  },
+  "profile": {
+    "loading": "Загрузка...",
+    "profile_info": {
+      "success_update": "Профиль обновлён!",
+      "error_update": "Ошибка сохранения"
+    },
+    "create_booking": "Забронировать",
+    "personal_info": {
+      "title": "Личный кабинет",
+      "edit_button": "Редактировать",
+      "save_button": "Сохранить",
+      "saving_button": "Сохранение...",
+      "cancel_button": "Отмена",
+      "upload_photo": "Загрузить фото",
+      "photo_upload_note": "Фото будет загружено при сохранении",
+      "name_label": "Имя",
+      "name_placeholder": "Ваше имя",
+      "about_label": "О себе",
+      "about_placeholder": "Расскажите о вашем опыте...",
+      "skills_label": "Навыки (через запятую)",
+      "skills_placeholder": "Мужские стрижки, бритьё, укладка...",
+      "description_label": "Описание",
+      "skills_display_label": "Навыки"
+    },
+    "services": {
+      "title": "Мои услуги",
+      "no_services": "У вас пока нет добавленных услуг",
+      "duration": "{minutes} мин",
+      "price": "{amount} сум"
+    },
+    "change_password": {
+      "title": "Изменить пароль",
+
+      "placeholders": {
+        "old_password": "Старый пароль",
+        "new_password": "Новый пароль"
+      },
+
+      "buttons": {
+        "verify_old": "Проверить старый пароль",
+        "verifying": "Проверка...",
+        "save_new": "Сохранить новый пароль",
+        "updating": "Обновление..."
+      },
+
+      "toast": {
+        "old_password_correct": "Старый пароль верен. Теперь введите новый пароль",
+        "success": "Пароль успешно изменён",
+        "new_password_required": "Введите новый пароль",
+        "error_verify": "Неверный старый пароль",
+        "error_change": "Не удалось изменить пароль"
+      },
+
+      "aria": {
+        "show_password": "Показать пароль",
+        "hide_password": "Скрыть пароль"
+      }
+    },
+    "blocked_time": {
+      "title": "Заблокированное время",
+      "add_button": "Добавить",
+      "no_blocked_times": "Нет заблокированного времени",
+      "reason_prefix": "Причина",
+      "system_label": "СИСТЕМА",
+      "show_more": "Показать ещё",
+      "show_less": "Скрыть",
+
+      "dialog": {
+        "title": "Блокировка времени",
+        "date_label": "Дата",
+        "start_label": "Начало",
+        "end_label": "Конец",
+        "reason_label": "Причина (необязательно)",
+        "reason_placeholder": "Например: отпуск, ремонт, личные дела...",
+        "block_button": "Заблокировать",
+        "blocking": "Блокировка..."
+      }
+    },
+    "schedule": {
+      "title": "Расписание",
+      "no_schedule_yet": "У вас пока нет настроенного расписания",
+      "add_new_day": "Добавить новый рабочий день",
+      "select_day": "Выберите день недели",
+      "already_exists": "уже есть",
+      "edit_mode": "Редактирование",
+      "start_time": "Начало работы",
+      "end_time": "Конец работы",
+      "add_new": "Добавить",
+      "save": "Сохранить",
+      "cancel": "Отмена"
+    },
+    "bookings": {
+      "section_title": "Мои записи",
+      "upcoming": {
+        "title": "Предстоящие",
+        "no_bookings": "Нет предстоящих записей",
+        "no_bookings_hint": "Здесь будут отображаться новые бронирования клиентов"
+      },
+      "past": {
+        "title": "Прошедшие",
+        "no_bookings": "Нет завершённых записей"
+      },
+      "actions": {
+        "confirm": "Подтвердить",
+        "cancel": "Отменить",
+        "complete": "Завершить"
+      },
+      "status": {
+        "pending": "Ожидает",
+        "confirmed": "Подтверждено",
+        "cancelled": "Отменено",
+        "completed": "Завершено"
+      }
+    }
+  },
+  "days": {
+    "0": "Воскресенье",
+    "1": "Понедельник",
+    "2": "Вторник",
+    "3": "Среда",
+    "4": "Четверг",
+    "5": "Пятница",
+    "6": "Суббота"
+  },
+  "admin": {
+    "booking_modal": {
+      "title": "Новая запись",
+
+      "fields": {
+        "client": "Клиент",
+        "client_name": "Имя клиента",
+        "specialist": "Специалист",
+        "service": "Услуга",
+        "date": "Дата",
+        "start_time": "Начало",
+        "end_time": "Конец"
+      },
+
+      "placeholders": {
+        "client_phone": "Введите номер телефона...",
+        "search_phone": "Поиск по телефону...",
+        "client_name": "Имя клиента (необязательно)",
+        "select_specialist": "Выберите специалиста",
+        "search_specialist": "Поиск специалиста...",
+        "select_service": "Выберите услугу",
+        "search_service": "Поиск услуги..."
+      },
+
+      "search": {
+        "no_results": "Ничего не найдено",
+        "found_clients": "Найденные клиенты",
+        "add_new": "Добавить нового",
+        "create_new": "Создать клиента: {phone}"
+      },
+
+      "new_client_default_name": "Клиент",
+
+      "buttons": {
+        "cancel": "Отмена",
+        "create": "Создать запись",
+        "creating": "Создание..."
+      },
+
+      "success": {
+        "created": "Запись успешно создана"
+      },
+
+      "errors": {
+        "load_data": "Не удалось загрузить специалистов или услуги",
+        "specialist_not_found": "Выбранный специалист не найден",
+        "required_fields": "Заполните все обязательные поля",
+        "create_failed": "Не удалось создать запись"
+      }
+    }
   }
+
 }

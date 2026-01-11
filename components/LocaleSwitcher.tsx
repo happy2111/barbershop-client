@@ -28,23 +28,41 @@ export default function LocaleSwitcher() {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button variant="outline" size="icon">
-          <Languages className="h-[1.2rem] w-[1.2rem]" />
-          <span className="sr-only">Switch language</span>
+        <Button
+          variant="ghost"
+          size="sm"
+          className="rounded-full h-9 px-3 gap-2 hover:bg-accent/50 transition-all active:scale-95"
+        >
+          <Languages className="h-4 w-4 opacity-70" />
+          <span className="text-xs font-bold uppercase tracking-wider">
+            {locale}
+          </span>
         </Button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent align="end">
+
+      {/* Контент меню в стиле iOS/Liquid */}
+      <DropdownMenuContent
+        align="end"
+        sideOffset={8}
+        className="rounded-[1.5rem] p-2 min-w-[140px] backdrop-blur-xl bg-background/80 border-border shadow-lg"
+      >
         <DropdownMenuItem
           onClick={() => switchLocale("ru")}
-          className={locale === "ru" ? "bg-accent" : ""}
+          className={`
+            rounded-[1rem] px-4 py-2 text-sm transition-colors mb-1
+            ${locale === "ru" ? "bg-primary text-primary-foreground" : "hover:bg-accent"}
+          `}
         >
           Русский (RU)
         </DropdownMenuItem>
         <DropdownMenuItem
           onClick={() => switchLocale("uz")}
-          className={locale === "uz" ? "bg-accent" : ""}
+          className={`
+            rounded-[1rem] px-4 py-2 text-sm transition-colors
+            ${locale === "uz" ? "bg-primary text-primary-foreground" : "hover:bg-accent"}
+          `}
         >
-          O'zbekча (UZ)
+          O'zbekchа (UZ)
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>

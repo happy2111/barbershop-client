@@ -1,5 +1,5 @@
-// components/profile/ProfilePersonalInfo.tsx
 import React, { useState } from 'react';
+import { useTranslations } from 'next-intl';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Pencil, Save, Upload } from "lucide-react";
@@ -36,6 +36,8 @@ const ProfilePersonalInfo = ({
   handleSaveInfo: () => void;
   isUploadingPhoto: boolean;
 }) => {
+  const t = useTranslations('profile.personal_info');
+
   const [photoPreview, setPhotoPreview] = useState<string | null>(null);
 
   const handlePhotoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -52,18 +54,24 @@ const ProfilePersonalInfo = ({
     <Card>
       <CardHeader>
         <div className="flex items-center justify-between">
-          <CardTitle className="text-2xl">Личный кабинет</CardTitle>
+          <CardTitle className="text-2xl">{t('title')}</CardTitle>
           {!editingInfo ? (
             <Button onClick={() => setEditingInfo(true)} variant="outline" size="sm">
-              <Pencil className="w-4 h-4 mr-2" /> Редактировать
+              <Pencil className="w-4 h-4 mr-2" /> {t('edit_button')}
             </Button>
           ) : (
             <div className="space-x-2">
               <Button onClick={handleSaveInfo} size="sm" disabled={isUploadingPhoto}>
-                {isUploadingPhoto ? "Сохранение..." : <><Save className="w-4 h-4 mr-2" /> Сохранить</>}
+                {isUploadingPhoto ? (
+                  t('saving_button')
+                ) : (
+                  <>
+                    <Save className="w-4 h-4 mr-2" /> {t('save_button')}
+                  </>
+                )}
               </Button>
               <Button onClick={() => setEditingInfo(false)} variant="outline" size="sm">
-                Отмена
+                {t('cancel_button')}
               </Button>
             </div>
           )}
@@ -81,7 +89,10 @@ const ProfilePersonalInfo = ({
             </Avatar>
 
             {editingInfo && (
-              <label className="absolute bottom-0 right-0 bg-primary text-white p-2 rounded-full cursor-pointer hover:bg-primary/90 transition">
+              <label
+                title={t('upload_photo')}
+                className="absolute bottom-0 right-0 bg-primary text-white p-2 rounded-full cursor-pointer hover:bg-primary/90 transition"
+              >
                 <Upload className="w-4 h-4" />
                 <input
                   type="file"
@@ -97,7 +108,9 @@ const ProfilePersonalInfo = ({
             <h2 className="text-2xl font-bold">{profile.name}</h2>
             <p className="text-gray-600">{profile.phone}</p>
             {photoPreview && (
-              <p className="text-sm text-green-600 mt-2">Фото будет загружено при сохранении</p>
+              <p className="text-sm text-green-600 mt-2">
+                {t('photo_upload_note')}
+              </p>
             )}
           </div>
         </div>
@@ -105,31 +118,31 @@ const ProfilePersonalInfo = ({
         {editingInfo ? (
           <div className="grid md:grid-cols-2 gap-6">
             <div className="space-y-2">
-              <Label>Имя</Label>
+              <Label>{t('name_label')}</Label>
               <Input
                 value={formData.name}
                 onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                placeholder="Ваше имя"
+                placeholder={t('name_placeholder')}
               />
             </div>
 
             <div className="md:col-span-2 space-y-2">
-              <Label>О себе</Label>
+              <Label>{t('about_label')}</Label>
               <Textarea
                 value={formData.description}
                 onChange={(e) => setFormData({ ...formData, description: e.target.value })}
                 rows={3}
-                placeholder="Расскажите о вашем опыте..."
+                placeholder={t('about_placeholder')}
               />
             </div>
 
             <div className="md:col-span-2 space-y-2">
-              <Label>Навыки (через запятую)</Label>
+              <Label>{t('skills_label')}</Label>
               <Textarea
                 value={formData.skills}
                 onChange={(e) => setFormData({ ...formData, skills: e.target.value })}
                 rows={2}
-                placeholder="Мужские стрижки, бритьё, укладка..."
+                placeholder={t('skills_placeholder')}
               />
             </div>
           </div>
@@ -138,16 +151,16 @@ const ProfilePersonalInfo = ({
             {profile.description && (
               <div>
                 <p className="text-sm">
-                  <strong className="text-foreground">Описание:</strong>{' '}
-                  <span className="">{profile.description}</span>
+                  <strong className="text-foreground">{t('description_label')}:</strong>{' '}
+                  <span>{profile.description}</span>
                 </p>
               </div>
             )}
             {profile.skills && (
               <div>
                 <p className="text-sm">
-                  <strong className="text-foreground">Навыки:</strong>{' '}
-                  <span className="">{profile.skills}</span>
+                  <strong className="text-foreground">{t('skills_display_label')}:</strong>{' '}
+                  <span>{profile.skills}</span>
                 </p>
               </div>
             )}
