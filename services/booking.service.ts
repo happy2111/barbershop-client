@@ -63,7 +63,9 @@ export const bookingService = {
   },
 
   updateStatus(id: number, status: BookingStatus) {
-    return api.patch<Booking>(`/booking/${id}/status/${status}`).then(res => res.data);
+    const hostname: string = window.location.hostname;
+
+    return api.patch<Booking>(`/booking/${id}/status/${status}`, {params: {hostname}}).then(res => res.data);
   },
 
   remove(id: number) {
