@@ -120,7 +120,7 @@
     padding-top: calc(var(--tg-safe-top) + 25px);
   }
   .tg-safe-top-sidebar {
-    padding-top: calc(var(--tg-safe-top) + 32px);
+    padding-top: calc(var(--tg-safe-top) + 35px);
   }
 }
 
