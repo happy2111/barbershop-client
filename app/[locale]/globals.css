@@ -124,6 +124,16 @@
   }
 }
 
+.bordernone div,
+.bordernone span,
+.bordernone button,
+.bordernone p,
+.bordernone svg,
+.bordernone
+{
+  border: none !important;
+}
+
 
 @layer base {
   * {
