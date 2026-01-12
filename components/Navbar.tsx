@@ -119,7 +119,7 @@ const Navbar = () => {
           </div>
         </div>
       </header>
-      <div className="relative py-9 max-sm:flex hidden"></div>
+      <div className="relative py-9 flex"></div>
     </>
   )
 }
