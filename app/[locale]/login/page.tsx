@@ -6,6 +6,7 @@ import { toast } from "sonner";
 import { authStore } from "@/stores/auth.store";
 import { Eye, EyeOff, Phone, Lock, LogIn } from "lucide-react";
 import { useTranslations } from "next-intl";
+import { PatternFormat } from "react-number-format"; // Импортируем маску
 
 import {
   Card,
@@ -25,7 +26,7 @@ export default function SpecialistLoginPage() {
   const login = authStore((state) => state.login);
   const { isLoading, accessToken, user } = authStore();
 
-  const [phone, setPhone] = useState("");
+  const [phone, setPhone] = useState(""); // Здесь будут только цифры (998...)
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
@@ -44,7 +45,9 @@ export default function SpecialistLoginPage() {
     e.preventDefault();
     setLoading(true);
 
-    const ok = await login(phone, password);
+    const formattedPhone = `+998${phone}`
+
+    const ok = await login(formattedPhone, password);
 
     setLoading(false);
 
@@ -66,7 +69,7 @@ export default function SpecialistLoginPage() {
 
   return (
     <div className="min-h-[100dvh] flex items-center justify-center bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-primary/10 via-background to-background p-4">
-      <Card className="w-full max-w-[400px] shadow-xl border-border/50 backdrop-blur-sm bg-card/95">
+      <Card className="w-full max-w-[400px] shadow-xl border-border/50 backdrop-blur-sm bg-card/95 rounded-[2rem]">
         <CardHeader className="space-y-1 pb-6 text-center">
           <CardTitle className="text-2xl font-bold tracking-tight">
             {t("auth.login.title")}
@@ -79,45 +82,44 @@ export default function SpecialistLoginPage() {
         <CardContent>
           <form className="space-y-5" onSubmit={handleSubmit}>
             <div className="space-y-2">
-              <Label htmlFor="phone">{t("auth.login.phone_label")}</Label>
+              <Label htmlFor="phone" className="ml-1 text-xs font-semibold uppercase tracking-wider opacity-70">
+                {t("auth.login.phone_label")}
+              </Label>
               <div className="relative">
-                <Phone className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                <Input
+                <Phone className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground z-10" />
+                <PatternFormat
                   id="phone"
-                  type="text"
-                  placeholder={t("auth.login.phone_placeholder")}
+                  format="+998 (##) ###-##-##"
+                  mask="_"
+                  customInput={Input} // Используем ваш UI-компонент Input
                   value={phone}
-                  onChange={(e) => setPhone(e.target.value)}
-                  className="pl-10 h-11 transition-all focus:ring-2 focus:ring-primary/20"
+                  onValueChange={(values) => {
+                    setPhone(values.value);
+                  }}
+                  placeholder="+998 (__) ___-__-__"
+                  className="pl-11 h-12 text-lg rounded-2xl transition-all focus:ring-2 focus:ring-primary/20 tracking-wide font-medium"
                   required
                 />
               </div>
             </div>
 
             <div className="space-y-2">
-              <div className="flex items-center justify-between">
-                <Label htmlFor="password">{t("auth.login.password_label")}</Label>
-              </div>
+              <Label htmlFor="password">{t("auth.login.password_label")}</Label>
               <div className="relative">
-                <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                <Lock className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground z-10" />
                 <Input
                   id="password"
                   type={showPassword ? "text" : "password"}
                   placeholder={t("auth.login.password_placeholder")}
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  className="pl-10 pr-10 h-11 transition-all focus:ring-2 focus:ring-primary/20"
+                  className="pl-11 pr-10 h-12 rounded-2xl transition-all focus:ring-2 focus:ring-primary/20"
                   required
                 />
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
-                  aria-label={
-                    showPassword
-                      ? t("auth.login.hide_password")
-                      : t("auth.login.show_password")
-                  }
+                  className="absolute right-4 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
                 >
                   {showPassword ? (
                     <EyeOff className="h-4 w-4" />
@@ -130,8 +132,8 @@ export default function SpecialistLoginPage() {
 
             <Button
               type="submit"
-              className="w-full h-11 font-medium transition-all active:scale-[0.98]"
-              disabled={loading}
+              className="w-full h-12 rounded-2xl font-bold text-lg transition-all active:scale-[0.98] shadow-lg shadow-primary/20"
+              disabled={loading || phone.length < 9} // Блокируем, пока номер не введен полностью
             >
               {loading ? (
                 <div className="flex items-center gap-2">

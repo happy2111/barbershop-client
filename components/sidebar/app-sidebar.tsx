@@ -5,7 +5,7 @@ import {
   BookOpen,
   Bot,
   Cable,
-  Frame, LayoutDashboard, NotebookPen, Scissors,
+  Frame, Home, LayoutDashboard, NotebookPen, Scissors,
   Settings2,
   SquareTerminal,
   User
@@ -20,6 +20,9 @@ import {
   SidebarHeader,
   SidebarRail,
 } from "@/components/ui/sidebar"
+import {Button} from "@/components/ui/button";
+import {useTranslations} from "next-intl";
+import {useRouter} from "@/i18n/navigation";
 
 export function AppSidebar(props: React.ComponentProps<typeof Sidebar>) {
   const navMain = [
@@ -33,6 +36,10 @@ export function AppSidebar(props: React.ComponentProps<typeof Sidebar>) {
 
   ]
 
+  const router = useRouter()
+
+  const t = useTranslations()
+
   return (
     <Sidebar collapsible="icon" {...props}>
       <SidebarHeader>
@@ -43,8 +50,8 @@ export function AppSidebar(props: React.ComponentProps<typeof Sidebar>) {
         <NavMain items={navMain} />
       </SidebarContent>
 
-      <SidebarFooter />
-
+      <SidebarFooter/>
+        <Button onClick={() => {router.push('/')}} className='m-4'><Home/> {t("navbar.menu.home")}</Button>
       <SidebarRail />
     </Sidebar>
   )
