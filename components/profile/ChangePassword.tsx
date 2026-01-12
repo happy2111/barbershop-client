@@ -1,19 +1,22 @@
+// components/profile/ChangePassword.tsx
 import React, { useState } from 'react';
+import { useTranslations } from 'next-intl';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { profileService } from "@/services/profile.service";
 import { toast } from "sonner";
-import { Eye, EyeOff, CheckCircle2 } from "lucide-react"; // Иконки
-import { motion, AnimatePresence } from "framer-motion"; // Для анимации
+import { Eye, EyeOff, CheckCircle2 } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
 
 const ChangePassword = () => {
+  const t = useTranslations('profile.change_password');
+
   const [oldPass, setOldPass] = useState('');
   const [newPass, setNewPass] = useState('');
   const [isValid, setIsValid] = useState(false);
   const [loading, setLoading] = useState(false);
 
-  // Состояния видимости паролей
   const [showOld, setShowOld] = useState(false);
   const [showNew, setShowNew] = useState(false);
 
@@ -22,16 +25,18 @@ const ChangePassword = () => {
     try {
       await profileService.changePassword(oldPass);
       setIsValid(true);
-      toast.success('Старый пароль верен. Теперь введите новый пароль.');
+      toast.success(t('toast.old_password_correct'));
     } catch (e: any) {
-      toast.error(e?.message || "Ошибка проверки пароля");
+      toast.error(e?.message || t('toast.error_verify'));
     } finally {
       setLoading(false);
     }
   };
 
   const handleChangePassword = async () => {
-    if (!newPass) return toast.error("Введите новый пароль");
+    if (!newPass.trim()) {
+      return toast.error(t('toast.new_password_required'));
+    }
 
     setLoading(true);
     try {
@@ -39,9 +44,9 @@ const ChangePassword = () => {
       setIsValid(false);
       setNewPass("");
       setOldPass("");
-      toast.success('Пароль успешно изменен.');
+      toast.success(t('toast.success'));
     } catch (e: any) {
-      toast.error(e?.message || "Ошибка при смене пароля");
+      toast.error(e?.message || t('toast.error_change'));
     } finally {
       setLoading(false);
     }
@@ -50,7 +55,7 @@ const ChangePassword = () => {
   return (
     <Card className="w-full mx-auto">
       <CardHeader>
-        <CardTitle className="text-2xl">Изменить Пароль</CardTitle>
+        <CardTitle className="text-2xl">{t('title')}</CardTitle>
       </CardHeader>
 
       <CardContent className="space-y-4">
@@ -61,29 +66,33 @@ const ChangePassword = () => {
               type={showOld ? "text" : "password"}
               value={oldPass}
               onChange={(e) => setOldPass(e.target.value)}
-              placeholder="Старый пароль"
+              placeholder={t('placeholders.old_password')}
               disabled={isValid}
               className={isValid ? "border-green-500 pr-10" : "pr-10"}
             />
             <button
               type="button"
               onClick={() => setShowOld(!showOld)}
-              className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700"
+              className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700 transition-colors"
+              aria-label={showOld ? t('aria.hide_password') : t('aria.show_password')}
             >
               {showOld ? <EyeOff size={18} /> : <Eye size={18} />}
             </button>
             {isValid && (
-              <CheckCircle2 className="absolute -right-7 top-1/2 -translate-y-1/2 text-green-500" size={20} />
+              <CheckCircle2
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-green-500"
+                size={20}
+              />
             )}
           </div>
 
           {!isValid && (
             <Button
               className="w-full"
-              disabled={loading || !oldPass}
+              disabled={loading || !oldPass.trim()}
               onClick={handleVerifyOld}
             >
-              {loading ? 'Проверка...' : 'Проверить старый пароль'}
+              {loading ? t('buttons.verifying') : t('buttons.verify_old')}
             </Button>
           )}
         </div>
@@ -102,24 +111,25 @@ const ChangePassword = () => {
                   type={showNew ? "text" : "password"}
                   value={newPass}
                   onChange={(e) => setNewPass(e.target.value)}
-                  placeholder="Новый пароль"
+                  placeholder={t('placeholders.new_password')}
                   className="pr-10"
                 />
                 <button
                   type="button"
                   onClick={() => setShowNew(!showNew)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700"
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700 transition-colors"
+                  aria-label={showNew ? t('aria.hide_password') : t('aria.show_password')}
                 >
                   {showNew ? <EyeOff size={18} /> : <Eye size={18} />}
                 </button>
               </div>
 
               <Button
-                className="w-full bg-green-600 hover:bg-green-700"
+                className="w-full bg-green-600 hover:bg-green-700 transition-colors"
                 onClick={handleChangePassword}
-                disabled={loading}
+                disabled={loading || !newPass.trim()}
               >
-                {loading ? 'Обновление...' : 'Сохранить новый пароль'}
+                {loading ? t('buttons.updating') : t('buttons.save_new')}
               </Button>
             </motion.div>
           )}

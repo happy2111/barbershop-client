@@ -1,0 +1,251 @@
+{
+  "actions": {
+    "back": "Orqaga",
+    "confirm": "Yozuvni tasdiqlash",
+    "loading": "Yuklanmoqda...",
+    "loading_slots": "Yuklanmoqda...",
+    "no_slots": "Bo'sh vaqt yo'q"
+  },
+  "auth": {
+    "login": {
+      "description": "Shaxsiy kabinetga kirish uchun ma'lumotlarni kiriting",
+      "hide_password": "Parolni yashirish",
+      "loading_button": "Kirish...",
+      "password_label": "Parol",
+      "password_placeholder": "••••••••",
+      "phone_label": "Telefon",
+      "phone_placeholder": "+998 90 123 45 67",
+      "show_password": "Parolni ko'rsatish",
+      "submit_button": "Kirish",
+      "title": "Tizimga kirish"
+    }
+  },
+  "booking": {
+    "confirm_booking": "Yozuvni tasdiqlash",
+    "home": {
+      "step1": {
+        "title": "Xizmatni tanlang"
+      },
+      "step2": {
+        "title": "Mutaxassisni tanlang"
+      },
+      "step3": {
+        "title": "Sanani tanlang"
+      },
+      "step4": {
+        "title": "Vaqtni tanlang"
+      },
+      "step5": {
+        "nameLabel": "Sizga qanday murojaat qilishimiz mumkin?",
+        "namePlaceholder": "Aleksandr",
+        "phoneLabel": "Telefon raqami",
+        "subtitle": "Yozuvni tasdiqlash uchun aloqa ma'lumotlarini qoldiring",
+        "title": "Sizning ma'lumotlaringiz"
+      }
+    },
+    "loading_slots": "Yuklanmoqda...",
+    "no_available_time": "Bo'sh vaqt yo'q"
+  },
+  "booking_summary": {
+    "service": "Xizmat",
+    "specialist": "Usta",
+    "time": "Vaqt",
+    "title": "Sizning ma'lumotlaringiz"
+  },
+  "common": {
+    "back": "Orqaga",
+    "duration": "{minutes} daqiqa",
+    "loading": "Yuklanmoqda...",
+    "master": "Usta",
+    "no_description": "Tavsif mavjud emas",
+    "price": "{amount} so'm",
+    "service": "Xizmat",
+    "time": "Vaqt",
+    "error": "Ma'lumotlarni yuklashda xatolik",
+    "unknown_client": "Mijoz",
+    "price_value": "{price} so'm",
+    "minutes": "min"
+  },
+  "errors": {
+    "booking_error": "Yozuvni yaratishda xato",
+    "booking_success": "Yozuv muvaffaqiyatli yaratildi!",
+    "fill_all_fields": "Barcha maydonlarni to'ldiring"
+  },
+  "navbar": {
+    "menu": {
+      "home": "Asosiy sahifa",
+      "logout": "Hisobdan chiqish",
+      "login_for_specialists": "Ustalar uchun kirish",
+      "personal_cabinet": "Shaxsiy kabinet"
+    },
+
+    "title": "Nom"
+  },
+  "toast": {
+    "login_error": "Telefon raqami yoki parol noto'g'ri",
+    "login_success": "Muvaffaqiyatli kirildi!"
+  },
+  "profile": {
+    "loading": "Yuklanmoqda...",
+    "profile_info": {
+      "success_update": "Profil yangilandi!",
+      "error_update": "Saqlashda xatolik"
+    },
+    "create_booking": "Band qilish",
+    "personal_info": {
+      "title": "Shaxsiy kabinet",
+      "edit_button": "Tahrirlash",
+      "save_button": "Saqlash",
+      "saving_button": "Saqlanmoqda...",
+      "cancel_button": "Bekor qilish",
+      "upload_photo": "Rasm yuklash",
+      "photo_upload_note": "Rasm saqlash vaqtida yuklanadi",
+      "name_label": "Ism",
+      "name_placeholder": "Ismingiz",
+      "about_label": "O'zim haqimda",
+      "about_placeholder": "Tajribangiz haqida gapirib bering...",
+      "skills_label": "Ko'nikmalar (vergul bilan ajrating)",
+      "skills_placeholder": "Erkaklar soch turmagi, soqol olish, turmaklash...",
+      "description_label": "Tavsif",
+      "skills_display_label": "Ko'nikmalar"
+    },
+    "services": {
+      "title": "Mening xizmatlarim",
+      "no_services": "Sizda hali qo'shilgan xizmatlar yo'q",
+      "duration": "{minutes} daqiqa",
+      "price": "{amount} so'm"
+    },
+    "change_password": {
+      "title": "Parolni o'zgartirish",
+      "placeholders": {
+        "old_password": "Eski parol",
+        "new_password": "Yangi parol"
+      },
+      "buttons": {
+        "verify_old": "Eski parolni tekshirish",
+        "verifying": "Tekshirilmoqda...",
+        "save_new": "Yangi parolni saqlash",
+        "updating": "Yangilanmoqda..."
+      },
+      "toast": {
+        "old_password_correct": "Eski parol to'g'ri. Endi yangi parolni kiriting",
+        "success": "Parol muvaffaqiyatli o'zgartirildi",
+        "new_password_required": "Yangi parolni kiriting",
+        "error_verify": "Eski parol noto'g'ri",
+        "error_change": "Parolni o'zgartirishning imkoni bo'lmadi"
+      },
+      "aria": {
+        "show_password": "Parolni ko'rsatish",
+        "hide_password": "Parolni yashirish"
+      }
+    },
+    "blocked_time": {
+      "title": "Band qilingan vaqt",
+      "add_button": "Qo'shish",
+      "no_blocked_times": "Band qilingan vaqtlar yo'q",
+      "reason_prefix": "Sababi",
+      "system_label": "TIZIM",
+      "show_more": "Ko'proq ko'rsatish",
+      "show_less": "Yashirish",
+      "dialog": {
+        "title": "Vaqtni band qilish",
+        "date_label": "Sana",
+        "start_label": "Boshlanishi",
+        "end_label": "Tugashi",
+        "reason_label": "Sababi (ixtiyoriy)",
+        "reason_placeholder": "Masalan: ta'til, ta'mirlash, shaxsiy ishlar...",
+        "block_button": "Band qilish",
+        "blocking": "Band qilinmoqda..."
+      }
+    },
+    "schedule": {
+      "title": "Ish tartibi",
+      "no_schedule_yet": "Sizda hali sozlangan ish tartibi yo'q",
+      "add_new_day": "Yangi ish kunini qo'shish",
+      "select_day": "Hafta kunini tanlang",
+      "already_exists": "allaqachon mavjud",
+      "edit_mode": "Tahrirlash",
+      "start_time": "Ish boshlanishi",
+      "end_time": "Ish tugashi",
+      "add_new": "Qo'shish",
+      "save": "Saqlash",
+      "cancel": "Bekor qilish"
+    },
+    "bookings": {
+      "section_title": "Mening yozuvlarim",
+      "upcoming": {
+        "title": "Kutilayotgan",
+        "no_bookings": "Kutilayotgan yozuvlar yo'q",
+        "no_bookings_hint": "Bu yerda mijozlarning yangi band qilgan vaqtlari ko'rinadi"
+      },
+      "past": {
+        "title": "O'tganlar",
+        "no_bookings": "Yakunlangan yozuvlar yo'q"
+      },
+      "actions": {
+        "confirm": "Tasdiqlash",
+        "cancel": "Bekor qilish",
+        "complete": "Yakunlash"
+      },
+      "status": {
+        "pending": "Kutilmoqda",
+        "confirmed": "Tasdiqlangan",
+        "cancelled": "Bekor qilingan",
+        "completed": "Yakunlangan"
+      }
+    }
+  },
+  "days": {
+    "0": "Yakshanba",
+    "1": "Dushanba",
+    "2": "Seshanba",
+    "3": "Chorshanba",
+    "4": "Payshanba",
+    "5": "Juma",
+    "6": "Shanba"
+  },
+  "admin": {
+    "booking_modal": {
+      "title": "Yangi yozuv",
+      "fields": {
+        "client": "Mijoz",
+        "client_name": "Mijoz ismi",
+        "specialist": "Mutaxassis",
+        "service": "Xizmat",
+        "date": "Sana",
+        "start_time": "Boshlanishi",
+        "end_time": "Tugashi"
+      },
+      "placeholders": {
+        "client_phone": "Telefon raqamini kiriting...",
+        "search_phone": "Telefon orqali qidirish...",
+        "client_name": "Mijoz ismi (ixtiyoriy)",
+        "select_specialist": "Mutaxassisni tanlang",
+        "search_specialist": "Mutaxassisni qidirish...",
+        "select_service": "Xizmatni tanlang",
+        "search_service": "Xizmatni qidirish..."
+      },
+      "search": {
+        "no_results": "Hech narsa topilmadi",
+        "found_clients": "Topilgan mijozlar",
+        "add_new": "Yangi qo'shish",
+        "create_new": "Yangi mijoz yaratish: {phone}"
+      },
+      "new_client_default_name": "Mijoz",
+      "buttons": {
+        "cancel": "Bekor qilish",
+        "create": "Yozuv yaratish",
+        "creating": "Yaratilmoqda..."
+      },
+      "success": {
+        "created": "Yozuv muvaffaqiyatli yaratildi"
+      },
+      "errors": {
+        "load_data": "Mutaxassislar yoki xizmatlarni yuklab bo'lmadi",
+        "specialist_not_found": "Tanlangan mutaxassis topilmadi",
+        "required_fields": "Barcha majburiy maydonlarni to'ldiring",
+        "create_failed": "Yozuvni yaratishda xatolik yuz berdi"
+      }
+    }
+  }
+}

@@ -1,4 +1,6 @@
+// components/profile/ProfileBlockedTime.tsx
 import React, { useEffect, useState } from "react";
+import { useTranslations } from "next-intl";
 import {
   Card,
   CardContent,
@@ -27,6 +29,8 @@ type BlockedTime = {
 const SHOW_LIMIT = 3;
 
 const ProfileBlockedTime = () => {
+  const t = useTranslations("profile.blocked_time");
+
   const [blocked, setBlocked] = useState<BlockedTime[]>([]);
   const [date, setDate] = useState("");
   const [start, setStart] = useState("");
@@ -37,8 +41,12 @@ const ProfileBlockedTime = () => {
   const [showAll, setShowAll] = useState(false);
 
   const loadBlocked = async () => {
-    const data = await bookingService.getBlockedTimes();
-    setBlocked(data);
+    try {
+      const data = await bookingService.getBlockedTimes();
+      setBlocked(data);
+    } catch (e) {
+      console.error("Failed to load blocked times", e);
+    }
   };
 
   useEffect(() => {
@@ -57,6 +65,9 @@ const ProfileBlockedTime = () => {
       setEnd("");
       setReason("");
       setOpen(false);
+    } catch (e: any) {
+      // Можно добавить toast.error здесь, если нужно
+      console.error("Failed to block time", e);
     } finally {
       setLoading(false);
     }
@@ -67,43 +78,62 @@ const ProfileBlockedTime = () => {
   return (
     <Card>
       <CardHeader className="flex flex-row items-center justify-between">
-        <CardTitle>Заблокированное время</CardTitle>
+        <CardTitle>{t("title")}</CardTitle>
 
-        {/* Кнопка открытия диалога */}
         <Dialog open={open} onOpenChange={setOpen}>
           <DialogTrigger asChild>
-            <Button size="sm">Добавить</Button>
+            <Button size="sm">{t("add_button")}</Button>
           </DialogTrigger>
 
           <DialogContent>
             <DialogHeader>
-              <DialogTitle>Блокировка времени</DialogTitle>
+              <DialogTitle>{t("dialog.title")}</DialogTitle>
             </DialogHeader>
 
-            <div className="space-y-3">
-              <Input
-                type="date"
-                value={date}
-                onChange={(e) => setDate(e.target.value)}
-              />
-              <Input
-                type="time"
-                value={start}
-                onChange={(e) => setStart(e.target.value)}
-              />
-              <Input
-                type="time"
-                value={end}
-                onChange={(e) => setEnd(e.target.value)}
-              />
-              <Input
-                placeholder="Причина (необязательно)"
-                value={reason}
-                onChange={(e) => setReason(e.target.value)}
-              />
+            <div className="space-y-4">
+              <div className="space-y-1.5">
+                <label className="text-sm font-medium">{t("dialog.date_label")}</label>
+                <Input
+                  type="date"
+                  value={date}
+                  onChange={(e) => setDate(e.target.value)}
+                />
+              </div>
 
-              <Button onClick={onBlock} disabled={loading} className="w-full">
-                Заблокировать
+              <div className="grid grid-cols-2 gap-3">
+                <div className="space-y-1.5">
+                  <label className="text-sm font-medium">{t("dialog.start_label")}</label>
+                  <Input
+                    type="time"
+                    value={start}
+                    onChange={(e) => setStart(e.target.value)}
+                  />
+                </div>
+                <div className="space-y-1.5">
+                  <label className="text-sm font-medium">{t("dialog.end_label")}</label>
+                  <Input
+                    type="time"
+                    value={end}
+                    onChange={(e) => setEnd(e.target.value)}
+                  />
+                </div>
+              </div>
+
+              <div className="space-y-1.5">
+                <label className="text-sm font-medium">{t("dialog.reason_label")}</label>
+                <Input
+                  placeholder={t("dialog.reason_placeholder")}
+                  value={reason}
+                  onChange={(e) => setReason(e.target.value)}
+                />
+              </div>
+
+              <Button
+                onClick={onBlock}
+                disabled={loading || !date || !start || !end}
+                className="w-full"
+              >
+                {loading ? t("dialog.blocking") : t("dialog.block_button")}
               </Button>
             </div>
           </DialogContent>
@@ -111,46 +141,48 @@ const ProfileBlockedTime = () => {
       </CardHeader>
 
       <CardContent className="space-y-3">
-        {blocked.length === 0 && (
-          <p className="text-sm text-muted-foreground">
-            Нет заблокированного времени
+        {blocked.length === 0 ? (
+          <p className="text-sm text-muted-foreground text-center py-4">
+            {t("no_blocked_times")}
           </p>
-        )}
+        ) : (
+          <>
+            {visibleItems.map((b) => (
+              <div
+                key={b.id}
+                className="border rounded-lg p-3 flex justify-between items-start gap-3"
+              >
+                <div className="min-w-0">
+                  <p className="font-medium">
+                    {new Date(b.date).toLocaleDateString()}
+                  </p>
+                  <p className="text-sm text-muted-foreground">
+                    {b.start_time} – {b.end_time}
+                  </p>
+                  {b.reason && (
+                    <p className="text-xs text-muted-foreground mt-1">
+                      {t("reason_prefix")}: {b.reason}
+                    </p>
+                  )}
+                </div>
 
-        {visibleItems.map((b) => (
-          <div
-            key={b.id}
-            className="border rounded-lg p-3 flex justify-between items-start"
-          >
-            <div>
-              <p className="font-medium">
-                {new Date(b.date).toLocaleDateString()}
-              </p>
-              <p className="text-sm text-gray-600">
-                {b.start_time} – {b.end_time}
-              </p>
+                <span className="text-xs px-2 py-1 rounded bg-muted text-muted-foreground whitespace-nowrap">
+                  {t("system_label")}
+                </span>
+              </div>
+            ))}
 
-              {b.reason && (
-                <p className="text-xs text-muted-foreground mt-1">
-                  Причина: {b.reason}
-                </p>
-              )}
-            </div>
-
-            <span className="text-xs px-2 py-1 rounded bg-foreground text-background">
-              SYSTEM
-            </span>
-          </div>
-        ))}
-
-        {blocked.length > SHOW_LIMIT && (
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => setShowAll(!showAll)}
-          >
-            {showAll ? "Скрыть" : "Показать ещё"}
-          </Button>
+            {blocked.length > SHOW_LIMIT && (
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => setShowAll(!showAll)}
+                className="w-full justify-center"
+              >
+                {showAll ? t("show_less") : t("show_more")}
+              </Button>
+            )}
+          </>
         )}
       </CardContent>
     </Card>

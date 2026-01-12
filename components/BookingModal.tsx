@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import { useTranslations } from "next-intl";
 import {
   Dialog,
   DialogContent,
@@ -8,7 +9,10 @@ import {
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Specialist, specialistService } from "@/services/specialist.service";
+import {
+  Specialist,
+  specialistService,
+} from "@/services/specialist.service";
 import { Service, serviceService } from "@/services/service.service";
 import { Client, clientService } from "@/services/client.service";
 import { bookingService, BookingStatus } from "@/services/booking.service";
@@ -50,11 +54,12 @@ export const AdminBookingModal: React.FC<AdminBookingModalProps> = ({
                                                                       specialistId,
                                                                       onCreated,
                                                                     }) => {
+  const t = useTranslations("admin.booking_modal");
+
   const [specialists, setSpecialists] = useState<Specialist[]>([]);
   const [services, setServices] = useState<Service[]>([]);
   const [foundClients, setFoundClients] = useState<Client[]>([]);
 
-  // Форма
   const [clientPhone, setClientPhone] = useState("");
   const [clientName, setClientName] = useState("");
   const [selectedClientId, setSelectedClientId] = useState<number | null>(null);
@@ -69,7 +74,6 @@ export const AdminBookingModal: React.FC<AdminBookingModalProps> = ({
   const [openServ, setOpenServ] = useState(false);
   const [openPhone, setOpenPhone] = useState(false);
 
-  // Загружаем списки один раз
   useEffect(() => {
     const loadData = async () => {
       try {
@@ -80,29 +84,24 @@ export const AdminBookingModal: React.FC<AdminBookingModalProps> = ({
         setSpecialists(specs);
         setServices(servs);
       } catch (err) {
-        console.error("Ошибка загрузки данных", err);
-        toast.error("Не удалось загрузить специалистов или услуги");
+        toast.error(t("errors.load_data"));
       }
     };
     loadData();
   }, []);
 
-  // Автоматический выбор специалиста, если передан specialistId
   useEffect(() => {
     if (!specialistId || specialists.length === 0) return;
 
     const found = specialists.find((s) => s.id === specialistId);
-
     if (found) {
       setSelectedSpecialist(found);
     } else {
-      console.warn(`Специалист с ID ${specialistId} не найден среди загруженных`);
-      toast.error("Выбранный специалист не найден");
+      toast.error(t("errors.specialist_not_found"));
       setSelectedSpecialist(null);
     }
   }, [specialistId, specialists]);
 
-  // Расчёт окончания услуги
   useEffect(() => {
     if (!start || !selectedService?.duration_min) return;
     setEnd(addMinutesToTime(start, selectedService.duration_min));
@@ -110,15 +109,16 @@ export const AdminBookingModal: React.FC<AdminBookingModalProps> = ({
 
   const handlePhoneSearch = async (val: string) => {
     setClientPhone(val);
-    if (val.length < 3) {
+    if (val.length < 4) {
       setFoundClients([]);
       return;
     }
+
     try {
       const res = await clientService.searchByPhone(val);
       setFoundClients(res);
-    } catch (err) {
-      console.error("Ошибка поиска клиента", err);
+    } catch {
+      // silent error - пользователь увидит пустой список
     }
   };
 
@@ -138,38 +138,42 @@ export const AdminBookingModal: React.FC<AdminBookingModalProps> = ({
   };
 
   const handleCreateBooking = async () => {
-    if (!selectedSpecialist || !selectedService || !date || !start || !clientPhone) {
-      toast.error("Заполните все обязательные поля");
+    if (!selectedSpecialist || !selectedService || !date || !start || !clientPhone.trim()) {
+      toast.error(t("errors.required_fields"));
       return;
     }
 
     setLoading(true);
 
     try {
-      let client: Client | null = null;
+      let client: Client;
 
-      // 1. Пытаемся найти / обновить / создать клиента
+      // 1. Клиент уже выбран по ID
       if (selectedClientId) {
-        client = await clientService.update(selectedClientId, { name: clientName.trim() || undefined });
-      } else {
-        // Проверяем, существует ли уже такой телефон
+        client = await clientService.update(selectedClientId, {
+          name: clientName.trim() || undefined,
+        });
+      }
+      // 2. Проверяем, вдруг клиент с таким телефоном уже существует
+      else {
         const found = await clientService.searchByPhone(clientPhone);
-        const exact = found.find((c) => c.phone === clientPhone);
+        const existing = found.find((c) => c.phone === clientPhone);
 
-        if (exact) {
-          client = await clientService.update(exact.id, { name: clientName.trim() || undefined });
+        if (existing) {
+          client = await clientService.update(existing.id, {
+            name: clientName.trim() || undefined,
+          });
+        }
+        // 3. Создаём нового
+        else {
+          client = await clientService.create({
+            phone: clientPhone,
+            name: clientName.trim() || t("new_client_default_name"),
+          });
         }
       }
 
-      // Если клиента всё ещё нет — создаём
-      if (!client) {
-        client = await clientService.create({
-          phone: clientPhone,
-          name: clientName.trim() || "Клиент",
-        });
-      }
-
-      // 2. Создаём бронирование
+      // 4. Создаём бронь
       await bookingService.create({
         clientId: client.id,
         specialistId: selectedSpecialist.id,
@@ -180,79 +184,68 @@ export const AdminBookingModal: React.FC<AdminBookingModalProps> = ({
         status: BookingStatus.CONFIRMED,
       });
 
-      toast.success("Запись успешно создана");
+      toast.success(t("success.created"));
       onCreated?.();
       onClose();
     } catch (err: any) {
-      console.error("Ошибка создания записи:", err);
-      toast.error(err?.response?.data?.message || "Не удалось создать запись");
+      toast.error(err?.response?.data?.message || t("errors.create_failed"));
     } finally {
       setLoading(false);
     }
   };
 
-  const resetForm = () => {
-    setClientPhone("");
-    setClientName("");
-    setSelectedClientId(null);
-    setIsNewClient(false);
-    setSelectedService(null);
-    setDate("");
-    setStart("");
-    setEnd("");
-    // selectedSpecialist НЕ сбрасываем, если он пришёл через prop
-  };
-
-  // Определяем, фиксирован ли специалист
   const isSpecialistFixed = !!specialistId;
-
-  // Если специалист фиксирован, но ещё не выбран → блокируем кнопку
   const canSubmit = !!selectedSpecialist && !!selectedService && !!date && !!start && !!clientPhone.trim();
 
   return (
     <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
-      <DialogContent className="sm:max-w-xl">
+      <DialogContent className="sm:max-w-xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle>Новая запись</DialogTitle>
+          <DialogTitle>{t("title")}</DialogTitle>
         </DialogHeader>
 
-        <div className="space-y-5 mt-1">
-          {/* Телефон клиента */}
+        <div className="space-y-5 mt-2">
+          {/* Клиент (поиск по телефону) */}
           <div className="space-y-2">
-            <label className="text-sm font-medium">Клиент</label>
+            <label className="text-sm font-medium">{t("fields.client")}</label>
             <Popover open={openPhone} onOpenChange={setOpenPhone}>
               <PopoverTrigger asChild>
                 <Button
                   variant="outline"
-                  className="w-full justify-between h-auto py-2 px-3 text-left font-normal"
+                  role="combobox"
+                  aria-expanded={openPhone}
+                  className="w-full justify-between h-auto py-2.5 px-3 text-left font-normal"
                 >
                   {clientPhone ? (
                     <span className="flex items-center gap-2">
-                      <Phone className="h-4 w-4" />
+                      <Phone className="h-4 w-4 shrink-0" />
                       {clientPhone}
                     </span>
                   ) : (
-                    <span className="text-muted-foreground">Введите номер телефона...</span>
+                    <span className="text-muted-foreground">
+                      {t("placeholders.client_phone")}
+                    </span>
                   )}
-                  <ChevronsUpDown className="h-4 w-4 opacity-50 ml-2" />
+                  <ChevronsUpDown className="ml-2 h-4 w-4 opacity-50 shrink-0" />
                 </Button>
               </PopoverTrigger>
 
-              <PopoverContent className="p-0 w-[var(--radix-popover-trigger-width)] min-w-80" align="start">
+              <PopoverContent className="p-0 w-full" align="start">
                 <Command shouldFilter={false}>
                   <CommandInput
-                    placeholder="Поиск по телефону..."
+                    placeholder={t("placeholders.search_phone")}
                     value={clientPhone}
                     onValueChange={handlePhoneSearch}
                   />
-                  <CommandList className="max-h-64">
-                    <CommandEmpty>Ничего не найдено</CommandEmpty>
+                  <CommandList className="max-h-60">
+                    <CommandEmpty>{t("search.no_results")}</CommandEmpty>
 
                     {foundClients.length > 0 && (
-                      <CommandGroup heading="Найденные клиенты">
+                      <CommandGroup heading={t("search.found_clients")}>
                         {foundClients.map((client) => (
                           <CommandItem
                             key={client.id}
+                            value={client.phone}
                             onSelect={() => handleSelectExistingClient(client)}
                           >
                             <Check
@@ -264,7 +257,9 @@ export const AdminBookingModal: React.FC<AdminBookingModalProps> = ({
                             <div className="flex flex-col">
                               <span>{client.phone}</span>
                               {client.name && (
-                                <span className="text-xs text-muted-foreground">{client.name}</span>
+                                <span className="text-xs text-muted-foreground">
+                                  {client.name}
+                                </span>
                               )}
                             </div>
                           </CommandItem>
@@ -272,14 +267,14 @@ export const AdminBookingModal: React.FC<AdminBookingModalProps> = ({
                       </CommandGroup>
                     )}
 
-                    {clientPhone.trim() && (
-                      <CommandGroup heading="Добавить нового">
+                    {clientPhone.trim().length >= 7 && (
+                      <CommandGroup heading={t("search.add_new")}>
                         <CommandItem
                           onSelect={handleAddNewClient}
                           className="text-primary"
                         >
                           <UserPlus className="mr-2 h-4 w-4" />
-                          Создать клиента: {clientPhone}
+                          {t("search.create_new", { phone: clientPhone })}
                         </CommandItem>
                       </CommandGroup>
                     )}
@@ -289,38 +284,50 @@ export const AdminBookingModal: React.FC<AdminBookingModalProps> = ({
             </Popover>
           </div>
 
-          {/* Имя — только если новый клиент или уже выбрали с именем */}
+          {/* Имя клиента (показываем только при создании нового или если уже есть) */}
           {(isNewClient || clientName.trim()) && (
             <div className="space-y-2">
-              <label className="text-sm font-medium">Имя клиента</label>
+              <label className="text-sm font-medium">{t("fields.client_name")}</label>
               <Input
                 value={clientName}
                 onChange={(e) => setClientName(e.target.value)}
-                placeholder="Имя клиента (необязательно)"
+                placeholder={t("placeholders.client_name")}
               />
             </div>
           )}
 
-          {/* Специалист — показываем только если НЕ фиксирован */}
-          {!isSpecialistFixed && (
+          {/* Специалист */}
+          {isSpecialistFixed ? (
             <div className="space-y-2">
-              <label className="text-sm font-medium">Специалист</label>
+              <label className="text-sm font-medium text-muted-foreground">
+                {t("fields.specialist")}
+              </label>
+              <div className="border rounded-md px-3 py-2.5 bg-muted/50 text-base font-medium">
+                {selectedSpecialist ? selectedSpecialist.name : t("loading")}
+              </div>
+            </div>
+          ) : (
+            <div className="space-y-2">
+              <label className="text-sm font-medium">{t("fields.specialist")}</label>
               <Popover>
                 <PopoverTrigger asChild>
                   <Button variant="outline" className="w-full justify-between">
-                    {selectedSpecialist ? selectedSpecialist.name : "Выберите специалиста"}
+                    {selectedSpecialist
+                      ? selectedSpecialist.name
+                      : t("placeholders.select_specialist")}
                     <ChevronsUpDown className="ml-2 h-4 w-4 opacity-50" />
                   </Button>
                 </PopoverTrigger>
-                <PopoverContent className="p-0 w-[var(--radix-popover-trigger-width)]">
+                <PopoverContent className="p-0">
                   <Command>
-                    <CommandInput placeholder="Поиск специалиста..." />
+                    <CommandInput placeholder={t("placeholders.search_specialist")} />
                     <CommandList>
-                      <CommandEmpty>Не найдено</CommandEmpty>
+                      <CommandEmpty>{t("search.no_results")}</CommandEmpty>
                       <CommandGroup>
                         {specialists.map((spec) => (
                           <CommandItem
                             key={spec.id}
+                            value={spec.name}
                             onSelect={() => setSelectedSpecialist(spec)}
                           >
                             {spec.name}
@@ -334,47 +341,39 @@ export const AdminBookingModal: React.FC<AdminBookingModalProps> = ({
             </div>
           )}
 
-          {/* Фиксированный специалист — просто отображаем */}
-          {isSpecialistFixed && (
-            <div className="space-y-2">
-              <label className="text-sm font-medium text-muted-foreground">Специалист</label>
-              <div className="border rounded-md px-3 py-2 bg-muted/40 text-base font-medium">
-                {selectedSpecialist ? selectedSpecialist.name : "Загрузка..."}
-              </div>
-            </div>
-          )}
-
           {/* Услуга */}
           <div className="space-y-2">
-            <label className="text-sm font-medium">Услуга</label>
+            <label className="text-sm font-medium">{t("fields.service")}</label>
             <Popover open={openServ} onOpenChange={setOpenServ}>
               <PopoverTrigger asChild>
                 <Button variant="outline" className="w-full justify-between">
                   {selectedService
-                    ? `${selectedService.name} (${selectedService.duration_min} мин)`
-                    : "Выберите услугу"}
+                    ? `${selectedService.name} (${selectedService.duration_min} ${t("common.minutes")})`
+                    : t("placeholders.select_service")}
                   <ChevronsUpDown className="ml-2 h-4 w-4 opacity-50" />
                 </Button>
               </PopoverTrigger>
-              <PopoverContent className="p-0 w-[var(--radix-popover-trigger-width)]">
+              <PopoverContent className="p-0">
                 <Command>
-                  <CommandInput placeholder="Поиск услуги..." />
+                  <CommandInput placeholder={t("placeholders.search_service")} />
                   <CommandList>
-                    <CommandEmpty>Не найдено</CommandEmpty>
+                    <CommandEmpty>{t("search.no_results")}</CommandEmpty>
                     <CommandGroup>
                       {services.map((s) => (
                         <CommandItem
                           key={s.id}
+                          value={s.name}
                           onSelect={() => {
                             setSelectedService(s);
                             setOpenServ(false);
                           }}
-                          className="flex justify-between"
                         >
-                          <span>{s.name}</span>
-                          <span className="text-xs text-muted-foreground ml-2">
-                            {s.duration_min} мин
-                          </span>
+                          <div className="flex justify-between w-full">
+                            <span>{s.name}</span>
+                            <span className="text-xs text-muted-foreground">
+                              {s.duration_min} {t("common.minutes")}
+                            </span>
+                          </div>
                         </CommandItem>
                       ))}
                     </CommandGroup>
@@ -384,10 +383,10 @@ export const AdminBookingModal: React.FC<AdminBookingModalProps> = ({
             </Popover>
           </div>
 
-          {/* Дата + время */}
+          {/* Дата и время */}
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
             <div className="space-y-2">
-              <label className="text-sm font-medium">Дата</label>
+              <label className="text-sm font-medium">{t("fields.date")}</label>
               <Input
                 type="date"
                 value={date}
@@ -395,7 +394,7 @@ export const AdminBookingModal: React.FC<AdminBookingModalProps> = ({
               />
             </div>
             <div className="space-y-2">
-              <label className="text-sm font-medium">Начало</label>
+              <label className="text-sm font-medium">{t("fields.start_time")}</label>
               <Input
                 type="time"
                 value={start}
@@ -403,21 +402,28 @@ export const AdminBookingModal: React.FC<AdminBookingModalProps> = ({
               />
             </div>
             <div className="space-y-2">
-              <label className="text-sm font-medium text-muted-foreground">Конец</label>
-              <Input type="time" value={end} readOnly className="bg-muted" />
+              <label className="text-sm font-medium text-muted-foreground">
+                {t("fields.end_time")}
+              </label>
+              <Input
+                type="time"
+                value={end}
+                readOnly
+                className="bg-muted cursor-not-allowed"
+              />
             </div>
           </div>
         </div>
 
-        <DialogFooter className="mt-6 gap-3 sm:gap-0">
+        <DialogFooter className="mt-6 sm:mt-8 gap-3">
           <Button variant="outline" onClick={onClose}>
-            Отмена
+            {t("buttons.cancel")}
           </Button>
           <Button
             onClick={handleCreateBooking}
             disabled={loading || !canSubmit}
           >
-            {loading ? "Создание..." : "Создать запись"}
+            {loading ? t("buttons.creating") : t("buttons.create")}
           </Button>
         </DialogFooter>
       </DialogContent>
