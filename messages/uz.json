@@ -64,7 +64,8 @@
     "error": "Ma'lumotlarni yuklashda xatolik",
     "unknown_client": "Mijoz",
     "price_value": "{price} so'm",
-    "minutes": "min"
+    "minutes": "min",
+    "sum": "so'm"
   },
   "errors": {
     "booking_error": "Yozuvni yaratishda xato",
@@ -246,6 +247,92 @@
         "required_fields": "Barcha majburiy maydonlarni to'ldiring",
         "create_failed": "Yozuvni yaratishda xatolik yuz berdi"
       }
+    }
+  },
+  "booking_check": {
+    "loading": "Yuklanmoqda...",
+    "errors": {
+      "load_failed": "Bronni yuklab bo'lmadi",
+      "not_found": "Bron topilmadi",
+      "screenshot_failed": "Skrinshotni saqlashda xatolik yuz berdi",
+      "copy_failed": "Havoladan nusxa ko'chirib bo'lmadi",
+      "share_failed": "Ulashishda xatolik yuz berdi",
+      "share_not_supported": "Ulashish funksiyasi brauzeringizda qo'llab-quvvatlanmaydi",
+      "cancel_failed": "Bronni bekor qilib bo'lmadi"
+    },
+    "status": {
+      "pending": {
+        "label": "Kutilmoqda",
+        "note": "Brongiz tasdiqlanish jarayonida. Iltimos, holat o'zgarishini kuting yoki usta bilan bog'laning."
+      },
+      "confirmed": {
+        "label": "Tasdiqlangan",
+        "note": "Brongiz tasdiqlandi. Iltimos, belgilangan vaqtda keling."
+      },
+      "completed": {
+        "label": "Yakunlangan",
+        "note": "Xizmat muvaffaqiyatli ko'rsatildi. Barber-shoppimizni tanlaganingiz uchun rahmat!"
+      },
+      "cancelled": {
+        "label": "Bekor qilingan",
+        "note": "Bron bekor qilindi. Istalgan vaqtda yangi yozuv yaratishingiz mumkin."
+      }
+    },
+    "cancelled": {
+      "title": "Bron qilish bekor qilindi",
+      "description": "Ushbu yozuv bekor qilingan. Agar bu xatolik bo'lsa, qo'llab-quvvatlash xizmatiga murojaat qiling."
+    },
+    "card": {
+      "title": "Bronni tasdiqlash"
+    },
+    "fields": {
+      "id": "ID",
+      "service": "Xizmat",
+      "price": "Narxi",
+      "master": "Usta",
+      "date": "Sana",
+      "time": "Vaqt",
+      "status": "Holat"
+    },
+    "note": {
+      "title": "Eslatma"
+    },
+    "buttons": {
+      "home": "Bosh sahifa",
+      "save_png": "PNG saqlash",
+      "copy_link": "Havolani nusxalash",
+      "copied": "Nusxa olindi",
+      "share": "Ulashish",
+      "cancel_booking": "Bronni bekor qilish",
+      "back": "Orqaga",
+      "confirm_cancel": "Bekor qilishni tasdiqlash",
+      "back_home": "Bosh sahifaga qaytish",
+      "close_note": "Закрыть заметку"
+    },
+    "toast": {
+      "screenshot_saved": "Skrinshot saqlandi",
+      "link_copied": "Havola nusxalandi",
+      "booking_cancelled": "Bron muvaffaqiyatli bekor qilindi"
+    },
+    "map": {
+      "title": "Bizning manzil",
+      "link_text": "Ramitan Barbershop xaritada — Yandex Xaritalar"
+    },
+    "reviews": {
+      "title": "Sharhlarimiz",
+      "iframe_title": "Ramitan Barbershop sharhlari",
+      "link_text": "Ramitan Barbershop Yandex Xaritalarda"
+    },
+    "share": {
+      "title": "Mening bronim",
+      "text": "Ramitan Barbershop-ga bron"
+    },
+    "cancel_dialog": {
+      "title": "Bronni bekor qilasizmi?",
+      "description": "Bu harakatni ortga qaytarib bo'lmaydi. Tasdiqlaganingizdan so'ng bronni qayta tiklay olmaysiz."
+    },
+    "common": {
+      "sum": "so'm"
     }
   }
 }
