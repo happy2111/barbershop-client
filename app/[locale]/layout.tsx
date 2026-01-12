@@ -69,7 +69,7 @@ export default async function RootLayout({
           enableSystem
           disableTransitionOnChange
         >
-          <div className="w-full mb-8 tg-safe-top sm:pt-16">
+          <div className="w-full mb-8 tg-safe-top">
             <Navbar/>
             {children}
             <ModeToggle />
