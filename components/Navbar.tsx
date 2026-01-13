@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useState } from 'react'
+import React, { useState, useEffect, useRef } from 'react'
 import { Button } from "@/components/ui/button"
 import { ChevronUp, LogIn, Menu, User, LogOut, Home } from "lucide-react"
 import { usePathname, useRouter } from "next/navigation"
@@ -13,6 +13,36 @@ const Navbar = () => {
   const t = useTranslations()
   const router = useRouter()
   const [isMenuOpen, setIsMenuOpen] = useState(false)
+
+  // Состояния для скрытия при скролле
+  const [isVisible, setIsVisible] = useState(true)
+  const lastScrollY = useRef(0)
+
+  // Эффект для отслеживания направления скролла
+  useEffect(() => {
+    const handleScroll = () => {
+      const currentScrollY = window.scrollY
+
+      // Если открыто бургер-меню, навбар всегда виден
+      if (isMenuOpen) {
+        setIsVisible(true)
+        return
+      }
+
+      // Если скроллим вверх (current < last) — показываем
+      // Если скроллим вниз (current > last) — скрываем
+      if (currentScrollY > lastScrollY.current && currentScrollY > 70) {
+        setIsVisible(false) // Скрываем при скролле вниз
+      } else {
+        setIsVisible(true) // Показываем при скролле вверх
+      }
+
+      lastScrollY.current = currentScrollY
+    }
+
+    window.addEventListener('scroll', handleScroll, { passive: true })
+    return () => window.removeEventListener('scroll', handleScroll)
+  }, [isMenuOpen])
 
   const isAuthenticated = authStore(state => state.isAuth())
   const logout = authStore(state => state.logout)
@@ -35,13 +65,20 @@ const Navbar = () => {
 
   return (
     <>
-      <header className="fixed  left-0 right-0 z-50 px-4 pointer-events-none sm:top-2  top-[calc(var(--tg-safe-top)+50px)]">
+      <header
+        className={`
+          fixed left-0 right-0 z-50 px-4 pointer-events-none 
+          sm:top-2 top-[calc(var(--tg-safe-top)+50px)]
+          transition-all duration-300 ease-in-out
+          ${isVisible ? 'translate-y-0 opacity-100' : '-translate-y-full opacity-0'}
+        `}
+      >
         <div className="max-w-2xl mx-auto pointer-events-auto">
           <div
             className={`
             transition-all duration-300 ease-in-out border
             bg-card/80 backdrop-blur-md border-border shadow-sm overflow-hidden
-            will-change-[height]
+            will-change-[height, transform]
             rounded-[2rem] mt-2
           `}
           >
@@ -119,6 +156,7 @@ const Navbar = () => {
           </div>
         </div>
       </header>
+      {/* Отступ под навбаром */}
       <div className="relative py-9 flex"></div>
     </>
   )
