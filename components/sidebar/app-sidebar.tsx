@@ -2,12 +2,9 @@
 
 import * as React from "react"
 import {
-  BookOpen,
-  Bot,
   Cable,
   Frame, Home, LayoutDashboard, NotebookPen, Scissors,
   Settings2,
-  SquareTerminal,
   User
 } from "lucide-react"
 
@@ -18,7 +15,7 @@ import {
   SidebarContent,
   SidebarFooter,
   SidebarHeader,
-  SidebarRail,
+  SidebarRail, useSidebar,
 } from "@/components/ui/sidebar"
 import {Button} from "@/components/ui/button";
 import {useTranslations} from "next-intl";
@@ -40,6 +37,8 @@ export function AppSidebar(props: React.ComponentProps<typeof Sidebar>) {
 
   const t = useTranslations()
 
+  const {state} = useSidebar();
+
   return (
     <Sidebar collapsible="icon" {...props}>
       <SidebarHeader>
@@ -51,7 +50,19 @@ export function AppSidebar(props: React.ComponentProps<typeof Sidebar>) {
       </SidebarContent>
 
       <SidebarFooter/>
-        <Button onClick={() => {router.push('/')}} className='m-4'><Home/> {t("navbar.menu.home")}</Button>
+      { state === 'expanded' ?
+        (
+          <Button onClick={() => {router.push('/')}} className='m-4'>
+            <Home/> {t("navbar.menu.home")}
+          </Button>
+        )  :
+        (
+          <Button variant={"ghost"} onClick={() => {router.push('/')}} className='m-4'>
+            <Home/>
+          </Button>
+        ) }
+
+
       <SidebarRail />
     </Sidebar>
   )

@@ -1,12 +1,8 @@
 "use client"
 
 import {
-  BadgeCheck,
-  Bell,
   ChevronsUpDown,
-  CreditCard,
   LogOut,
-  Sparkles,
 } from "lucide-react"
 
 import {
@@ -17,7 +13,6 @@ import {
 import {
   DropdownMenu,
   DropdownMenuContent,
-  DropdownMenuGroup,
   DropdownMenuItem,
   DropdownMenuLabel,
   DropdownMenuSeparator,
@@ -38,7 +33,7 @@ export function NavUser() {
   const user = authStore((state) => state.user)
   const logout = authStore((state) => state.logout)
 
-  if (!user) return null // если не авторизован — нечего показывать
+  if (!user) return null
 
   const initials =
     user.name?.slice(0, 2).toUpperCase() ||
