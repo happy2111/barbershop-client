@@ -77,7 +77,8 @@
       "home": "Asosiy sahifa",
       "logout": "Hisobdan chiqish",
       "login_for_specialists": "Ustalar uchun kirish",
-      "personal_cabinet": "Shaxsiy kabinet"
+      "personal_cabinet": "Shaxsiy kabinet",
+      "panel": "Boshqaruv paneli"
     },
 
     "title": "Nom"
@@ -309,6 +310,9 @@
       },
       "common" : {
         "minutes": "min"
+      },
+      "error": {
+        "failed_load" : "Bronlarni yuklab bo'lmadi"
       }
     },
     "clients": {

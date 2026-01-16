@@ -216,9 +216,9 @@ export default function SpecialistsPage() {
       cell: ({ row }) => (
         <Badge
           variant={row.original.role === "ADMIN" ? "destructive" : "secondary"}
-          className="font-medium flex items-center gap-1"
+          className="font-medium flex items-center gap-1 "
         >
-          <Shield className="w-3 h-3" />
+          <Shield className="w-3 h-3 " />
           {t(`roles.${row.original.role.toLowerCase()}`)}
         </Badge>
       ),

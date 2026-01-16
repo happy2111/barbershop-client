@@ -2,7 +2,15 @@
 
 import React, { useState, useEffect, useRef } from 'react'
 import { Button } from "@/components/ui/button"
-import { ChevronUp, LogIn, Menu, User, LogOut, Home } from "lucide-react"
+import {
+  ChevronUp,
+  LogIn,
+  Menu,
+  User,
+  LogOut,
+  Home,
+  LayoutDashboard
+} from "lucide-react"
 import { usePathname, useRouter } from "next/navigation"
 import Link from "next/link"
 import { authStore } from "@/stores/auth.store"
@@ -46,6 +54,8 @@ const Navbar = () => {
 
   const isAuthenticated = authStore(state => state.isAuth())
   const logout = authStore(state => state.logout)
+
+  const user = authStore(state => state.user)
 
   const pathname = usePathname()
   const segments = pathname.split('/').filter(Boolean)
@@ -120,6 +130,14 @@ const Navbar = () => {
                     label={t('navbar.menu.home')}
                     onClick={() => handleNavigation(`/${locale}`)}
                   />
+                  {isAuthenticated && user?.role === 'ADMIN' && (
+                    <MenuButton
+                      icon={<LayoutDashboard className="h-4 w-4" />}
+                      label={t('navbar.menu.panel')}
+                      onClick={() => handleNavigation(`/${locale}/admin`)}
+                    />
+                  )}
+
 
                   {isAuthenticated ? (
                     <>
@@ -150,6 +168,9 @@ const Navbar = () => {
                       <span className="text-sm font-medium">{t('navbar.menu.login_for_specialists')}</span>
                     </Button>
                   )}
+
+
+
                 </nav>
               </div>
             </div>
