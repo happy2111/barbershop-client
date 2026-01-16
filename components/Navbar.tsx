@@ -92,7 +92,7 @@ const Navbar = () => {
               </Link>
 
               <div className="flex items-center gap-1">
-                <LocaleSwitcher />
+                <LocaleSwitcher isMobile={false} />
                 <Button
                   onClick={() => setIsMenuOpen(p => !p)}
                   variant="ghost"
