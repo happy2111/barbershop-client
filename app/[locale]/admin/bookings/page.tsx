@@ -118,6 +118,7 @@ export default function BookingsPage() {
       header: t("table.id"),
       size: 80,
     },
+
     {
       accessorKey: "date",
       header: t("table.date"),
@@ -131,8 +132,9 @@ export default function BookingsPage() {
         );
       },
     },
+
     {
-      accessorKey: "start_time",
+      id: "time",
       header: t("table.time"),
       cell: ({ row }) => (
         <div className="flex items-center gap-2">
@@ -141,8 +143,9 @@ export default function BookingsPage() {
         </div>
       ),
     },
+
     {
-      accessorKey: "client.name",
+      id: "client",
       header: t("table.client"),
       cell: ({ row }) => (
         <div className="flex items-center gap-2">
@@ -151,8 +154,9 @@ export default function BookingsPage() {
         </div>
       ),
     },
+
     {
-      accessorKey: "client.phone",
+      id: "phone",
       header: t("table.phone"),
       cell: ({ row }) => (
         <div className="flex items-center gap-2">
@@ -161,31 +165,57 @@ export default function BookingsPage() {
         </div>
       ),
     },
+
     {
-      accessorKey: "specialist.name",
+      id: "specialist",
       header: t("table.specialist"),
-      cell: ({ row }) => row.original.specialist?.name || t("table.unknown"),
+      cell: ({ row }) =>
+        row.original.specialist?.name || t("table.unknown"),
     },
+
     {
-      accessorKey: "service.name",
+      id: "services",
       header: t("table.service"),
-      cell: ({ row }) => (
-        <div className="flex items-center gap-2">
-          <Scissors className="w-4 h-4 text-muted-foreground" />
-          {row.original.service?.name || t("table.unknown")}
-        </div>
-      ),
+      cell: ({ row }) => {
+        const services = row.original.services ?? [];
+
+        if (services.length === 0) {
+          return <span className="text-muted-foreground">—</span>;
+        }
+
+        if (services.length === 1) {
+          return (
+            <div className="flex items-center gap-2">
+              <Scissors className="w-4 h-4 text-muted-foreground" />
+              {services[0].service.name}
+            </div>
+          );
+        }
+
+        return (
+          <div className="flex items-center gap-2">
+            <Scissors className="w-4 h-4 text-muted-foreground" />
+            {services[0].service.name}
+            <span className="text-xs text-muted-foreground">
+            +{services.length - 1}
+          </span>
+          </div>
+        );
+      },
     },
+
     {
       accessorKey: "status",
       header: t("table.status"),
       cell: ({ row }) => getStatusBadge(row.original.status),
     },
+
     {
       id: "actions",
       size: 80,
       cell: ({ row }) => {
         const booking = row.original;
+
         return (
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
@@ -193,22 +223,32 @@ export default function BookingsPage() {
                 <MoreHorizontal className="h-4 w-4" />
               </Button>
             </DropdownMenuTrigger>
+
             <DropdownMenuContent align="end">
               <DropdownMenuItem
-                onClick={() => updateStatus(booking.id, BookingStatus.CONFIRMED)}
+                onClick={() =>
+                  updateStatus(booking.id, BookingStatus.CONFIRMED)
+                }
                 disabled={booking.status === BookingStatus.CONFIRMED}
               >
                 {t("actions.confirm")}
               </DropdownMenuItem>
+
               <DropdownMenuItem
-                onClick={() => updateStatus(booking.id, BookingStatus.COMPLETED)}
+                onClick={() =>
+                  updateStatus(booking.id, BookingStatus.COMPLETED)
+                }
                 disabled={booking.status === BookingStatus.COMPLETED}
               >
                 {t("actions.complete")}
               </DropdownMenuItem>
+
               <DropdownMenuSeparator />
+
               <DropdownMenuItem
-                onClick={() => updateStatus(booking.id, BookingStatus.CANCELLED)}
+                onClick={() =>
+                  updateStatus(booking.id, BookingStatus.CANCELLED)
+                }
                 className="text-destructive focus:bg-destructive/10"
                 disabled={booking.status === BookingStatus.CANCELLED}
               >
@@ -220,6 +260,7 @@ export default function BookingsPage() {
       },
     },
   ];
+
 
   const table = useReactTable({
     data: bookings,
@@ -314,7 +355,9 @@ export default function BookingsPage() {
                 <div className="flex items-center gap-2">
                   <Scissors className="w-4 h-4 text-muted-foreground" />
                   <span className="truncate italic">
-                    {booking.service?.name || t("table.unknown")}
+                  {booking.services && booking.services.length > 0
+                      ? booking.services.map(s => s.service.name).join(", ")
+                      : t("table.unknown")}
                   </span>
                 </div>
               </div>

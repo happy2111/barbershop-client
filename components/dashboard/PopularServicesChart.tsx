@@ -25,11 +25,9 @@ export function PopularServicesChart() {
   const { popularServices, isLoading } = useDashboardStore();
   const loading = isLoading["popularServices_count_5"];
 
-  // Инициализация перевода
   const t = useTranslations("admin.dashboard.popular_services");
 
   const formatValue = (val: number) => {
-    // Используем интерполяцию для вывода количества записей
     return t('record_count', { count: val });
   };
 
@@ -47,7 +45,7 @@ export function PopularServicesChart() {
             <BarChart
               data={popularServices}
               layout="vertical"
-              margin={{ top: 5, right: 30, left: 40, bottom: 5 }}
+              margin={{ top: 5, right: 30, left: -20, bottom: 5 }}
             >
               <CartesianGrid
                 horizontal={false}

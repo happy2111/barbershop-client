@@ -11,7 +11,6 @@ export interface Booking {
   id: number;
   clientId: number;
   specialistId: number;
-  serviceId: number;
   date: string;       // ISO string
   start_time: string; // "HH:MM"
   end_time: string;   // "HH:MM"
@@ -20,28 +19,38 @@ export interface Booking {
   reason?: string;
   client?: any;
   specialist?: any;
-  service?: any;
-}
-
-export interface CreateBookingDto {
-  clientId: number;
-  specialistId: number;
-  serviceId: number;
-  date: string;
-  start_time: string;
-  end_time: string;
-  status?: BookingStatus;
+  services?: Array<{
+    service: {
+      id: number;
+      name: string;
+      price: number;
+      duration_min: number;
+    };
+  }>;
 }
 
 export interface UpdateBookingDto {
   clientId?: number;
   specialistId?: number;
-  serviceId?: number;
+  serviceIds?: number[]; // массив ID выбранных услуг
   date?: string;
   start_time?: string;
   end_time?: string;
   status?: BookingStatus;
+  reason?: string;
 }
+
+export interface CreateBookingDto {
+  clientId: number;
+  specialistId: number;
+  serviceIds: number[];
+  date: string;
+  start_time: string;
+  end_time: string;
+  status?: BookingStatus;
+  reason?: string;
+}
+
 
 export const bookingService = {
   getAll() {
@@ -72,15 +81,18 @@ export const bookingService = {
     return api.delete<void>(`/booking/${id}`).then(res => res.data);
   },
 
-  getFreeSlots(specialistId: number, serviceId: number, date: string) {
+  getFreeSlots(specialistId: number, serviceIds: number[], date: string) {
     const hostname: string = window.location.hostname;
     return api
       .get(`/schedule/${specialistId}/free-slots`, {
-        params: { serviceId, date, hostname }
+        params: {
+          serviceIds: serviceIds.join(','), // массив в строку "1,2,3"
+          date,
+          hostname
+        }
       })
       .then((res) => res.data);
   },
-
   block(date: string, start_time: string, end_time: string, reason?: string) {
     return api.post(`/booking/block`, { date, start_time, end_time, reason }).then((res) => res.data);
   },

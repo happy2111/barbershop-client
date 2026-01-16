@@ -44,7 +44,9 @@
       }
     },
     "loading_slots": "Загрузка...",
-    "no_available_time": "Нет свободного времени"
+    "no_available_time": "Нет свободного времени",
+    "selected": "Выбрано",
+    "services_count": "услуг"
   },
   "booking_summary": {
     "service": "Услуга",
@@ -65,7 +67,8 @@
     "unknown_client": "Клиент",
     "price_value": "{price} сум",
     "minutes": "мин",
-    "sum": "сум"
+    "sum": "сум",
+    "next": "Далее"
   },
   "errors": {
     "booking_error": "Ошибка при создании записи",
@@ -207,7 +210,9 @@
         "confirmed": "Подтверждено",
         "cancelled": "Отменено",
         "completed": "Завершено"
-      }
+      },
+      "selected": "Выбрано",
+      "services_count": "услуг"
     }
   },
   "days": {
@@ -221,6 +226,9 @@
   },
   "admin": {
     "booking_modal": {
+      "loading": "Загрузка...",
+
+
       "title": "Новая запись",
 
       "fields": {
@@ -269,7 +277,8 @@
         "create_failed": "Не удалось создать запись"
       },
       "common" : {
-        "minutes": "min"
+        "minutes": "min",
+        "services_selected": "услуг выбрано"
       }
     },
     "bookings": {
@@ -741,6 +750,8 @@
       }
     },
     "dashboard": {
+      "title": "Дашборд",
+      "description": "Общая статистика и аналитика вашего салона\n",
       "stats": {
         "revenue": "Выручка",
         "revenue_subtitle": "За текущий месяц",
