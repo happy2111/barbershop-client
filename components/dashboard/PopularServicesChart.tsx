@@ -1,3 +1,6 @@
+"use client";
+
+import { useTranslations } from "next-intl";
 import {
   Card,
   CardContent,
@@ -15,38 +18,36 @@ import {
   ResponsiveContainer,
   Cell
 } from "recharts";
-import {useDashboardStore} from "@/stores/dashboard.store";
-import {Skeleton} from "@/components/ui/skeleton";
+import { useDashboardStore } from "@/stores/dashboard.store";
+import { Skeleton } from "@/components/ui/skeleton";
 
 export function PopularServicesChart() {
-  const {popularServices, isLoading} = useDashboardStore();
-  // Предполагаем, что ключ загрузки соответствует вашим параметрам
+  const { popularServices, isLoading } = useDashboardStore();
   const loading = isLoading["popularServices_count_5"];
 
+  // Инициализация перевода
+  const t = useTranslations("admin.dashboard.popular_services");
+
   const formatValue = (val: number) => {
-    // Если это доход, форматируем как сум, если количество — просто число
-    // В данном примере логика для 'count' (количества)
-    return `${val} записей`;
+    // Используем интерполяцию для вывода количества записей
+    return t('record_count', { count: val });
   };
 
   return (
     <Card className="col-span-1 md:col-span-2 shadow-sm border-border/60">
       <CardHeader>
-        <CardTitle className="text-xl font-bold">Популярные услуги</CardTitle>
-        <CardDescription>Топ-5 услуг по количеству записей</CardDescription>
+        <CardTitle className="text-xl font-bold">{t('title')}</CardTitle>
+        <CardDescription>{t('description')}</CardDescription>
       </CardHeader>
       <CardContent className="h-[350px] w-full">
         {loading || !popularServices ? (
           <Skeleton className="w-full h-full rounded-xl" />
         ) : (
-          <ResponsiveContainer
-            width="100%"
-            height="100%"
-          >
+          <ResponsiveContainer width="100%" height="100%">
             <BarChart
               data={popularServices}
-              layout="vertical" // Горизонтальные бары удобнее для длинных названий
-              margin={{top: 5, right: 30, left: 40, bottom: 5}}
+              layout="vertical"
+              margin={{ top: 5, right: 30, left: 40, bottom: 5 }}
             >
               <CartesianGrid
                 horizontal={false}
@@ -54,10 +55,7 @@ export function PopularServicesChart() {
                 stroke="var(--border)"
                 opacity={0.4}
               />
-              <XAxis
-                type="number"
-                hide // Прячем нижнюю ось для более чистого дизайна
-              />
+              <XAxis type="number" hide />
               <YAxis
                 dataKey="name"
                 type="category"
@@ -66,23 +64,18 @@ export function PopularServicesChart() {
                 axisLine={false}
                 fontSize={12}
                 stroke="var(--muted-foreground)"
-                // Умная обрезка длинных названий
                 tickFormatter={(value) => value.length > 15 ? `${value.substring(0, 15)}...` : value}
               />
               <Tooltip
-                cursor={{fill: "var(--muted)", opacity: 0.3}}
+                cursor={{ fill: "var(--muted)", opacity: 0.3 }}
                 contentStyle={{
                   backgroundColor: "var(--card)",
                   border: "1px solid var(--border)",
                   borderRadius: "var(--radius)",
                   boxShadow: "0 4px 12px rgba(0,0,0,0.1)",
                 }}
-                formatter={(value: any) => [formatValue(Number(value)), "Популярность"]}
-                itemStyle={
-                  {
-                    color: `var(--chart-5})`
-                  }
-                }
+                formatter={(value: any) => [formatValue(Number(value)), t('popularity')]}
+                itemStyle={{ color: `var(--chart-5)` }}
               />
               <Bar
                 dataKey="value"
@@ -92,7 +85,7 @@ export function PopularServicesChart() {
                 {popularServices.map((_, index) => (
                   <Cell
                     key={`cell-${index}`}
-                    fill={`var(--chart-${(index % 5) + 1})`} // Разные цвета для каждой услуги
+                    fill={`var(--chart-${(index % 5) + 1})`}
                   />
                 ))}
               </Bar>

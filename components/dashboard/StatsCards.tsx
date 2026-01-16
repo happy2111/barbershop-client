@@ -1,85 +1,65 @@
+"use client";
+
+import { useTranslations } from "next-intl";
 import { MetricCard } from "./MetricCard";
 import { useDashboardStore } from "@/stores/dashboard.store";
-import {
-  TrendingUp,
-  TrendingDown,
-  DollarSign,
-  Calendar,
-  Users,
-  Award,
-  ArrowUpRight,
-  ArrowDownRight
-} from "lucide-react";
-
-// Утилита для форматирования валюты UZS
-const formatUZS = (value: number | null | undefined) => {
-  if (value === undefined || value === null) return "—";
-  return new Intl.NumberFormat('ru-RU', {
-    style: 'currency',
-    currency: 'UZS',
-    minimumFractionDigits: 0,
-    maximumFractionDigits: 0,
-  }).format(value).replace('UZS', 'сум');
-};
+import { DollarSign, Calendar, TrendingUp, TrendingDown, Users, Award } from "lucide-react";
 
 export function StatsCards() {
+  const t = useTranslations("admin.dashboard.stats");
+  const common = useTranslations("common");
+
   const {
-    revenue,
-    bookingsCount,
-    averageCheck,
-    lostMoney,
-    repeatClients,
-    bestSpecialist,
-    isLoading,
+    revenue, bookingsCount, averageCheck, lostMoney,
+    repeatClients, bestSpecialist, isLoading,
   } = useDashboardStore();
+
+  const formatUZS = (value: number | null | undefined) => {
+    if (value === undefined || value === null) return "—";
+    return new Intl.NumberFormat('ru-RU').format(value) + ` ${common('sum')}`;
+  };
 
   const cards = [
     {
-      title: "Выручка",
+      title: t("revenue"),
       value: formatUZS(revenue?.revenue),
-      subtitle: "За текущий месяц",
+      subtitle: t("revenue_subtitle"),
       icon: DollarSign,
-      variant: "primary",
       loadingKey: "revenue_month",
     },
     {
-      title: "Бронирования",
+      title: t("bookings"),
       value: bookingsCount?.count?.toString() ?? "—",
-      subtitle: "Всего записей",
+      subtitle: t("bookings_subtitle"),
       icon: Calendar,
-      variant: "blue",
       loadingKey: "bookingsCount_month",
     },
     {
-      title: "Средний чек",
+      title: t("avg_check"),
       value: formatUZS(averageCheck),
-      subtitle: "На одного клиента",
+      subtitle: t("avg_check_subtitle"),
       icon: TrendingUp,
-      variant: "green",
-      loadingKey: "averageCheck", // проверьте ключ в сторе
+      loadingKey: "averageCheck",
     },
     {
-      title: "Упущенная выгода",
+      title: t("lost_profit"),
       value: formatUZS(lostMoney?.lost),
-      subtitle: `${lostMoney?.count ?? 0} отмен за период`,
+      subtitle: t("lost_profit_subtitle", { count: lostMoney?.count ?? 0 }),
       icon: TrendingDown,
-      variant: "destructive",
       loadingKey: "lostMoney",
     },
     {
-      title: "Лояльность",
+      title: t("loyalty"),
       value: repeatClients ? `${repeatClients.repeatPercent}%` : "—",
-      subtitle: "Повторные визиты",
+      subtitle: t("loyalty_subtitle"),
       icon: Users,
-      variant: "purple",
       loadingKey: "repeatClients",
     },
     {
-      title: "Топ специалист",
+      title: t("top_specialist"),
       value: bestSpecialist?.name ?? "—",
       subtitle: formatUZS(bestSpecialist?.value),
       icon: Award,
-      variant: "orange",
       loadingKey: "bestSpecialist",
     },
   ];
@@ -89,10 +69,7 @@ export function StatsCards() {
       {cards.map((card, i) => (
         <MetricCard
           key={i}
-          title={card.title}
-          value={card.value}
-          subtitle={card.subtitle}
-          icon={card.icon}
+          {...card}
           isLoading={isLoading[card.loadingKey] || false}
         />
       ))}

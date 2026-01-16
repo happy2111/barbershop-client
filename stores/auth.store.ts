@@ -57,7 +57,7 @@ export const authStore = create<AuthState>((set, get) => ({
   isSpecialist: () => get().user?.role === "SPECIALIST",
 
   async initialize() {
-    const refreshToken = Cookies.get("refresh_token");
+    const refreshToken = Cookies.get("refreshToken");
     if (!refreshToken) {
       set({ isLoading: false });
       return;

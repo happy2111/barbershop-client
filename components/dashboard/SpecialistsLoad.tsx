@@ -1,27 +1,33 @@
+"use client";
+
+import { useTranslations } from "next-intl";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { useDashboardStore } from "@/stores/dashboard.store";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Badge } from "@/components/ui/badge"; // Убедитесь, что этот компонент есть в shadcn
+import { Badge } from "@/components/ui/badge";
 import { User2 } from "lucide-react";
 
 export function SpecialistsLoad() {
   const { specialistsLoad, isLoading } = useDashboardStore();
   const loading = isLoading["specialistsLoad_month"];
 
+  // Инициализация перевода
+  const t = useTranslations("admin.dashboard.specialists_load");
+
   const getStatusDetails = (status: string) => {
     switch (status) {
-      case 'high': return { label: 'Перегрузка', variant: 'destructive' as const };
-      case 'low': return { label: 'Свободен', variant: 'secondary' as const };
-      default: return { label: 'Оптимально', variant: 'outline' as const };
+      case 'high': return { label: t('status.high'), variant: 'destructive' as const };
+      case 'low': return { label: t('status.low'), variant: 'secondary' as const };
+      default: return { label: t('status.optimal'), variant: 'outline' as const };
     }
   };
 
   return (
     <Card className="lg:col-span-2 shadow-sm border-border/60">
       <CardHeader>
-        <CardTitle className="text-xl font-bold">Загрузка мастеров</CardTitle>
-        <CardDescription>Эффективность работы команды за месяц</CardDescription>
+        <CardTitle className="text-xl font-bold">{t('title')}</CardTitle>
+        <CardDescription>{t('description')}</CardDescription>
       </CardHeader>
       <CardContent className="space-y-7">
         {loading ? (
@@ -44,7 +50,7 @@ export function SpecialistsLoad() {
                     <div>
                       <p className="text-sm font-semibold leading-none">{spec.name}</p>
                       <p className="text-xs text-muted-foreground mt-1">
-                        {spec.bookedHours}ч из {spec.totalHours}ч отработано
+                        {t('hours_info', { booked: spec.bookedHours, total: spec.totalHours })}
                       </p>
                     </div>
                   </div>
@@ -63,7 +69,7 @@ export function SpecialistsLoad() {
             );
           })
         ) : (
-          <div className="text-center py-10 text-muted-foreground">Данные отсутствуют</div>
+          <div className="text-center py-10 text-muted-foreground">{t('no_data')}</div>
         )}
       </CardContent>
     </Card>

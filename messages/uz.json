@@ -82,6 +82,15 @@
 
     "title": "Nom"
   },
+  "sidebar" : {
+    "dashboard": "Boshqaruv paneli",
+    "bookings": "Bronlar",
+    "clients": "Mijozlar",
+    "services": "Xizmatlar",
+    "categories": "Xizmat kategoriyalari",
+    "specialists": "Mutaxassislar",
+    "integrations": "Integratsiyalar"
+  },
   "toast": {
     "login_error": "Telefon raqami yoki parol noto'g'ri",
     "login_success": "Muvaffaqiyatli kirildi!"
@@ -246,8 +255,493 @@
         "specialist_not_found": "Tanlangan mutaxassis topilmadi",
         "required_fields": "Barcha majburiy maydonlarni to'ldiring",
         "create_failed": "Yozuvni yaratishda xatolik yuz berdi"
+      },
+      "common" : {
+        "minutes": "min"
+      }
+    },
+    "bookings": {
+      "title": "Bronlar",
+
+      "search": {
+        "placeholder": "Ism yoki telefon bo'yicha qidiruv..."
+      },
+
+      "filter": {
+        "status": "Holati",
+        "all": "Barchasi"
+      },
+
+      "buttons": {
+        "add_new": "Yangi yozuv qo'shish"
+      },
+
+      "table": {
+        "id": "ID",
+        "date": "Sana",
+        "time": "Vaqt",
+        "client": "Mijoz",
+        "phone": "Telefon",
+        "specialist": "Mutaxassis",
+        "service": "Xizmat",
+        "status": "Holat",
+        "unknown": "—",
+        "no_results": "Bronlar topilmadi"
+      },
+
+      "status": {
+        "pending": "Kutilmoqda",
+        "confirmed": "Tasdiqlangan",
+        "cancelled": "Bekor qilingan",
+        "completed": "Yakunlangan"
+      },
+
+      "actions": {
+        "confirm": "Tasdiqlash",
+        "complete": "Yakunlash",
+        "cancel": "Bekor qilish"
+      },
+
+      "toast": {
+        "status_updated": "Holat muvaffaqiyatli yangilandi",
+        "status_update_failed": "Holatni yangilab bo'lmadi",
+        "load_failed": "Bronlar ro'yxatini yuklashda xatolik yuz berdi"
+      },
+      "common" : {
+        "minutes": "min"
+      }
+    },
+    "clients": {
+      "title": "Mijozlar",
+      "search": {
+        "placeholder": "Ism yoki telefon bo'yicha qidiruv..."
+      },
+      "buttons": {
+        "add_new": "Yangi mijoz",
+        "cancel": "Bekor qilish",
+        "create": "Yaratish",
+        "save": "Saqlash"
+      },
+      "table": {
+        "id": "ID",
+        "name": "Ismi",
+        "name_unknown": "Ko'rsatilmagan",
+        "phone": "Telefon",
+        "bookings_count": "Bronlar soni",
+        "bookings": "bronlar",
+        "no_results": "Mijozlar hali yo'q",
+        "total": "Jami mijozlar: {count}"
+      },
+      "actions": {
+        "edit": "Tahrirlash",
+        "delete": "O'chirish"
+      },
+      "dialog": {
+        "new_title": "Yangi mijoz",
+        "edit_title": "Mijozni tahrirlash"
+      },
+      "form": {
+        "name": {
+          "label": "Ismi",
+          "placeholder": "Ism va familiya"
+        },
+        "phone": {
+          "label": "Telefon",
+          "placeholder": "+998 (99) 123-45-67"
+        }
+      },
+      "confirm": {
+        "delete": "Mijoz o'chirilsinmi? Bu amalni ortga qaytarib bo'lmaydi."
+      },
+      "toast": {
+        "created": "Mijoz muvaffaqiyatli yaratildi",
+        "updated": "Mijoz ma'lumotlari yangilandi",
+        "deleted": "Mijoz o'chirildi",
+        "load_failed": "Mijozlar ro'yxatini yuklab bo'lmadi",
+        "save_failed": "Mijozni saqlashda xatolik yuz berdi",
+        "delete_failed": "Mijozni o'chirib bo'lmadi",
+        "phone_required": "Telefon raqami kiritilishi shart"
+      }
+    },
+    "integrations": {
+      "title": "Integratsiyalar",
+      "subtitle": "Mijozlar bilan muloqot va bildirishnomalarni avtomatlashtirish uchun messenjer hamda xizmatlarni ulang",
+
+      "status": {
+        "soon": "Tez kunda"
+      },
+
+      "items": {
+        "telegram": {
+          "name": "Telegram Bot",
+          "description": "Yangi yozuvlar haqida bildirishnomalar, mijozlarga eslatmalar va kundalik hisobotlarni to'g'ridan-to'g'ri Telegram-da oling."
+        },
+        "whatsapp": {
+          "name": "WhatsApp Business",
+          "description": "Mijozlarga avtomatik eslatmalar, yozuvni tasdiqlash va WhatsApp orqali chat-bot xizmati."
+        }
+      },
+
+      "telegram": {
+        "title": "Telegram bildirishnomalari",
+        "subtitle": "Yangi yozuvlar va muhim voqealar haqida Telegram-ingizga lahzali bildirishnomalar oling",
+
+        "loading": "Integratsiya holati tekshirilmoqda...",
+
+        "step1": {
+          "title": "Telegram-botni ulash",
+          "subtitle": "Bildirishnomalarni olishni boshlash uchun 3 ta oddiy qadamni bajaring",
+          "instructions": [
+            "@RamitanBarbershopBot botini guruhingizga qo'shing va uni administrator qiling",
+            "Guruhda istalgan xabarni yozing (masalan: /start)",
+            "Olingan Chat ID-ni nusxalab oling va keyingi bosqichda kiriting"
+          ],
+          "button": "Ulashni boshlash"
+        },
+
+        "step2": {
+          "token_expires": "Token amal qilish muddati",
+          "token_label": "Sizning tekshiruv tokeningiz",
+          "chat_id_label": "Guruh Chat ID-si",
+          "chat_id_placeholder": "-1001234567890",
+          "chat_id_hint": "-100... bilan boshlanadi (guruh) yoki shunchaki raqam (shaxsiy chat)",
+          "button": "Ulashni yakunlash"
+        },
+
+        "connected": {
+          "title": "Telegram muvaffaqiyatli ulandi",
+          "description": "Endi barcha yangi yozuvlar, holat o'zgarishi va eslatmalar guruhingizga avtomatik ravishda kelib turadi."
+        },
+
+        "buttons": {
+          "disconnect": "Integratsiyani uzish",
+          "back": "Orqaga"
+        },
+
+        "toast": {
+          "token_generated": "Token muvaffaqiyatli yaratildi",
+          "token_generation_failed": "Token yaratib bo'lmadi",
+          "token_expired": "Tokenning amal qilish muddati tugadi",
+          "connected": "Telegram muvaffaqiyatli ulandi",
+          "bind_failed": "Chat ID-ni bog'lab bo'lmadi",
+          "disconnected": "Integratsiya o'chirildi",
+          "disconnect_failed": "O'chirishda xatolik yuz berdi",
+          "copied": "Vaqtinchalik xotiraga nusxalandi"
+        },
+
+        "confirm": {
+          "disconnect": "Haqiqatan ham Telegram bildirishnomalarini o'chirmoqchimisiz?"
+        }
+      }
+    },
+    "services": {
+      "title": "Xizmatlar",
+
+      "search": {
+        "placeholder": "Nomi bo'yicha qidiruv..."
+      },
+
+      "buttons": {
+        "add_new": "Yangi xizmat",
+        "cancel": "Bekor qilish",
+        "create": "Xizmat qo'shish",
+        "save": "O'zgarishlarni saqlash"
+      },
+
+      "table": {
+        "photo": "Rasm",
+        "name": "Nomi",
+        "category": "Kategoriya",
+        "no_category": "Kategoriyasiz",
+        "price": "Narxi",
+        "duration": "Davomiyligi",
+        "no_results": "Xizmatlar hali mavjud emas",
+        "total": "Jami xizmatlar: {count}"
+      },
+
+      "actions": {
+        "edit": "Tahrirlash",
+        "delete": "O'chirish"
+      },
+
+      "dialog": {
+        "new_title": "Yangi xizmat qo'shish",
+        "edit_title": "Xizmatni tahrirlash"
+      },
+
+      "form": {
+        "photo": {
+          "label": "Xizmat rasmi",
+          "hint": "Ushbu rasmni mijozlar yozilish vaqtida ko'rishadi. 400×400px o'lcham tavsiya etiladi."
+        },
+        "name": {
+          "label": "Xizmat nomi",
+          "placeholder": "Masalan: Erkaklar soch turmagi (Fade)"
+        },
+        "price": {
+          "label": "Narxi"
+        },
+        "duration": {
+          "label": "Davomiyligi"
+        },
+        "category": {
+          "label": "Kategoriya",
+          "placeholder": "Xizmat kategoriyasini tanlang"
+        }
+      },
+
+      "errors": {
+        "load_failed": "Ma'lumotlarni yuklab bo'lmadi",
+        "name_required": "Nomini kiriting",
+        "price_invalid": "To'g'ri narxni ko'rsating",
+        "duration_invalid": "Davomiyligi kamida 1 daqiqa bo'lishi kerak",
+        "category_required": "Kategoriyani tanlang",
+        "save_failed": "Saqlashda xatolik yuz berdi",
+        "delete_failed": "Xizmatni o'chirib bo'lmadi"
+      },
+
+      "toast": {
+        "created": "Xizmat muvaffaqiyatli yaratildi",
+        "updated": "Xizmat yangilandi",
+        "deleted": "Xizmat o'chirildi"
+      },
+
+      "confirm": {
+        "delete": "Xizmat o'chirilsinmi? Bu amalni ortga qaytarib bo'lmaydi."
+      },
+      "common": {
+        "sum": "so'm",
+        "minutes": "daq"
+      }
+    },
+    "service_categories": {
+      "title": "Xizmat kategoriyalari",
+      "search": {
+        "placeholder": "Nomi bo'yicha qidiruv..."
+      },
+      "buttons": {
+        "add_new": "Yangi kategoriya",
+        "cancel": "Bekor qilish",
+        "create": "Yaratish",
+        "save": "Saqlash"
+      },
+      "table": {
+        "id": "ID",
+        "name": "Kategoriya nomi",
+        "services_count": "Xizmatlar",
+        "services": "xizmatlar",
+        "no_results": "Kategoriyalar hali mavjud emas",
+        "total": "Jami kategoriyalar: {count}"
+      },
+      "actions": {
+        "edit": "Tahrirlash",
+        "delete": "O'chirish"
+      },
+      "dialog": {
+        "new_title": "Yangi kategoriya",
+        "edit_title": "Kategoriyani tahrirlash"
+      },
+      "form": {
+        "name": {
+          "label": "Kategoriya nomi",
+          "placeholder": "Masalan: Soch turmaklari, Bo'yash, Parvarish"
+        }
+      },
+      "confirm": {
+        "delete": "Kategoriya o'chirilsinmi? Barcha bog'langan xizmatlar kategoriyasiz qoladi."
+      },
+      "toast": {
+        "created": "Kategoriya muvaffaqiyatli yaratildi",
+        "updated": "Kategoriya yangilandi",
+        "deleted": "Kategoriya o'chirildi",
+        "load_failed": "Kategoriyalarni yuklab bo'lmadi",
+        "save_failed": "Saqlashda xatolik yuz berdi",
+        "delete_failed": "Kategoriyani o'chirib bo'lmadi"
+      }
+    },
+    "specialists": {
+      "title": "Mutaxassislar",
+      "search": {
+        "placeholder": "Ism yoki telefon bo'yicha qidiruv..."
+      },
+      "buttons": {
+        "add_new": "Yangi mutaxassis",
+        "cancel": "Bekor qilish",
+        "create": "Mutaxassis yaratish",
+        "save": "O'zgarishlarni saqlash"
+      },
+      "table": {
+        "photo": "Rasm",
+        "name": "Ismi",
+        "phone": "Telefon",
+        "role": "Roli",
+        "description": "O'zi haqida",
+        "no_results": "Mutaxassislar hali mavjud emas",
+        "total": "Jami mutaxassislar: {count}"
+      },
+      "roles": {
+        "specialist": "Usta",
+        "admin": "Administrator"
+      },
+      "actions": {
+        "edit": "Tahrirlash",
+        "services": "Xizmatlar",
+        "delete": "O'chirish"
+      },
+      "dialog": {
+        "new_title": "Yangi mutaxassis",
+        "edit_title": "Profilni tahrirlash"
+      },
+      "form": {
+        "photo": {
+          "label": "Profil rasmi",
+          "hint": "PNG, JPG 5MB gacha. Kvadrat shaklidagi rasm tavsiya etiladi."
+        },
+        "name": {
+          "label": "Usta ismi",
+          "placeholder": "Masalan: Alisher Ivanov"
+        },
+        "phone": {
+          "label": "Telefon raqami",
+          "placeholder": "+998 (99) 123-45-67"
+        },
+        "password": {
+          "new_label": "Kirish uchun parol",
+          "change_label": "Parolni o'zgartirish",
+          "placeholder": "••••••••"
+        },
+        "role": {
+          "label": "Tizimdagi roli",
+          "placeholder": "Rolni tanlang"
+        },
+        "description": {
+          "label": "Usta haqida (qisqacha)",
+          "placeholder": "Tajriba yoki ish uslubi haqida so'zlab bering..."
+        },
+        "skills": {
+          "label": "Ko'nikmalar (vergul bilan ajrating)",
+          "placeholder": "Soch turmaklari, Bo'yash, Parvarish..."
+        }
+      },
+      "errors": {
+        "load_failed": "Mutaxassislarni yuklab bo'lmadi",
+        "name_required": "Ismni kiriting",
+        "phone_required": "Telefon raqamini kiriting",
+        "password_required": "Parolni kiriting",
+        "save_failed": "Saqlashda xatolik yuz berdi",
+        "delete_failed": "Mutaxassisni o'chirib bo'lmadi"
+      },
+      "toast": {
+        "created": "Mutaxassis muvaffaqiyatli yaratildi",
+        "updated": "Mutaxassis ma'lumotlari yangilandi",
+        "deleted": "Mutaxassis o'chirildi"
+      },
+      "confirm": {
+        "delete": "Mutaxassis o'chirilsinmi? Bu amalni ortga qaytarib bo'lmaydi."
+      }
+    },
+    "specialist_services": {
+      "title": "Xizmatlar: {name}",
+      "subtitle": "Mutaxassis bajara oladigan xizmatlarni boshqarish",
+      "assigned_title": "Biriktirilgan xizmatlar",
+      "empty": {
+        "title": "Mutaxassisda hali xizmatlar yo'q",
+        "hint": "U bajara oladigan xizmatlarni qo'shing"
+      },
+      "total": "Jami xizmatlar: {count}",
+
+      "buttons": {
+        "back": "Orqaga",
+        "add_service": "Xizmat qo'shish",
+        "cancel": "Bekor qilish",
+        "add": "Qo'shish"
+      },
+
+      "table": {
+        "photo": "Rasm",
+        "name": "Xizmat",
+        "category": "Kategoriya",
+        "no_category": "Kategoriyasiz",
+        "price": "Narxi",
+        "duration": "Davomiyligi"
+      },
+
+      "actions": {
+        "remove": "Uzish"
+      },
+
+      "dialog": {
+        "title": "Mutaxassisga xizmat qo'shish",
+        "label": "Xizmatni tanlang",
+        "placeholder": "Ro'yxatdan tanlang...",
+        "no_available": "Barcha xizmatlar allaqachon biriktirilgan"
+      },
+
+      "errors": {
+        "load_failed": "Ma'lumotlarni yuklab bo'lmadi",
+        "not_found": "Mutaxassis topilmadi",
+        "select_service": "Xizmatni tanlang",
+        "add_failed": "Xizmat qo'shishda xatolik yuz berdi",
+        "remove_failed": "Xizmatni uzib bo'lmadi"
+      },
+
+      "toast": {
+        "added": "Xizmat muvaffaqiyatli qo'shildi",
+        "removed": "Xizmat uzildi"
+      },
+
+      "confirm": {
+        "remove": "Xizmat mutaxassisdan uzilsinmi?"
+      },
+      "common": {
+        "sum": "so'm",
+        "minutes": "daq"
+      }
+    },
+    "dashboard": {
+      "stats": {
+        "revenue": "Tushum",
+        "revenue_subtitle": "Joriy oy uchun",
+        "bookings": "Bronlar",
+        "bookings_subtitle": "Jami yozuvlar",
+        "avg_check": "O'rtacha chek",
+        "avg_check_subtitle": "Bitta mijozga",
+        "lost_profit": "Boy berilgan foyda",
+        "lost_profit_subtitle": "Davr ichida {count} ta bekor qilish",
+        "loyalty": "Sodiqlik",
+        "loyalty_subtitle": "Takroriy tashriflar",
+        "top_specialist": "Top mutaxassis",
+        "total_period": "Davr bo'yicha jami",
+        "per_day": "Kuniga",
+        "total": "Jami"
+      },
+      "charts": {
+        "revenue_title": "Tushum dinamikasi",
+        "revenue_description": "Oxirgi 30 kundagi umumiy daromad",
+        "bookings_title": "Bronlar soni",
+        "bookings_description": "30 kundagi mijozlar faolligi",
+        "tooltip_revenue": "Tushum",
+        "tooltip_bookings": "{value} ta yozuv"
+      },
+      "specialists_load": {
+        "title": "Ustalar yuklamasi",
+        "description": "Jamoaning bir oylik ish samaradorligi",
+        "hours_info": "{total} soatdan {booked} soati ishlangan",
+        "no_data": "Ma'lumotlar mavjud emas",
+        "status": {
+          "high": "Yuqori yuklama",
+          "low": "Bo'sh",
+          "optimal": "Optimal"
+        }
+      },
+      "popular_services": {
+        "title": "Ommabop xizmatlar",
+        "description": "Yozuvlar soni bo'yicha Top-5 xizmatlar",
+        "record_count": "{count} ta yozuv",
+        "popularity": "Ommaboplik"
       }
     }
+
   },
   "booking_check": {
     "loading": "Yuklanmoqda...",
@@ -309,6 +803,7 @@
       "back_home": "Bosh sahifaga qaytish",
       "close_note": "Закрыть заметку"
     },
+
     "toast": {
       "screenshot_saved": "Skrinshot saqlandi",
       "link_copied": "Havola nusxalandi",
@@ -332,7 +827,8 @@
       "description": "Bu harakatni ortga qaytarib bo'lmaydi. Tasdiqlaganingizdan so'ng bronni qayta tiklay olmaysiz."
     },
     "common": {
-      "sum": "so'm"
+      "sum": "so'm",
+      "minutes": "min"
     }
   }
 }

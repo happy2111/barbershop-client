@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useTranslations } from "next-intl";
 import {
   ColumnDef,
   flexRender,
@@ -39,12 +40,14 @@ import { Phone, User, Search, Edit, Trash2, Plus } from "lucide-react";
 import ProtectedAdminRoute from "@/components/Pretecters&Providers/ProtectedAdminRoute";
 
 export default function ClientsPage() {
+  const t = useTranslations("admin.clients");
+
   const [clients, setClients] = useState<Client[]>([]);
   const [loading, setLoading] = useState(true);
   const [sorting, setSorting] = useState<SortingState>([]);
   const [globalFilter, setGlobalFilter] = useState("");
 
-  const [open, setOpen] = useState(false);
+  const [dialogOpen, setDialogOpen] = useState(false);
   const [editingClient, setEditingClient] = useState<Client | null>(null);
   const [formData, setFormData] = useState({ name: "", phone: "" });
 
@@ -53,11 +56,12 @@ export default function ClientsPage() {
   }, []);
 
   const loadClients = async () => {
+    setLoading(true);
     try {
       const data = await clientService.getAll();
       setClients(data);
     } catch (error: any) {
-      toast.error(error.response?.data?.message || "Не удалось загрузить клиентов");
+      toast.error(error.response?.data?.message || t("errors.load_failed"));
     } finally {
       setLoading(false);
     }
@@ -65,74 +69,82 @@ export default function ClientsPage() {
 
   const handleSave = async () => {
     if (!formData.phone.trim()) {
-      toast.error("Телефон обязателен");
+      toast.error(t("errors.phone_required"));
       return;
     }
 
     try {
       if (editingClient) {
         await clientService.update(editingClient.id, {
-          name: formData.name || undefined,
+          name: formData.name.trim() || undefined,
           phone: formData.phone.trim(),
         });
-        toast.success("Клиент обновлён");
+        toast.success(t("toast.updated"));
       } else {
         await clientService.create({
-          name: formData.name || undefined,
+          name: formData.name.trim() || undefined,
           phone: formData.phone.trim(),
         });
-        toast.success("Клиент создан");
+        toast.success(t("toast.created"));
       }
 
-      setOpen(false);
+      setDialogOpen(false);
       setFormData({ name: "", phone: "" });
+      setEditingClient(null);
       loadClients();
     } catch (error: any) {
-      toast.error(error.response?.data?.message || "Ошибка при сохранении");
+      toast.error(error.response?.data?.message || t("errors.save_failed"));
     }
   };
 
   const handleDelete = async (id: number) => {
-    if (!confirm("Удалить клиента? Это действие нельзя отменить.")) return;
+    if (!confirm(t("confirm.delete"))) return;
 
     try {
       await clientService.remove(id);
       setClients((prev) => prev.filter((c) => c.id !== id));
-      toast.success("Клиент удалён");
+      toast.success(t("toast.deleted"));
     } catch (error: any) {
-      toast.error(error.response?.data?.message || "Не удалось удалить");
+      toast.error(error.response?.data?.message || t("errors.delete_failed"));
     }
   };
 
-  const openEdit = (client?: Client) => {
+  const openDialog = (client?: Client) => {
     if (client) {
       setEditingClient(client);
-      setFormData({ name: client.name || "", phone: client.phone || "" });
+      setFormData({
+        name: client.name || "",
+        phone: client.phone || "",
+      });
     } else {
       setEditingClient(null);
       setFormData({ name: "", phone: "" });
     }
-    setOpen(true);
+    setDialogOpen(true);
   };
 
   // ─── Desktop Columns ───────────────────────────────────────────────────────
   const desktopColumns: ColumnDef<Client>[] = [
-    { accessorKey: "id", header: "ID", size: 80 },
+    {
+      accessorKey: "id",
+      header: t("table.id"),
+      size: 80,
+    },
     {
       accessorKey: "name",
-      header: "Имя",
+      header: t("table.name"),
       cell: ({ row }) => (
         <div className="flex items-center gap-2">
           <User className="w-4 h-4 text-muted-foreground" />
           <span className="font-medium">
-            {row.original.name || <span className="text-muted-foreground">Не указано</span>}
+            {row.original.name || t("table.name_unknown")}
           </span>
         </div>
       ),
     },
     {
       accessorKey: "phone",
-      header: "Телефон",
+      header: t("table.phone"),
       cell: ({ row }) => (
         <div className="flex items-center gap-2 font-mono">
           <Phone className="w-4 h-4 text-muted-foreground" />
@@ -141,8 +153,8 @@ export default function ClientsPage() {
       ),
     },
     {
-      accessorKey: "bookings",
-      header: "Бронирований",
+      accessorKey: "bookings.length",
+      header: t("table.bookings_count"),
       cell: ({ row }) => (
         <Badge variant="outline" className="font-medium">
           {row.original.bookings?.length || 0}
@@ -156,7 +168,12 @@ export default function ClientsPage() {
         const client = row.original;
         return (
           <div className="flex items-center gap-1">
-            <Button size="sm" variant="ghost" onClick={() => openEdit(client)}>
+            <Button
+              size="sm"
+              variant="ghost"
+              onClick={() => openDialog(client)}
+              title={t("actions.edit")}
+            >
               <Edit className="h-4 w-4" />
             </Button>
             <Button
@@ -164,6 +181,7 @@ export default function ClientsPage() {
               variant="ghost"
               className="text-destructive hover:text-destructive/90"
               onClick={() => handleDelete(client.id)}
+              title={t("actions.delete")}
             >
               <Trash2 className="h-4 w-4" />
             </Button>
@@ -188,39 +206,44 @@ export default function ClientsPage() {
 
   // ─── Mobile Card ───────────────────────────────────────────────────────────
   const ClientCard = ({ client }: { client: Client }) => (
-    <Card className="mb-4">
-      <CardContent className="pt-6">
-        <div className="flex flex-wrap justify-between items-start my-4">
-          <div>
-            <div className="font-medium text-lg">
-              {client.name || "Имя не указано"}
+    <Card className="overflow-hidden border-none shadow-sm hover:shadow transition-shadow">
+      <CardContent className="p-5">
+        <div className="flex flex-col gap-4">
+          <div className="flex justify-between items-start">
+            <div>
+              <div className="font-semibold text-lg">
+                {client.name || t("table.name_unknown")}
+              </div>
+              <div className="text-sm font-mono text-muted-foreground mt-1">
+                {client.phone}
+              </div>
             </div>
-            <div className="text-sm font-mono text-muted-foreground mt-1">
-              {client.phone}
-            </div>
+
+            <Badge variant="outline" className="ml-3">
+              {client.bookings?.length || 0} {t("table.bookings")}
+            </Badge>
           </div>
 
-          <Badge variant="outline">
-            {client.bookings?.length || 0} бронирований
-          </Badge>
-        </div>
-
-        <div className="flex gap-3 mt-4 flex-wrap">
-          <Button variant="outline" size="sm"
-                  className="flex-1"
-                  onClick={() => openEdit(client)}>
-            <Edit className="h-4 w-4 mr-2" />
-            Редактировать
-          </Button>
-          <Button
-            variant="outline"
-            size="sm"
-            className="text-destructive hover:text-destructive/90 flex-1 border-destructive/30"
-            onClick={() => handleDelete(client.id)}
-          >
-            <Trash2 className="h-4 w-4 mr-2" />
-            Удалить
-          </Button>
+          <div className="flex gap-3">
+            <Button
+              variant="outline"
+              size="sm"
+              className="flex-1"
+              onClick={() => openDialog(client)}
+            >
+              <Edit className="h-4 w-4 mr-2" />
+              {t("actions.edit")}
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              className="flex-1 text-destructive hover:text-destructive/90 border-destructive/30"
+              onClick={() => handleDelete(client.id)}
+            >
+              <Trash2 className="h-4 w-4 mr-2" />
+              {t("actions.delete")}
+            </Button>
+          </div>
         </div>
       </CardContent>
     </Card>
@@ -228,26 +251,28 @@ export default function ClientsPage() {
 
   return (
     <ProtectedAdminRoute>
-      <div className="container mx-auto py-6 px-4">
-        <Card>
-          <CardHeader>
-            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-              <CardTitle className="text-2xl font-bold">Клиенты</CardTitle>
+      <div className="container mx-auto py-6 px-4 max-w-6xl">
+        <Card className="border-none shadow-lg">
+          <CardHeader className="pb-4">
+            <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-5">
+              <CardTitle className="text-2xl md:text-3xl font-bold">
+                {t("title")}
+              </CardTitle>
 
-              <div className="flex flex-col sm:flex-row gap-3 w-full sm:w-auto">
-                <div className="relative flex-1 sm:flex-none">
+              <div className="flex flex-wrap items-center gap-3">
+                <div className="relative flex-1 md:flex-none md:w-72">
                   <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                   <Input
-                    placeholder="Поиск по имени или телефону..."
+                    placeholder={t("search.placeholder")}
                     value={globalFilter ?? ""}
                     onChange={(e) => setGlobalFilter(e.target.value)}
-                    className="pl-10 w-full sm:w-72"
+                    className="pl-10 w-full"
                   />
                 </div>
 
-                <Button onClick={() => openEdit()} className="gap-2 w-full sm:w-auto">
+                <Button onClick={() => openDialog()} className="gap-2 w-full md:w-auto">
                   <Plus className="w-4 h-4" />
-                  Новый клиент
+                  {t("buttons.add_new")}
                 </Button>
               </div>
             </div>
@@ -256,14 +281,14 @@ export default function ClientsPage() {
           <CardContent>
             {loading ? (
               <div className="space-y-4">
-                {[...Array(5)].map((_, i) => (
-                  <Skeleton key={i} className="h-32 w-full rounded-lg" />
+                {[...Array(6)].map((_, i) => (
+                  <Skeleton key={i} className="h-28 md:h-20 w-full rounded-xl" />
                 ))}
               </div>
             ) : (
               <>
                 {/* Desktop Table */}
-                <div className="hidden md:block rounded-md border">
+                <div className="hidden md:block rounded-xl border overflow-hidden">
                   <Table>
                     <TableHeader>
                       {table.getHeaderGroups().map((headerGroup) => (
@@ -289,7 +314,7 @@ export default function ClientsPage() {
                     <TableBody>
                       {table.getRowModel().rows?.length ? (
                         table.getRowModel().rows.map((row) => (
-                          <TableRow key={row.id} className="hover:bg-muted/50">
+                          <TableRow key={row.id} className="hover:bg-muted/60">
                             {row.getVisibleCells().map((cell) => (
                               <TableCell key={cell.id}>
                                 {flexRender(cell.column.columnDef.cell, cell.getContext())}
@@ -301,9 +326,9 @@ export default function ClientsPage() {
                         <TableRow>
                           <TableCell
                             colSpan={desktopColumns.length}
-                            className="h-32 text-center text-muted-foreground"
+                            className="h-48 text-center text-muted-foreground"
                           >
-                            Клиентов пока нет
+                            {t("table.no_results")}
                           </TableCell>
                         </TableRow>
                       )}
@@ -317,64 +342,67 @@ export default function ClientsPage() {
                     clients
                       .filter(
                         (c) =>
-                          globalFilter === "" ||
+                          !globalFilter ||
                           c.name?.toLowerCase().includes(globalFilter.toLowerCase()) ||
                           c.phone?.includes(globalFilter)
                       )
                       .map((client) => <ClientCard key={client.id} client={client} />)
                   ) : (
-                    <div className="text-center py-12 text-muted-foreground">
-                      Клиентов пока нет
+                    <div className="text-center py-16 text-muted-foreground">
+                      {t("table.no_results")}
                     </div>
                   )}
                 </div>
               </>
             )}
 
-            {!loading && (
+            {!loading && clients.length > 0 && (
               <div className="mt-6 text-sm text-muted-foreground text-center md:text-left">
-                Всего клиентов: {clients.length}
+                {t("table.total", { count: clients.length })}
               </div>
             )}
           </CardContent>
         </Card>
 
-        {/* Модальное окно */}
-        <Dialog open={open} onOpenChange={setOpen}>
-          <DialogContent className="sm:max-w-[425px]">
+        {/* Модальное окно создания/редактирования */}
+        <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
+          <DialogContent className="sm:max-w-md">
             <DialogHeader>
               <DialogTitle>
-                {editingClient ? "Редактировать клиента" : "Новый клиент"}
+                {editingClient ? t("dialog.edit_title") : t("dialog.new_title")}
               </DialogTitle>
             </DialogHeader>
 
-            <div className="grid gap-4 py-4">
+            <div className="grid gap-5 py-4">
               <div className="grid gap-2">
-                <Label htmlFor="name">Имя (необязательно)</Label>
+                <Label htmlFor="name">{t("form.name.label")}</Label>
                 <Input
                   id="name"
-                  placeholder="Иван Иванов"
+                  placeholder={t("form.name.placeholder")}
                   value={formData.name}
                   onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                 />
               </div>
+
               <div className="grid gap-2">
-                <Label htmlFor="phone">Телефон *</Label>
+                <Label htmlFor="phone" className="flex items-center gap-1">
+                  {t("form.phone.label")} <span className="text-destructive">*</span>
+                </Label>
                 <Input
                   id="phone"
-                  placeholder="+7 (999) 123-45-67"
+                  placeholder={t("form.phone.placeholder")}
                   value={formData.phone}
                   onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
                 />
               </div>
             </div>
 
-            <DialogFooter>
-              <Button variant="outline" onClick={() => setOpen(false)}>
-                Отмена
+            <DialogFooter className="flex flex-col-reverse sm:flex-row sm:justify-end gap-3">
+              <Button variant="outline" onClick={() => setDialogOpen(false)}>
+                {t("buttons.cancel")}
               </Button>
-              <Button onClick={handleSave}>
-                {editingClient ? "Сохранить" : "Создать"}
+              <Button onClick={handleSave} disabled={!formData.phone.trim()}>
+                {editingClient ? t("buttons.save") : t("buttons.create")}
               </Button>
             </DialogFooter>
           </DialogContent>

@@ -2,13 +2,13 @@
 
 import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
+import { useTranslations } from "next-intl";
 import {
   ColumnDef,
   flexRender,
   getCoreRowModel,
   useReactTable,
   getSortedRowModel,
-  SortingState,
 } from "@tanstack/react-table";
 
 import {
@@ -44,13 +44,17 @@ import { specialistService, Specialist } from "@/services/specialist.service";
 import { serviceService, Service } from "@/services/service.service";
 import { specialistServiceService } from "@/services/specialist-service.service";
 
-import { ArrowLeft, Scissors, Clock, DollarSign, Plus, Trash2, Search } from "lucide-react";
+import { ArrowLeft, Scissors, Clock, Plus, Trash2 } from "lucide-react";
 import ProtectedAdminRoute from "@/components/Pretecters&Providers/ProtectedAdminRoute";
 
 export default function SpecialistServicesPage() {
   const params = useParams();
   const router = useRouter();
   const specialistId = Number(params.id);
+
+  // Инициализация переводов
+  const t = useTranslations("admin.specialist_services");
+  const common = useTranslations("common");
 
   const [specialist, setSpecialist] = useState<Specialist | null>(null);
   const [assignedServices, setAssignedServices] = useState<Service[]>([]);
@@ -82,7 +86,7 @@ export default function SpecialistServicesPage() {
       setAllServices(allServicesData);
       setAssignedServices(assigned);
     } catch {
-      toast.error("Не удалось загрузить данные");
+      toast.error(t("errors.load_failed"));
     } finally {
       setLoading(false);
     }
@@ -93,24 +97,24 @@ export default function SpecialistServicesPage() {
   );
 
   const handleAddService = async () => {
-    if (!selectedServiceId) return toast.error("Выберите услугу");
+    if (!selectedServiceId) return toast.error(t("errors.select_service"));
 
     try {
       await specialistServiceService.create({
         specialistId,
         serviceId: Number(selectedServiceId),
       });
-      toast.success("Услуга добавлена");
+      toast.success(t("toast.added"));
       setOpen(false);
       setSelectedServiceId("");
       loadData();
     } catch (err: any) {
-      toast.error(err.response?.data?.message || "Ошибка добавления");
+      toast.error(err.response?.data?.message || t("errors.add_failed"));
     }
   };
 
   const handleRemoveService = async (serviceId: number) => {
-    if (!confirm("Отвязать услугу от специалиста?")) return;
+    if (!confirm(t("confirm.remove"))) return;
 
     try {
       const relations = await specialistServiceService.getAll();
@@ -119,19 +123,18 @@ export default function SpecialistServicesPage() {
       );
       if (relation) {
         await specialistServiceService.remove(relation.id);
-        toast.success("Услуга отвязана");
+        toast.success(t("toast.removed"));
         loadData();
       }
     } catch {
-      toast.error("Не удалось отвязать услугу");
+      toast.error(t("errors.remove_failed"));
     }
   };
 
-  // ─── Desktop Columns ───────────────────────────────────────────────────────
   const desktopColumns: ColumnDef<Service>[] = [
     {
       accessorKey: "photo",
-      header: "Фото",
+      header: t("table.photo"),
       size: 80,
       cell: ({ row }) => (
         <div className="w-12 h-12 rounded-md overflow-hidden border">
@@ -151,32 +154,34 @@ export default function SpecialistServicesPage() {
     },
     {
       accessorKey: "name",
-      header: "Услуга",
+      header: t("table.name"),
       cell: ({ row }) => <div className="font-medium">{row.original.name}</div>,
     },
     {
       accessorKey: "category",
-      header: "Категория",
+      header: t("table.category"),
       cell: ({ row }) => (
-        <Badge variant="outline">{row.original.category?.name || "—"}</Badge>
+        <Badge variant="outline">
+          {row.original.category?.name || t("table.no_category")}
+        </Badge>
       ),
     },
     {
       accessorKey: "price",
-      header: "Цена",
+      header: t("table.price"),
       cell: ({ row }) => (
-        <div className="flex items-center gap-1">
-          {row.original.price.toLocaleString()} сум
+        <div className="flex items-center gap-1 text-nowrap">
+          {row.original.price.toLocaleString()} {common("sum")}
         </div>
       ),
     },
     {
       accessorKey: "duration_min",
-      header: "Длительность",
+      header: t("table.duration"),
       cell: ({ row }) => (
-        <div className="flex items-center gap-1">
+        <div className="flex items-center gap-1 text-nowrap">
           <Clock className="w-4 h-4 text-muted-foreground" />
-          {row.original.duration_min} мин
+          {row.original.duration_min} {common("minutes")}
         </div>
       ),
     },
@@ -203,11 +208,9 @@ export default function SpecialistServicesPage() {
     getSortedRowModel: getSortedRowModel(),
   });
 
-  // ─── Mobile Card ───────────────────────────────────────────────────────────
   const ServiceCard = ({ service }: { service: Service }) => (
     <Card className="mb-4 overflow-hidden border-none shadow-sm hover:shadow-md transition-shadow">
       <CardContent className="p-4">
-        {/* Верхний блок: Фото и Название */}
         <div className="flex items-center gap-4 mb-4">
           <div className="relative w-16 h-16 flex-shrink-0">
             <div className="w-full h-full rounded-xl overflow-hidden border bg-muted">
@@ -230,24 +233,29 @@ export default function SpecialistServicesPage() {
               {service.name}
             </h4>
             <p className="text-xs text-muted-foreground mt-1">
-              {service.category?.name || "Без категории"}
+              {service.category?.name || t("table.no_category")}
             </p>
           </div>
         </div>
 
-        {/* Нижний блок: Цена, Время и Действие */}
         <div className="flex items-center justify-between pt-3 border-t border-dashed">
           <div className="flex gap-4">
             <div className="flex flex-col">
-              <span className="text-[10px] uppercase tracking-wider text-muted-foreground font-medium">Цена</span>
-              <span className="font-bold text-primary">{service.price.toLocaleString()} сум</span>
+              <span className="text-[10px] uppercase tracking-wider text-muted-foreground font-medium">
+                {t("table.price")}
+              </span>
+              <span className="font-bold text-primary">
+                {service.price.toLocaleString()} {common("sum")}
+              </span>
             </div>
 
             <div className="flex flex-col">
-              <span className="text-[10px] uppercase tracking-wider text-muted-foreground font-medium">Длительность</span>
+              <span className="text-[10px] uppercase tracking-wider text-muted-foreground font-medium">
+                {t("table.duration")}
+              </span>
               <div className="flex items-center gap-1 font-medium">
                 <Clock className="w-3.5 h-3.5" />
-                <span>{service.duration_min} мин</span>
+                <span>{service.duration_min} {common("minutes")}</span>
               </div>
             </div>
           </div>
@@ -264,6 +272,7 @@ export default function SpecialistServicesPage() {
       </CardContent>
     </Card>
   );
+
   if (loading) {
     return (
       <div className="container mx-auto py-6 px-4">
@@ -280,7 +289,7 @@ export default function SpecialistServicesPage() {
   if (!specialist) {
     return (
       <div className="container mx-auto py-12 px-4 text-center text-muted-foreground">
-        Специалист не найден
+        {t("errors.not_found")}
       </div>
     );
   }
@@ -291,27 +300,27 @@ export default function SpecialistServicesPage() {
         <div className="mb-6">
           <Button variant="ghost" onClick={() => router.back()} className="mb-4">
             <ArrowLeft className="w-4 h-4 mr-2" />
-            Назад
+            {t("buttons.back")}
           </Button>
           <h1 className="text-2xl md:text-3xl font-bold">
-            Услуги: <span className="text-primary">{specialist.name}</span>
+            {t("title", { name: specialist.name })}
           </h1>
           <p className="text-muted-foreground mt-1.5">
-            Управление услугами специалиста
+            {t("subtitle")}
           </p>
         </div>
 
         <Card>
           <CardHeader className="pb-4">
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-              <CardTitle>Привязанные услуги</CardTitle>
+              <CardTitle>{t("assigned_title")}</CardTitle>
               <Button
                 onClick={() => setOpen(true)}
                 disabled={availableServices.length === 0}
                 className="w-full sm:w-auto"
               >
                 <Plus className="w-4 h-4 mr-2" />
-                Добавить услугу
+                {t("buttons.add_service")}
               </Button>
             </div>
           </CardHeader>
@@ -320,12 +329,11 @@ export default function SpecialistServicesPage() {
             {assignedServices.length === 0 ? (
               <div className="text-center py-16 text-muted-foreground">
                 <Scissors className="w-16 h-16 mx-auto mb-4 opacity-40" />
-                <p className="text-lg">У специалиста пока нет услуг</p>
-                <p className="mt-2">Добавьте услуги, которые он может выполнять</p>
+                <p className="text-lg">{t("empty.title")}</p>
+                <p className="mt-2">{t("empty.hint")}</p>
               </div>
             ) : (
               <>
-                {/* Desktop Table */}
                 <div className="hidden md:block rounded-md border">
                   <Table>
                     <TableHeader>
@@ -353,7 +361,6 @@ export default function SpecialistServicesPage() {
                   </Table>
                 </div>
 
-                {/* Mobile Cards */}
                 <div className="md:hidden space-y-4">
                   {assignedServices.map((service) => (
                     <ServiceCard key={service.id} service={service} />
@@ -364,25 +371,24 @@ export default function SpecialistServicesPage() {
 
             {assignedServices.length > 0 && (
               <div className="mt-6 text-sm text-muted-foreground text-center md:text-left">
-                Всего услуг: {assignedServices.length}
+                {t("total", { count: assignedServices.length })}
               </div>
             )}
           </CardContent>
         </Card>
       </div>
 
-      {/* Диалог добавления */}
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
-            <DialogTitle>Добавить услугу специалисту</DialogTitle>
+            <DialogTitle>{t("dialog.title")}</DialogTitle>
           </DialogHeader>
 
           <div className="py-4">
-            <Label className="mb-2 block">Выберите услугу</Label>
+            <Label className="mb-2 block">{t("dialog.label")}</Label>
             <Select value={selectedServiceId} onValueChange={setSelectedServiceId}>
               <SelectTrigger>
-                <SelectValue placeholder="Выберите из списка..." />
+                <SelectValue placeholder={t("dialog.placeholder")} />
               </SelectTrigger>
               <SelectContent className="max-h-[320px]">
                 {availableServices.map((service) => (
@@ -390,15 +396,15 @@ export default function SpecialistServicesPage() {
                     <div className="flex flex-col py-1">
                       <span className="font-medium">{service.name}</span>
                       <span className="text-xs text-muted-foreground">
-                        {service.category?.name || "—"} • {service.duration_min} мин •{" "}
-                        {service.price.toLocaleString()} сум
+                        {service.category?.name || t("table.no_category")} • {service.duration_min} {common("minutes")} •{" "}
+                        {service.price.toLocaleString()} {common("sum")}
                       </span>
                     </div>
                   </SelectItem>
                 ))}
                 {availableServices.length === 0 && (
                   <div className="py-2 px-3 text-sm text-muted-foreground">
-                    Все услуги уже привязаны
+                    {t("dialog.no_available")}
                   </div>
                 )}
               </SelectContent>
@@ -407,10 +413,10 @@ export default function SpecialistServicesPage() {
 
           <DialogFooter>
             <Button variant="outline" onClick={() => setOpen(false)}>
-              Отмена
+              {t("buttons.cancel")}
             </Button>
             <Button onClick={handleAddService} disabled={!selectedServiceId}>
-              Добавить
+              {t("buttons.add")}
             </Button>
           </DialogFooter>
         </DialogContent>

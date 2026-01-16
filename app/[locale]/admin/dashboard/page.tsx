@@ -24,7 +24,6 @@ export default function DashboardPage() {
   } = useDashboardStore();
 
   useEffect(() => {
-    // Загружаем все данные при монтировании
     Promise.all([
       fetchRevenue("month"),
       fetchRevenueGraph(30),

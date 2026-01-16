@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useTranslations } from "next-intl";
 import { format } from "date-fns";
 import { ru } from "date-fns/locale";
 import {
@@ -34,7 +35,8 @@ import {
 import {
   DropdownMenu,
   DropdownMenuContent,
-  DropdownMenuItem, DropdownMenuSeparator,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Badge } from "@/components/ui/badge";
@@ -50,12 +52,15 @@ import {
   Clock,
   User,
   Scissors,
-  PhoneCall,
+  Phone,
+  Plus,
 } from "lucide-react";
 import ProtectedAdminRoute from "@/components/Pretecters&Providers/ProtectedAdminRoute";
-import {AdminBookingModal} from "@/components/BookingModal";
+import { AdminBookingModal } from "@/components/BookingModal";
 
 export default function BookingsPage() {
+  const t = useTranslations("admin.bookings");
+
   const [bookings, setBookings] = useState<Booking[]>([]);
   const [loading, setLoading] = useState(true);
   const [sorting, setSorting] = useState<SortingState>([]);
@@ -68,11 +73,12 @@ export default function BookingsPage() {
   }, []);
 
   const loadBookings = async () => {
+    setLoading(true);
     try {
       const data = await bookingService.getAll();
       setBookings(data);
     } catch (error) {
-      toast.error("Не удалось загрузить бронирования");
+      toast.error(t("errors.load_failed"));
     } finally {
       setLoading(false);
     }
@@ -84,30 +90,37 @@ export default function BookingsPage() {
       setBookings((prev) =>
         prev.map((b) => (b.id === id ? { ...b, status } : b))
       );
-      toast.success("Статус обновлён");
+      toast.success(t("toast.status_updated"));
     } catch {
-      toast.error("Ошибка при смене статуса");
+      toast.error(t("toast.status_update_failed"));
     }
   };
 
   const getStatusBadge = (status: BookingStatus) => {
-    const variants: Record<BookingStatus, { label: string; variant: "default" | "secondary" | "destructive" | "outline" }> = {
-      PENDING: { label: "Ожидает", variant: "secondary" },
-      CONFIRMED: { label: "Подтверждено", variant: "default" },
-      CANCELLED: { label: "Отменено", variant: "destructive" },
-      COMPLETED: { label: "Завершено", variant: "outline" },
+    const variants: Record<
+      BookingStatus,
+      { labelKey: string; variant: "default" | "secondary" | "destructive" | "outline" }
+    > = {
+      PENDING: { labelKey: "status.pending", variant: "secondary" },
+      CONFIRMED: { labelKey: "status.confirmed", variant: "default" },
+      CANCELLED: { labelKey: "status.cancelled", variant: "destructive" },
+      COMPLETED: { labelKey: "status.completed", variant: "outline" },
     };
 
-    const { label, variant } = variants[status];
-    return <Badge variant={variant}>{label}</Badge>;
+    const { labelKey, variant } = variants[status];
+    return <Badge variant={variant}>{t(labelKey)}</Badge>;
   };
 
-  // ─── Desktop Table Columns ────────────────────────────────────────────────
+  // ─── Desktop Columns ───────────────────────────────────────────────────────
   const desktopColumns: ColumnDef<Booking>[] = [
-    { accessorKey: "id", header: "ID", size: 70 },
+    {
+      accessorKey: "id",
+      header: t("table.id"),
+      size: 80,
+    },
     {
       accessorKey: "date",
-      header: "Дата",
+      header: t("table.date"),
       cell: ({ row }) => {
         const date = new Date(row.original.date);
         return (
@@ -120,7 +133,7 @@ export default function BookingsPage() {
     },
     {
       accessorKey: "start_time",
-      header: "Время",
+      header: t("table.time"),
       cell: ({ row }) => (
         <div className="flex items-center gap-2">
           <Clock className="w-4 h-4 text-muted-foreground" />
@@ -129,43 +142,43 @@ export default function BookingsPage() {
       ),
     },
     {
-      accessorKey: "client",
-      header: "Клиент",
+      accessorKey: "client.name",
+      header: t("table.client"),
       cell: ({ row }) => (
         <div className="flex items-center gap-2">
           <User className="w-4 h-4 text-muted-foreground" />
-          {row.original.client?.name || "—"}
+          {row.original.client?.name || t("table.unknown")}
         </div>
       ),
     },
     {
       accessorKey: "client.phone",
-      header: "Телефон",
+      header: t("table.phone"),
       cell: ({ row }) => (
         <div className="flex items-center gap-2">
-          <PhoneCall className="w-4 h-4 text-muted-foreground" />
+          <Phone className="w-4 h-4 text-muted-foreground" />
           {row.original.client?.phone || "—"}
         </div>
       ),
     },
     {
-      accessorKey: "specialist",
-      header: "Специалист",
-      cell: ({ row }) => row.original.specialist?.name || "—",
+      accessorKey: "specialist.name",
+      header: t("table.specialist"),
+      cell: ({ row }) => row.original.specialist?.name || t("table.unknown"),
     },
     {
-      accessorKey: "service",
-      header: "Услуга",
+      accessorKey: "service.name",
+      header: t("table.service"),
       cell: ({ row }) => (
         <div className="flex items-center gap-2">
           <Scissors className="w-4 h-4 text-muted-foreground" />
-          {row.original.service?.name || "—"}
+          {row.original.service?.name || t("table.unknown")}
         </div>
       ),
     },
     {
       accessorKey: "status",
-      header: "Статус",
+      header: t("table.status"),
       cell: ({ row }) => getStatusBadge(row.original.status),
     },
     {
@@ -185,20 +198,21 @@ export default function BookingsPage() {
                 onClick={() => updateStatus(booking.id, BookingStatus.CONFIRMED)}
                 disabled={booking.status === BookingStatus.CONFIRMED}
               >
-                Подтвердить
+                {t("actions.confirm")}
               </DropdownMenuItem>
               <DropdownMenuItem
                 onClick={() => updateStatus(booking.id, BookingStatus.COMPLETED)}
                 disabled={booking.status === BookingStatus.COMPLETED}
               >
-                Завершить
+                {t("actions.complete")}
               </DropdownMenuItem>
+              <DropdownMenuSeparator />
               <DropdownMenuItem
                 onClick={() => updateStatus(booking.id, BookingStatus.CANCELLED)}
-                className="text-destructive"
+                className="text-destructive focus:bg-destructive/10"
                 disabled={booking.status === BookingStatus.CANCELLED}
               >
-                Отменить
+                {t("actions.cancel")}
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
@@ -225,84 +239,83 @@ export default function BookingsPage() {
   // ─── Mobile Card ───────────────────────────────────────────────────────────
   const BookingCard = ({ booking }: { booking: Booking }) => {
     return (
-      <Card className="mb-4 overflow-hidden border-none shadow-sm hover:shadow-md transition-all">
+      <Card className="overflow-hidden border-none shadow-sm hover:shadow transition-shadow">
         <CardContent className="p-0">
           <div className="flex flex-col sm:flex-row">
-
-            {/* Левая часть: Время и Статус (Акцент) */}
-            <div className="bg-muted/30 p-4 sm:w-48 flex flex-col justify-center items-center border-b sm:border-b-0 sm:border-r border-dashed border-muted-foreground/20">
-              <div className="text-2xl font-bold text-primary">
+            {/* Время + статус */}
+            <div className="bg-muted/40 p-5 sm:w-44 flex flex-col items-center justify-center border-b sm:border-b-0 sm:border-r">
+              <div className="text-3xl font-bold text-primary">
                 {booking.start_time}
               </div>
-              <div className="text-xs text-muted-foreground font-medium mb-2">
-                до {booking.end_time}
+              <div className="text-sm text-muted-foreground mt-1">
+                → {booking.end_time}
               </div>
-              {getStatusBadge(booking.status)}
+              <div className="mt-3">{getStatusBadge(booking.status)}</div>
             </div>
 
-            {/* Правая часть: Основная информация */}
-            <div className="flex-1 p-4 flex flex-col justify-between">
-              <div className="flex justify-between items-start gap-2 mb-3">
+            {/* Основная информация */}
+            <div className="flex-1 p-5">
+              <div className="flex justify-between items-start gap-3 mb-4">
                 <div className="min-w-0">
-                  <h3 className="font-bold text-lg leading-tight truncate">
-                    {booking.client?.name || "Клиент не указан"}
+                  <h3 className="font-semibold text-lg truncate">
+                    {booking.client?.name || t("table.unknown")}
                   </h3>
-                  <p className="text-sm text-muted-foreground font-mono">
+                  <p className="text-sm text-muted-foreground font-mono mt-0.5">
                     {booking.client?.phone || "—"}
                   </p>
                 </div>
 
-                {/* Кнопка действий вынесена в угол */}
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
-                    <Button variant="ghost" size="icon" className="h-8 w-8 rounded-full">
-                      <MoreHorizontal className="h-4 w-4" />
+                    <Button variant="ghost" size="icon" className="h-9 w-9">
+                      <MoreHorizontal className="h-5 w-5" />
                     </Button>
                   </DropdownMenuTrigger>
-                  <DropdownMenuContent align="end" className="w-48">
+                  <DropdownMenuContent align="end">
                     <DropdownMenuItem
                       onClick={() => updateStatus(booking.id, BookingStatus.CONFIRMED)}
                       disabled={booking.status === BookingStatus.CONFIRMED}
                     >
-                      Подтвердить
+                      {t("actions.confirm")}
                     </DropdownMenuItem>
                     <DropdownMenuItem
                       onClick={() => updateStatus(booking.id, BookingStatus.COMPLETED)}
                       disabled={booking.status === BookingStatus.COMPLETED}
                     >
-                      Завершить
+                      {t("actions.complete")}
                     </DropdownMenuItem>
                     <DropdownMenuSeparator />
                     <DropdownMenuItem
                       onClick={() => updateStatus(booking.id, BookingStatus.CANCELLED)}
-                      className="text-destructive focus:bg-destructive/10"
+                      className="text-destructive"
                       disabled={booking.status === BookingStatus.CANCELLED}
                     >
-                      Отменить
+                      {t("actions.cancel")}
                     </DropdownMenuItem>
                   </DropdownMenuContent>
                 </DropdownMenu>
               </div>
 
-              {/* Детали записи */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-y-2 gap-x-4 pt-3 border-t">
-                <div className="flex items-center gap-2 text-sm">
-                  <Calendar className="w-4 h-4 text-muted-foreground/60" />
-                  <span className="font-medium">
-                  {format(new Date(booking.date), "d MMMM", { locale: ru })}
-                </span>
+              <div className="grid grid-cols-1 gap-3 text-sm">
+                <div className="flex items-center gap-2">
+                  <Calendar className="w-4 h-4 text-muted-foreground" />
+                  <span>
+                    {format(new Date(booking.date), "d MMMM yyyy", { locale: ru })}
+                  </span>
                 </div>
 
-                <div className="flex items-center gap-2 text-sm">
-                  <User className="w-4 h-4 text-muted-foreground/60" />
-                  <span className="truncate">Мастер: <span className="font-medium">{booking.specialist?.name || "—"}</span></span>
+                <div className="flex items-center gap-2">
+                  <User className="w-4 h-4 text-muted-foreground" />
+                  <span className="truncate">
+                    {t("table.specialist")}: {booking.specialist?.name || t("table.unknown")}
+                  </span>
                 </div>
 
-                <div className="flex items-center gap-2 text-sm col-span-1 md:col-span-2">
-                  <Scissors className="w-4 h-4 text-muted-foreground/60" />
-                  <span className="truncate italic text-muted-foreground">
-                  {booking.service?.name || "Услуга не выбрана"}
-                </span>
+                <div className="flex items-center gap-2">
+                  <Scissors className="w-4 h-4 text-muted-foreground" />
+                  <span className="truncate italic">
+                    {booking.service?.name || t("table.unknown")}
+                  </span>
                 </div>
               </div>
             </div>
@@ -311,22 +324,25 @@ export default function BookingsPage() {
       </Card>
     );
   };
+
   return (
     <ProtectedAdminRoute>
-      <div className="container mx-auto py-6 px-4">
-        <Card>
-          <CardHeader>
-            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-              <CardTitle className="text-2xl font-bold">Бронирования</CardTitle>
+      <div className="container mx-auto py-6 px-4 max-w-7xl">
+        <Card className="border-none shadow-lg">
+          <CardHeader className="pb-4">
+            <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-5">
+              <CardTitle className="text-2xl md:text-3xl font-bold">
+                {t("title")}
+              </CardTitle>
 
               <div className="flex flex-wrap items-center gap-3">
-                <div className="relative w-full sm:w-auto">
+                <div className="relative w-full md:w-72">
                   <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground w-4 h-4" />
                   <Input
-                    placeholder="Поиск по имени, телефону..."
+                    placeholder={t("search.placeholder")}
                     value={globalFilter ?? ""}
                     onChange={(e) => setGlobalFilter(e.target.value)}
-                    className="pl-10 w-full sm:w-64"
+                    className="pl-10"
                   />
                 </div>
 
@@ -335,18 +351,22 @@ export default function BookingsPage() {
                     table.getColumn("status")?.setFilterValue(value === "all" ? "" : value)
                   }
                 >
-                  <SelectTrigger className="w-full sm:w-44">
-                    <SelectValue placeholder="Статус" />
+                  <SelectTrigger className="w-full md:w-40">
+                    <SelectValue placeholder={t("filter.status")} />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="all">Все</SelectItem>
-                    <SelectItem value="PENDING">Ожидает</SelectItem>
-                    <SelectItem value="CONFIRMED">Подтверждено</SelectItem>
-                    <SelectItem value="CANCELLED">Отменено</SelectItem>
-                    <SelectItem value="COMPLETED">Завершено</SelectItem>
+                    <SelectItem value="all">{t("filter.all")}</SelectItem>
+                    <SelectItem value="PENDING">{t("status.pending")}</SelectItem>
+                    <SelectItem value="CONFIRMED">{t("status.confirmed")}</SelectItem>
+                    <SelectItem value="CANCELLED">{t("status.cancelled")}</SelectItem>
+                    <SelectItem value="COMPLETED">{t("status.completed")}</SelectItem>
                   </SelectContent>
                 </Select>
-                <Button onClick={() => setShowModal(true)}>Добавить</Button>
+
+                <Button onClick={() => setShowModal(true)} className="gap-2">
+                  <Plus className="w-4 h-4" />
+                  {t("buttons.add_new")}
+                </Button>
               </div>
             </div>
           </CardHeader>
@@ -354,14 +374,14 @@ export default function BookingsPage() {
           <CardContent>
             {loading ? (
               <div className="space-y-4">
-                {[...Array(5)].map((_, i) => (
-                  <Skeleton key={i} className="h-32 w-full rounded-lg" />
+                {[...Array(6)].map((_, i) => (
+                  <Skeleton key={i} className="h-28 md:h-20 w-full rounded-xl" />
                 ))}
               </div>
             ) : (
               <>
                 {/* Desktop Table */}
-                <div className="hidden md:block rounded-md border">
+                <div className="hidden md:block rounded-xl border overflow-hidden">
                   <Table>
                     <TableHeader>
                       {table.getHeaderGroups().map((headerGroup) => (
@@ -383,7 +403,7 @@ export default function BookingsPage() {
                     <TableBody>
                       {table.getRowModel().rows?.length ? (
                         table.getRowModel().rows.map((row) => (
-                          <TableRow key={row.id} className="hover:bg-muted/50">
+                          <TableRow key={row.id} className="hover:bg-muted/60">
                             {row.getVisibleCells().map((cell) => (
                               <TableCell key={cell.id}>
                                 {flexRender(cell.column.columnDef.cell, cell.getContext())}
@@ -395,9 +415,9 @@ export default function BookingsPage() {
                         <TableRow>
                           <TableCell
                             colSpan={desktopColumns.length}
-                            className="h-32 text-center text-muted-foreground"
+                            className="h-48 text-center text-muted-foreground"
                           >
-                            Бронирования не найдены
+                            {t("table.no_results")}
                           </TableCell>
                         </TableRow>
                       )}
@@ -411,14 +431,14 @@ export default function BookingsPage() {
                     bookings
                       .filter(
                         (b) =>
-                          globalFilter === "" ||
+                          !globalFilter ||
                           b.client?.name?.toLowerCase().includes(globalFilter.toLowerCase()) ||
                           b.client?.phone?.includes(globalFilter)
                       )
                       .map((booking) => <BookingCard key={booking.id} booking={booking} />)
                   ) : (
-                    <div className="text-center py-12 text-muted-foreground">
-                      Бронирования не найдены
+                    <div className="text-center py-16 text-muted-foreground">
+                      {t("table.no_results")}
                     </div>
                   )}
                 </div>
@@ -428,7 +448,13 @@ export default function BookingsPage() {
         </Card>
       </div>
 
-      <AdminBookingModal isOpen={showModal} onClose={() => setShowModal(false)}/>
+      <AdminBookingModal
+        isOpen={showModal}
+        onClose={() => {
+          setShowModal(false);
+          loadBookings(); // перезагружаем список после создания
+        }}
+      />
     </ProtectedAdminRoute>
   );
 }
