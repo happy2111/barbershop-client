@@ -1,5 +1,6 @@
 // src/services/profile.service.ts
-import api from "./axiosInstance"; // твой существующий axios
+import api from "./axiosInstance";
+import {Booking} from "@/services/booking.service"; // твой существующий axios
 
 export interface SpecialistProfile {
   id: number;
@@ -21,7 +22,7 @@ export interface SpecialistProfile {
     start_time: string;
     end_time: string;
   }>;
-  bookings: Array<any>;
+  bookings: Booking[];
 }
 
 export interface ScheduleDto {

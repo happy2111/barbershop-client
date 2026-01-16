@@ -69,9 +69,13 @@ export const specialistService = {
       headers: data instanceof FormData ? { "Content-Type": "multipart/form-data" } : {},
     }).then(res => res.data);
   },
-  getByService(serviceId: any) {
+  getByServices(serviceIds: number[]) {
     const hostname: string = window.location.hostname;
-    return api.get<Specialist[]>(`/specialist/by-service/${serviceId}` , {params: {hostname}}).then(res => res.data);
+    return api.get<Specialist[]>(`/specialist/by-services/`, {
+      params: {
+        hostname, serviceIds: serviceIds.join(','),
+      }
+    }).then(res => res.data);
   },
 
   remove(id: number) {

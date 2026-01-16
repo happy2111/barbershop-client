@@ -14,7 +14,11 @@ import {
 } from "lucide-react";
 import React, { useEffect, useState } from "react";
 import { useTranslations } from "next-intl";
-import { bookingService, BookingStatus } from "@/services/booking.service";
+import {
+  Booking,
+  bookingService,
+  BookingStatus
+} from "@/services/booking.service";
 import domtoimage from "dom-to-image-more";
 import { format, parseISO } from "date-fns";
 import { uz } from "date-fns/locale";
@@ -29,6 +33,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { toast } from "sonner";
+import {b} from "framer-motion/m";
 
 interface StatusMeta {
   label: string;
@@ -194,6 +199,10 @@ export default function BookingCheckClient({ id }: { id: number }) {
 
   const status = statusMap.get(booking.status);
 
+  const servicesText = booking.services.map((bs: any) => bs.service.name).join(", ");
+
+  const totalPrice = booking.services.reduce((sum: number, b: any) => b.service.price + sum, 0);
+
   return (
     <div className="w-full min-h-screen relative flex flex-col gap-6 items-center justify-center p-4">
       {/* Шапка */}
@@ -221,11 +230,11 @@ export default function BookingCheckClient({ id }: { id: number }) {
             <span className="font-medium">{booking.id}</span>
 
             <span className="text-muted-foreground">{t("fields.service")}:</span>
-            <span className="font-medium">{booking.service?.name}</span>
+            <span className="font-medium">{servicesText}</span>
 
             <span className="text-muted-foreground">{t("fields.price")}:</span>
             <span className="font-medium">
-              {booking.service?.price} {t("common.sum")}
+            {totalPrice}{t("common.sum")}
             </span>
 
             <span className="text-muted-foreground">{t("fields.master")}:</span>

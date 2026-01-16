@@ -11,7 +11,7 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Calendar } from "@/components/ui/calendar";
-import {CheckCircle2, ChevronLeft, ChevronRight } from "lucide-react";
+import {Check, CheckCircle2, ChevronLeft, ChevronRight} from "lucide-react";
 import { format } from "date-fns";
 import {useRouter} from "next/navigation";
 import {PatternFormat} from "react-number-format";
@@ -42,7 +42,7 @@ export default observer(function BookingPage() {
 
   const router = useRouter();
   const [step, setStep] = useState<Step>(1);
-  const [selectedService, setSelectedService] = useState<number | null>(null);
+  const [selectedServices, setSelectedServices] = useState<number[]>([]);
   const [selectedSpecialist, setSelectedSpecialist] = useState<number | null>(null);
   const [selectedDate, setSelectedDate] = useState<string | null>(null);
   const [selectedTime, setSelectedTime] = useState<{ date: string; start: string; end: string } | null>(null);
@@ -100,10 +100,14 @@ export default observer(function BookingPage() {
   }, []);
 
   useEffect(() => {
-    if (selectedService) {
-      specialistStore.fetchByService(selectedService);
+    if (selectedServices.length > 0) {
+      specialistStore.fetchByServices(selectedServices);
+    } else {
+      specialistStore.specialists = [];
     }
-  }, [selectedService]);
+  }, [selectedServices]);
+
+
 
   useEffect(() => {
     window.scrollTo({
@@ -113,31 +117,30 @@ export default observer(function BookingPage() {
   }, [step]);
 
   useEffect(() => {
-
-    if (selectedSpecialist && selectedService && selectedDate) {
+    if (selectedSpecialist && selectedServices.length > 0 && selectedDate) {
       setLoadingSlots(true);
       bookingService
-        .getFreeSlots(selectedSpecialist, selectedService, selectedDate)
+        .getFreeSlots(selectedSpecialist, selectedServices, selectedDate)
         .then((slots) => setTimeSlots(slots))
         .catch(() => {
           setTimeSlots([]);
-          alert("Ошибка загрузки свободного времени");
+          toast.error("Ошибка загрузки свободного времени");
         })
         .finally(() => setLoadingSlots(false));
     } else {
       setTimeSlots([]);
     }
-  }, [selectedSpecialist, selectedService, selectedDate]);
+  }, [selectedSpecialist, selectedServices, selectedDate]);
+
 
   const handleCreateBooking = async () => {
-    if (!selectedService || !selectedSpecialist || !selectedTime || !clientName || !clientPhone) {
+    if (!selectedServices || !selectedSpecialist || !selectedTime || !clientName || !clientPhone) {
       toast.error("Заполните все поля"); // Используем toast вместо alert для красоты
       return;
     }
 
     setCreateLoading(true);
     try {
-      // 1. Создаем (или получаем) клиента с данными Telegram
       const client = await clientStore.create({
         name: clientName,
         phone: `+998${clientPhone}`,
@@ -148,16 +151,16 @@ export default observer(function BookingPage() {
         telegramLang: user?.language_code,
       });
 
-      // 2. Создаем бронь
       const res = await bookingService.create({
         clientId: client.id,
         specialistId: selectedSpecialist,
-        serviceId: selectedService,
+        serviceIds: selectedServices,
         date: selectedTime.date,
         start_time: selectedTime.start,
         end_time: selectedTime.end,
         status: BookingStatus.PENDING,
       });
+
 
       toast.success("Запись успешно создана!");
       router.replace('/booking/' + res.id);
@@ -220,85 +223,118 @@ export default observer(function BookingPage() {
         </div>
 
         {step === 1 && (
-          <Card className="p-6 shadow-xl bg-card border-border animate-in fade-in zoom-in-98 duration-500">
-            <h2 className="text-2xl font-semibold mb-6">
-              {t("booking.home.step1.title")}
-            </h2>
+          <div className="pb-24">
+            <Card className="p-6 shadow-xl bg-card border-border animate-in fade-in zoom-in-98 duration-500">
+              <h2 className="text-2xl font-semibold mb-6">
+                {t("booking.home.step1.title")}
+              </h2>
 
-            <div className="space-y-4">
-              {categories.map((category) => {
-                const isOpen = openCategories[category.id];
+              <div className="space-y-4">
+                {categories.map((category) => {
+                  const isOpen = openCategories[category.id];
 
-                return (
-                  <div
-                    key={category.id}
-                    className="border rounded-xl overflow-hidden border-border"
-                  >
-                    {/* Заголовок категории */}
-                    <button
-                      onClick={() => toggleCategory(category.id)}
-                      className="w-full flex items-center justify-between px-4 py-3 bg-muted hover:bg-muted/70 transition"
-                    >
-              <span className="font-semibold text-lg capitalize">
-                {category.name}
-              </span>
-                      <ChevronRight
-                        className={`transition-transform duration-300 ${
-                          isOpen ? "rotate-90" : ""
-                        }`}
-                      />
-                    </button>
-
-                    {/* Контент */}
+                  return (
                     <div
-                      className={`grid gap-4 transition-all duration-300 px-4 ${
-                        isOpen
-                          ? "grid-rows-[1fr] py-4 opacity-100"
-                          : "grid-rows-[0fr] py-0 opacity-0 pointer-events-none"
-                      }`}
+                      key={category.id}
+                      className="border rounded-xl overflow-hidden border-border"
                     >
-                      <div className="grid grid-cols-1 gap-4 overflow-hidden">
-                        {category.services.map((s) => (
-                          <div
-                            key={s.id}
-                            onClick={() => {
-                              setSelectedService(s.id);
-                              nextStep();
-                            }}
-                            className={`border rounded-xl overflow-hidden cursor-pointer transition-all
-                      ${
-                              selectedService === s.id
-                                ? "border-primary shadow-xl ring-2 ring-primary/30"
-                                : "border-border hover:border-primary/50"
-                            }`}
-                          >
-                            <img
-                              src={`${process.env.NEXT_PUBLIC_API_URL}${s.photo}`}
-                              alt={s.name}
-                              className="w-full h-40 object-cover"
-                            />
-                            <div className="p-4">
-                              <h3 className="font-medium text-lg">{s.name}</h3>
-                              <p className="text-sm text-muted-foreground">
-                                {t("common.duration", { minutes: s.duration_min })}
-                              </p>
-                              <p className="text-primary font-bold text-xl mt-2">
-                                {t("common.price", { amount: s.price })}
-                              </p>
+                      {/* Заголовок категории */}
+                      <button
+                        onClick={() => toggleCategory(category.id)}
+                        className="w-full flex items-center justify-between px-4 py-3 bg-muted hover:bg-muted/70 transition"
+                      >
+                        <span className="font-semibold text-lg capitalize">
+                          {category.name}
+                        </span>
+                        <ChevronRight
+                          className={`transition-transform duration-300 ${
+                            isOpen ? "rotate-90" : ""
+                          }`}
+                        />
+                      </button>
+
+                      {/* Контент */}
+                      <div
+                        className={`grid gap-4 transition-all duration-300 px-4 ${
+                          isOpen
+                            ? "grid-rows-[1fr] py-4 opacity-100"
+                            : "grid-rows-[0fr] py-0 opacity-0 pointer-events-none"
+                        }`}
+                      >
+                        <div className="grid grid-cols-1 gap-4 overflow-hidden">
+                          {category.services.map((s) => (
+                            <div
+                              key={s.id}
+                              onClick={() => {
+                                setSelectedServices(prev => {
+                                  if (prev.includes(s.id)) {
+                                    return prev.filter(id => id !== s.id);
+                                  } else {
+                                    return [...prev, s.id];
+                                  }
+                                });
+                              }}
+
+                                className={`relative border rounded-xl overflow-hidden cursor-pointer transition-all duration-300
+                                    ${selectedServices.includes(s.id)
+                                  ? "border-primary shadow-md bg-primary/5 ring-1 ring-primary"
+                                  : "border-border hover:border-primary/40 bg-card"}`}
+                            >
+                              {selectedServices.includes(s.id) && (
+                                <div className="absolute top-2 right-2 z-10 bg-primary text-primary-foreground rounded-full p-1 animate-in zoom-in duration-200">
+                                  <Check className="w-4 h-4" strokeWidth={3} />
+                                </div>
+                              )}
+                              <img
+                                src={`${process.env.NEXT_PUBLIC_API_URL}${s.photo}`}
+                                alt={s.name}
+                                className={`w-full h-40 object-cover transition-transform duration-500 ${selectedServices.includes(s.id) ? "scale-105" : ""}`}
+                              />
+                              <div className="p-4">
+                                <h3 className="font-medium text-lg">{s.name}</h3>
+                                <p className="text-sm text-muted-foreground">
+                                  {t("common.duration", { minutes: s.duration_min })}
+                                </p>
+                                <p className="text-primary font-bold text-xl mt-2">
+                                  {t("common.price", { amount: s.price })}
+                                </p>
+                              </div>
                             </div>
-                          </div>
-                        ))}
+                          ))}
+                        </div>
+
                       </div>
+
                     </div>
+                  );
+                })}
+              </div>
+            </Card>
+            <div className="fixed bottom-0 left-0 right-0 z-50 border-t bg-background/80 backdrop-blur-lg p-4 pb-safe shadow-[0_-10px_15px_-3px_rgba(0,0,0,0.1)]">
+              <div className="max-w-2xl mx-auto flex justify-between items-center gap-4">
+                <div className="flex flex-col">
+                  <span className="text-xs text-muted-foreground uppercase tracking-wider font-medium">
+                    {t("booking.selected")}
+                  </span>
+                          <span className="text-lg font-bold">
+                     {selectedServices.length} {t("booking.services_count")}
+                  </span>
                   </div>
-                );
-              })}
+
+                  <Button
+                    onClick={nextStep}
+                    disabled={selectedServices.length === 0}
+                    className="px-10 py-6 text-lg rounded-xl shadow-lg hover:scale-[1.02] active:scale-[0.98] transition-all"
+                  >
+                    {t("common.next")}
+                  </Button>
+              </div>
             </div>
-          </Card>
+          </div>
         )}
 
 
-        {step === 2 && selectedService && (
+        {step === 2 && selectedServices.length>0 && (
           <Card className="p-6 shadow-xl bg-card border-border animate-in fade-in zoom-in-98 duration-500 ease-out">
             <h2 className="text-2xl font-semibold mb-6">{t("booking.home.step2.title")}</h2>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
@@ -466,7 +502,7 @@ export default observer(function BookingPage() {
               <div className="flex justify-between items-center">
                 <span className="text-muted-foreground">{t("common.service")}</span>
                 <span className="font-bold">
-              {serviceStore.services.find((s) => s.id === selectedService)?.name}
+                {selectedServices.map(id => serviceStore.services.find(s => s.id === id)?.name).join(', ')}
             </span>
               </div>
               <div className="flex justify-between items-center">

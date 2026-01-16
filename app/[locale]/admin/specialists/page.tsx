@@ -258,7 +258,6 @@ export default function SpecialistsPage() {
               <Scissors className="h-4 w-4" />
             </Button>
 
-            {spec.role !== "ADMIN" && (
               <Button
                 size="sm"
                 variant="ghost"
@@ -268,7 +267,6 @@ export default function SpecialistsPage() {
               >
                 <Trash2 className="h-4 w-4" />
               </Button>
-            )}
           </div>
         );
       },
@@ -362,7 +360,6 @@ export default function SpecialistsPage() {
                 {t("actions.services")}
               </Button>
 
-              {specialist.role !== "ADMIN" && (
                 <Button
                   variant="outline"
                   size="sm"
@@ -372,7 +369,6 @@ export default function SpecialistsPage() {
                   <Trash2 className="w-4 h-4 mr-2" />
                   {t("actions.delete")}
                 </Button>
-              )}
             </div>
           </div>
         </div>

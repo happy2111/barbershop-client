@@ -21,6 +21,8 @@
     }
   },
   "booking": {
+    "selected": "Tanlandi",
+    "services_count": "xizmatlar",
     "confirm_booking": "Yozuvni tasdiqlash",
     "home": {
       "step1": {
@@ -65,7 +67,8 @@
     "unknown_client": "Mijoz",
     "price_value": "{price} so'm",
     "minutes": "min",
-    "sum": "so'm"
+    "sum": "so'm",
+    "next": "Keyingisi"
   },
   "errors": {
     "booking_error": "Yozuvni yaratishda xato",
@@ -217,6 +220,7 @@
   },
   "admin": {
     "booking_modal": {
+      "loading": "Yuklanmoqda...",
       "title": "Yangi yozuv",
       "fields": {
         "client": "Mijoz",
@@ -258,7 +262,8 @@
         "create_failed": "Yozuvni yaratishda xatolik yuz berdi"
       },
       "common" : {
-        "minutes": "min"
+        "minutes": "min",
+        "services_selected": " ta xizmat tanlandi"
       }
     },
     "bookings": {
@@ -703,6 +708,8 @@
       }
     },
     "dashboard": {
+      "title": "Panel",
+      "description": "Saloningiz uchun umumiy statistika va tahlillar",
       "stats": {
         "revenue": "Tushum",
         "revenue_subtitle": "Joriy oy uchun",

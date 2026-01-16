@@ -1,28 +1,26 @@
 'use client';
 
-import { useEffect, useState } from "react";
-import { useTranslations } from 'next-intl';
-import { profileService, ScheduleDto } from "@/services/profile.service";
-import { bookingService, BookingStatus } from "@/services/booking.service";
-import { format } from "date-fns";
-import { ru } from "date-fns/locale";
+import {useEffect, useState} from "react";
+import {useTranslations} from 'next-intl';
+import {profileService, ScheduleDto} from "@/services/profile.service";
+import {bookingService, BookingStatus} from "@/services/booking.service";
+import {format} from "date-fns";
+import {ru} from "date-fns/locale";
 
-import {
-  Card, CardHeader, CardTitle, CardContent
-} from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
+import {Card, CardContent, CardHeader, CardTitle} from "@/components/ui/card";
+import {Button} from "@/components/ui/button";
+import {Input} from "@/components/ui/input";
+import {Label} from "@/components/ui/label";
+import {Tabs, TabsContent, TabsList, TabsTrigger} from "@/components/ui/tabs";
 
-import {Calendar, Clock, Pencil, Plus, Trash2, History} from "lucide-react";
+import {Calendar, Clock, History, Pencil, Plus, Trash2} from "lucide-react";
 
 import ProfilePersonalInfo from "@/components/profile/ProfilePersonalInfo";
 import ProfileServices from "@/components/profile/ProfileServices";
-import { toast } from "sonner";
+import {toast} from "sonner";
 import ChangePassword from "@/components/profile/ChangePassword";
 import ProfileBlockedTime from "@/components/profile/ProfileBlockedTime";
-import { AdminBookingModal } from "@/components/BookingModal";
+import {AdminBookingModal} from "@/components/BookingModal";
 import ProfileSkeleton from "@/components/profile/ProfileSkeleton";
 
 // Массив дней недели лучше тоже локализовать, но для простоты оставим пока так
@@ -197,6 +195,7 @@ export default function SpecialistProfilePage() {
       setIsUploadingPhoto(false);
     }
   };
+
 
   return (
     <div className="min-h-screen bg-background py-8 px-4">
@@ -424,60 +423,87 @@ export default function SpecialistProfilePage() {
                     </p>
                   </div>
                 ) : (
-                  <div className="space-y-4">
+                  <div className="grid gap-4">
                     {upcoming.map((b) => (
                       <div
                         key={b.id}
-                        className="border rounded-xl p-5 hover:shadow-md transition-shadow bg-card"
+                        className="group relative border border-border rounded-[var(--radius)] p-5 bg-card text-card-foreground hover:shadow-lg hover:shadow-primary/5 transition-all duration-300"
                       >
-                        <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-5">
-                          <div className="flex-1 space-y-2">
+                        <div className="flex flex-col md:flex-row md:items-start justify-between gap-6">
+
+                          {/* Инфо о клиенте и услугах */}
+                          <div className="flex-1 space-y-4">
                             <div className="flex items-center justify-between">
-                              <h3 className="font-semibold text-lg">
-                                {b.client?.name || t('common.unknown_client')}
-                              </h3>
-                              {renderBookingStatus(b.status)}
-                            </div>
-
-                            <p className="text-sm text-muted-foreground">
-                              {b.client?.phone}
-                            </p>
-
-                            <div className="flex items-center gap-2 text-sm">
-                              <span className="font-medium">{b.service?.name}</span>
-                              <span className="text-muted-foreground">•</span>
-                              <span className="font-medium text-primary">
-                        {t('common.price_value', { price: b.service?.price })}
-                      </span>
-                            </div>
-
-                            <div className="flex items-center gap-3 text-sm text-muted-foreground mt-2">
-                              <div className="flex items-center gap-1">
-                                <Calendar className="w-4 h-4" />
-                                {format(new Date(b.date), "dd MMMM yyyy", { locale: ru })}
+                              <div>
+                                <h3 className="font-bold text-xl tracking-tight">
+                                  {b.client?.name || t('common.unknown_client')}
+                                </h3>
+                                <p className="text-sm font-medium text-muted-foreground">
+                                  {b.client?.phone}
+                                </p>
                               </div>
-                              <div className="flex items-center gap-1">
-                                <Clock className="w-4 h-4" />
+                              <div className="shrink-0">
+                                {renderBookingStatus(b.status)}
+                              </div>
+                            </div>
+
+                            {/* Список услуг с ценами */}
+                            <div className="space-y-2 rounded-lg bg-muted/30 p-3">
+                              <div className="flex flex-col gap-1.5">
+                                {b.services.map((bs: any, idx: number) => (
+                                  <div
+                                    key={idx}
+                                    className="flex justify-between text-sm"
+                                  >
+                                  <span className="text-muted-foreground">
+                                    <span className="text-primary mr-2">•</span>
+                                    {bs.service.name}
+                                  </span>
+                                                    <span className="font-medium whitespace-nowrap ml-4">
+                                    {bs.service.price.toLocaleString()} сум
+                                  </span>
+                                  </div>
+                                ))}
+                              </div>
+
+                              <div className="pt-2 mt-2 border-t border-border flex justify-between items-center">
+                                <span className="text-xs uppercase tracking-wider font-semibold text-muted-foreground">
+                                  Итого
+                                </span>
+                                 <span className="text-lg font-bold text-primary">
+                                  {b.services.reduce((sum: number, s: any) => sum + s.service.price, 0).toLocaleString()} сум
+                                </span>
+                              </div>
+                            </div>
+
+                            {/* Дата и время */}
+                            <div className="flex flex-wrap items-center gap-4 text-sm font-medium">
+                              <div className="flex items-center gap-2 px-2.5 py-1 rounded-md bg-secondary text-secondary-foreground">
+                                <Calendar className="w-4 h-4 opacity-70" />
+                                {format(new Date(b.date), "dd MMM yyyy", {locale: ru})}
+                              </div>
+                              <div className="flex items-center gap-2 px-2.5 py-1 rounded-md bg-secondary text-secondary-foreground">
+                                <Clock className="w-4 h-4 opacity-70" />
                                 {b.start_time} – {b.end_time}
                               </div>
                             </div>
                           </div>
 
-                          {/* Действия */}
-                          <div className="flex flex-row sm:flex-col gap-2 sm:gap-3 min-w-[140px]">
+                          {/* Секция действий */}
+                          <div className="flex flex-row sm:flex-col gap-2 min-w-full sm:min-w-[160px]">
                             {b.status === "PENDING" && (
                               <>
                                 <Button
-                                  size="sm"
-                                  className="bg-green-600 hover:bg-green-700"
+                                  size="default"
+                                  className="flex-1 bg-primary text-primary-foreground hover:opacity-90 shadow-sm"
                                   onClick={() => updateBooking(b.id, BookingStatus.CONFIRMED)}
                                 >
                                   {t('profile.bookings.actions.confirm')}
                                 </Button>
                                 <Button
-                                  size="sm"
+                                  size="default"
                                   variant="outline"
-                                  className="border-red-200 text-red-700 hover:bg-red-50"
+                                  className="flex-1 border-destructive/20 text-destructive hover:bg-destructive hover:text-white transition-colors"
                                   onClick={() => updateBooking(b.id, BookingStatus.CANCELLED)}
                                 >
                                   {t('profile.bookings.actions.cancel')}
@@ -487,9 +513,8 @@ export default function SpecialistProfilePage() {
 
                             {b.status === "CONFIRMED" && (
                               <Button
-                                size="sm"
-                                variant="default"
-                                className="bg-blue-600 hover:bg-blue-700"
+                                size="default"
+                                className="w-full bg-blue-600 hover:bg-blue-700 text-white shadow-md"
                                 onClick={() => updateBooking(b.id, BookingStatus.COMPLETED)}
                               >
                                 {t('profile.bookings.actions.complete')}
@@ -562,7 +587,7 @@ export default function SpecialistProfilePage() {
         </Tabs>
       </div>
       {
-        showModal && <AdminBookingModal isOpen={showModal} onClose={() => setShowModal(false)} specialistId={profile.id} />
+        showModal && <AdminBookingModal isOpen={showModal} onClose={() => setShowModal(false)} specialistId={profile.id} onCreated={() => loadData()} />
       }
     </div>
   );

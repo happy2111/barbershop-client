@@ -23,12 +23,19 @@ class SpecialistStore {
     }
   }
 
-  async fetchByService(serviceId: number) {
+  async fetchByServices(serviceIds: number[]) {
+    if (serviceIds.length === 0) {
+      runInAction(() => {
+        this.specialists = [];
+      });
+      return;
+    }
+
     this.loading = true;
     const hostname = window.location.hostname;
 
     try {
-      const data = await specialistService.getByService(serviceId);
+      const data = await specialistService.getByServices(serviceIds);
       runInAction(() => {
         this.specialists = data;
       });
@@ -36,6 +43,7 @@ class SpecialistStore {
       this.loading = false;
     }
   }
+
 
   async create(dto: CreateSpecialistDto) {
     const created = await specialistService.create(dto);

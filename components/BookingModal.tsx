@@ -64,7 +64,7 @@ export const AdminBookingModal: React.FC<AdminBookingModalProps> = ({
   const [clientName, setClientName] = useState("");
   const [selectedClientId, setSelectedClientId] = useState<number | null>(null);
   const [selectedSpecialist, setSelectedSpecialist] = useState<Specialist | null>(null);
-  const [selectedService, setSelectedService] = useState<Service | null>(null);
+  const [selectedService, setSelectedService] = useState<Service[]>([]);
   const [date, setDate] = useState("");
   const [start, setStart] = useState("");
   const [end, setEnd] = useState("");
@@ -73,6 +73,28 @@ export const AdminBookingModal: React.FC<AdminBookingModalProps> = ({
   const [isNewClient, setIsNewClient] = useState(false);
   const [openServ, setOpenServ] = useState(false);
   const [openPhone, setOpenPhone] = useState(false);
+
+  const totalDuration = selectedService.reduce(
+    (sum: any, s: any) => sum + s.duration_min,
+    0
+  );
+
+  const toggleService = (service: Service) => {
+    setSelectedService((prev) =>
+      prev.some((s) => s.id === service.id)
+        ? prev.filter((s) => s.id !== service.id)
+        : [...prev, service]
+    );
+  };
+
+
+  useEffect(() => {
+    if (!start || totalDuration === 0) {
+      setEnd("");
+      return;
+    }
+    setEnd(addMinutesToTime(start, totalDuration));
+  }, [start, totalDuration]);
 
   useEffect(() => {
     const loadData = async () => {
@@ -102,10 +124,9 @@ export const AdminBookingModal: React.FC<AdminBookingModalProps> = ({
     }
   }, [specialistId, specialists]);
 
-  useEffect(() => {
-    if (!start || !selectedService?.duration_min) return;
-    setEnd(addMinutesToTime(start, selectedService.duration_min));
-  }, [start, selectedService?.duration_min]);
+
+
+
 
   const handlePhoneSearch = async (val: string) => {
     setClientPhone(val);
@@ -138,7 +159,13 @@ export const AdminBookingModal: React.FC<AdminBookingModalProps> = ({
   };
 
   const handleCreateBooking = async () => {
-    if (!selectedSpecialist || !selectedService || !date || !start || !clientPhone.trim()) {
+    if (
+      !selectedSpecialist ||
+      selectedService.length === 0 ||
+      !date ||
+      !start ||
+      !clientPhone.trim()
+    ) {
       toast.error(t("errors.required_fields"));
       return;
     }
@@ -148,14 +175,11 @@ export const AdminBookingModal: React.FC<AdminBookingModalProps> = ({
     try {
       let client: Client;
 
-      // 1. Клиент уже выбран по ID
       if (selectedClientId) {
         client = await clientService.update(selectedClientId, {
           name: clientName.trim() || undefined,
         });
-      }
-      // 2. Проверяем, вдруг клиент с таким телефоном уже существует
-      else {
+      } else {
         const found = await clientService.searchByPhone(clientPhone);
         const existing = found.find((c) => c.phone === clientPhone);
 
@@ -163,9 +187,7 @@ export const AdminBookingModal: React.FC<AdminBookingModalProps> = ({
           client = await clientService.update(existing.id, {
             name: clientName.trim() || undefined,
           });
-        }
-        // 3. Создаём нового
-        else {
+        } else {
           client = await clientService.create({
             phone: clientPhone,
             name: clientName.trim() || t("new_client_default_name"),
@@ -173,11 +195,10 @@ export const AdminBookingModal: React.FC<AdminBookingModalProps> = ({
         }
       }
 
-      // 4. Создаём бронь
       await bookingService.create({
         clientId: client.id,
         specialistId: selectedSpecialist.id,
-        serviceId: selectedService.id,
+        serviceIds: selectedService.map((s) => s.id),
         date,
         start_time: start,
         end_time: end,
@@ -194,8 +215,15 @@ export const AdminBookingModal: React.FC<AdminBookingModalProps> = ({
     }
   };
 
+
   const isSpecialistFixed = !!specialistId;
-  const canSubmit = !!selectedSpecialist && !!selectedService && !!date && !!start && !!clientPhone.trim();
+  const canSubmit =
+    !!selectedSpecialist &&
+    selectedService.length > 0 &&
+    !!date &&
+    !!start &&
+    !!clientPhone.trim();
+
 
   return (
     <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
@@ -347,33 +375,41 @@ export const AdminBookingModal: React.FC<AdminBookingModalProps> = ({
             <Popover open={openServ} onOpenChange={setOpenServ}>
               <PopoverTrigger asChild>
                 <Button variant="outline" className="w-full justify-between">
-                  {selectedService
-                    ? `${selectedService.name} (${selectedService.duration_min} ${t("common.minutes")})`
+                  {selectedService.length > 0
+                    ? selectedService.length === 1
+                      ? `${selectedService[0].name} (${selectedService[0].duration_min} ${t("common.minutes")})`
+                      : `${selectedService.length} ${t("common.services_selected")}`
                     : t("placeholders.select_service")}
                   <ChevronsUpDown className="ml-2 h-4 w-4 opacity-50" />
                 </Button>
               </PopoverTrigger>
+              {selectedService.length > 0 && (
+                <div className="text-xs text-muted-foreground">
+                  {selectedService.map(s => s.name).join(", ")}
+                </div>
+              )}
               <PopoverContent className="p-0">
                 <Command>
                   <CommandInput placeholder={t("placeholders.search_service")} />
                   <CommandList>
                     <CommandEmpty>{t("search.no_results")}</CommandEmpty>
+
                     <CommandGroup>
                       {services.map((s) => (
                         <CommandItem
                           key={s.id}
                           value={s.name}
-                          onSelect={() => {
-                            setSelectedService(s);
-                            setOpenServ(false);
-                          }}
+                          onSelect={() => toggleService(s)}
                         >
-                          <div className="flex justify-between w-full">
-                            <span>{s.name}</span>
-                            <span className="text-xs text-muted-foreground">
-                              {s.duration_min} {t("common.minutes")}
-                            </span>
-                          </div>
+                          <Check
+                            className={cn(
+                              "mr-2 h-4 w-4",
+                              selectedService.some((x) => x.id === s.id)
+                                ? "opacity-100"
+                                : "opacity-0"
+                            )}
+                          />
+                          {s.name}
                         </CommandItem>
                       ))}
                     </CommandGroup>
