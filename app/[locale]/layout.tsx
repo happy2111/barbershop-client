@@ -72,7 +72,6 @@ export default async function RootLayout({
           <div className="w-full mb-8 tg-safe-top">
             <Navbar/>
             {children}
-            <ModeToggle />
             <Footer/>
           </div>
           <Toaster />
