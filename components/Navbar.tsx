@@ -9,13 +9,15 @@ import {
   User,
   LogOut,
   Home,
-  LayoutDashboard
+  LayoutDashboard, Moon, Sun
 } from "lucide-react"
 import { usePathname, useRouter } from "next/navigation"
 import Link from "next/link"
 import { authStore } from "@/stores/auth.store"
 import LocaleSwitcher from "@/components/LocaleSwitcher"
 import { useTranslations } from 'next-intl'
+import {ModeToggle} from "@/components/ModeToggle";
+import {useTheme} from "next-themes";
 
 const Navbar = () => {
   const t = useTranslations()
@@ -73,6 +75,9 @@ const Navbar = () => {
     setIsMenuOpen(false)
   }
 
+  const { setTheme, theme } = useTheme()
+
+
   return (
     <>
       <header
@@ -102,6 +107,9 @@ const Navbar = () => {
               </Link>
 
               <div className="flex items-center gap-1">
+                {/*<ModeToggle />*/}
+
+
                 <LocaleSwitcher isMobile={false} />
                 <Button
                   onClick={() => setIsMenuOpen(p => !p)}
@@ -169,7 +177,30 @@ const Navbar = () => {
                     </Button>
                   )}
 
+                  <div className="h-px bg-border my-2 mx-3" /> {/* Разделитель */}
 
+                  <div className="flex items-center justify-between px-4 py-2 bg-muted/50 rounded-[1.5rem] mt-1">
+                    <span className="text-sm font-medium text-muted-foreground">
+                      {t('navbar.menu.theme') || 'Тема'}
+                    </span>
+                    <div className="flex bg-background/50 p-1 rounded-full border border-border">
+                      <ThemeButton
+                        active={theme === 'light'}
+                        onClick={() => setTheme('light')}
+                        icon={<Sun className="h-4 w-4" />}
+                      />
+                      <ThemeButton
+                        active={theme === 'dark'}
+                        onClick={() => setTheme('dark')}
+                        icon={<Moon className="h-4 w-4" />}
+                      />
+                      <ThemeButton
+                        active={theme === 'system'}
+                        onClick={() => setTheme('system')}
+                        icon={<span className="text-[10px] font-bold">AS</span>}
+                      />
+                    </div>
+                  </div>
 
                 </nav>
               </div>
@@ -196,6 +227,20 @@ const MenuButton = ({ icon, label, onClick, variant = "default" }: any) => (
     <span className="text-muted-foreground">{icon}</span>
     <span className="text-sm font-medium">{label}</span>
   </Button>
+)
+
+const ThemeButton = ({ active, onClick, icon }: { active: boolean, onClick: () => void, icon: React.ReactNode }) => (
+  <button
+    onClick={onClick}
+    className={`
+      p-2 rounded-full transition-all duration-200
+      ${active
+      ? 'bg-primary text-primary-foreground shadow-sm scale-110'
+      : 'text-muted-foreground hover:text-foreground'}
+    `}
+  >
+    {icon}
+  </button>
 )
 
 export default Navbar

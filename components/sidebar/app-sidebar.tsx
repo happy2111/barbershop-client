@@ -21,6 +21,8 @@ import {Button} from "@/components/ui/button";
 import {useTranslations} from "next-intl";
 import {useRouter} from "@/i18n/navigation";
 import LocaleSwitcher from "@/components/LocaleSwitcher";
+import Footer from "@/components/Footer";
+import {ModeToggle} from "@/components/ModeToggle";
 
 export function AppSidebar(props: React.ComponentProps<typeof Sidebar>) {
   const navMain = [
@@ -51,7 +53,13 @@ export function AppSidebar(props: React.ComponentProps<typeof Sidebar>) {
       </SidebarContent>
 
       <SidebarFooter/>
-      <LocaleSwitcher isMobile={state === 'collapsed'}/>
+      <div className={`flex items-center justify-center ${state === 'expanded' ? '' : " flex-col"}`}>
+        <LocaleSwitcher isMobile={state === 'collapsed'}/>
+        <div className={`w-[1px] h-4 bg-border mx-1 ${state === 'collapsed' && 'hidden'}`} />
+        <ModeToggle />
+      </div>
+
+
 
       { state === 'expanded' ?
         (
@@ -60,7 +68,7 @@ export function AppSidebar(props: React.ComponentProps<typeof Sidebar>) {
           </Button>
         )  :
         (
-          <Button variant={"ghost"} onClick={() => {router.push('/')}} className='m-4'>
+          <Button variant={"ghost"} onClick={() => {router.push('/')}}>
             <Home/>
           </Button>
         ) }

@@ -81,7 +81,9 @@
       "logout": "Hisobdan chiqish",
       "login_for_specialists": "Ustalar uchun kirish",
       "personal_cabinet": "Shaxsiy kabinet",
-      "panel": "Boshqaruv paneli"
+      "panel": "Boshqaruv paneli",
+       "theme": "Tema"
+
     },
 
     "title": "Nom"
