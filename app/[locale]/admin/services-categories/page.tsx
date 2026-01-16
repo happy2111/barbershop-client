@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useTranslations } from "next-intl";
 import {
   ColumnDef,
   flexRender,
@@ -39,12 +40,14 @@ import { FolderOpen, Edit, Trash2, Plus, Search } from "lucide-react";
 import ProtectedAdminRoute from "@/components/Pretecters&Providers/ProtectedAdminRoute";
 
 export default function ServiceCategoriesPage() {
+  const t = useTranslations("admin.service_categories");
+
   const [categories, setCategories] = useState<ServiceCategory[]>([]);
   const [loading, setLoading] = useState(true);
   const [sorting, setSorting] = useState<SortingState>([]);
   const [globalFilter, setGlobalFilter] = useState("");
 
-  const [open, setOpen] = useState(false);
+  const [dialogOpen, setDialogOpen] = useState(false);
   const [editingCategory, setEditingCategory] = useState<ServiceCategory | null>(null);
   const [name, setName] = useState("");
 
@@ -53,11 +56,12 @@ export default function ServiceCategoriesPage() {
   }, []);
 
   const loadCategories = async () => {
+    setLoading(true);
     try {
       const data = await serviceCategoryService.getAll();
       setCategories(data);
     } catch (err: any) {
-      toast.error("Не удалось загрузить категории");
+      toast.error(err.response?.data?.message || t("errors.load_failed"));
     } finally {
       setLoading(false);
     }
@@ -65,40 +69,41 @@ export default function ServiceCategoriesPage() {
 
   const handleSave = async () => {
     if (!name.trim()) {
-      toast.error("Введите название категории");
+      toast.error(t("errors.name_required"));
       return;
     }
 
     try {
       if (editingCategory) {
         await serviceCategoryService.update(editingCategory.id, { name: name.trim() });
-        toast.success("Категория обновлена");
+        toast.success(t("toast.updated"));
       } else {
         await serviceCategoryService.create({ name: name.trim() });
-        toast.success("Категория создана");
+        toast.success(t("toast.created"));
       }
-      setOpen(false);
+
+      setDialogOpen(false);
       setName("");
       setEditingCategory(null);
       loadCategories();
     } catch (err: any) {
-      toast.error(err.response?.data?.message || "Ошибка сохранения");
+      toast.error(err.response?.data?.message || t("errors.save_failed"));
     }
   };
 
   const handleDelete = async (id: number) => {
-    if (!confirm("Удалить категорию? Все связанные услуги останутся без категории.")) return;
+    if (!confirm(t("confirm.delete"))) return;
 
     try {
       await serviceCategoryService.remove(id);
       setCategories((prev) => prev.filter((c) => c.id !== id));
-      toast.success("Категория удалена");
+      toast.success(t("toast.deleted"));
     } catch (err: any) {
-      toast.error(err.response?.data?.message || "Не удалось удалить");
+      toast.error(err.response?.data?.message || t("errors.delete_failed"));
     }
   };
 
-  const openEdit = (category?: ServiceCategory) => {
+  const openDialog = (category?: ServiceCategory) => {
     if (category) {
       setEditingCategory(category);
       setName(category.name);
@@ -106,15 +111,19 @@ export default function ServiceCategoriesPage() {
       setEditingCategory(null);
       setName("");
     }
-    setOpen(true);
+    setDialogOpen(true);
   };
 
   // ─── Desktop Columns ───────────────────────────────────────────────────────
   const desktopColumns: ColumnDef<ServiceCategory>[] = [
-    { accessorKey: "id", header: "ID", size: 80 },
+    {
+      accessorKey: "id",
+      header: t("table.id"),
+      size: 80,
+    },
     {
       accessorKey: "name",
-      header: "Название категории",
+      header: t("table.name"),
       cell: ({ row }) => (
         <div className="flex items-center gap-3 font-medium">
           <FolderOpen className="w-5 h-5 text-muted-foreground" />
@@ -123,8 +132,8 @@ export default function ServiceCategoriesPage() {
       ),
     },
     {
-      accessorKey: "services",
-      header: "Услуг",
+      accessorKey: "services.length",
+      header: t("table.services_count"),
       cell: ({ row }) => (
         <Badge variant="secondary" className="font-medium">
           {row.original.services?.length || 0}
@@ -136,7 +145,12 @@ export default function ServiceCategoriesPage() {
       size: 100,
       cell: ({ row }) => (
         <div className="flex items-center gap-1">
-          <Button size="sm" variant="ghost" onClick={() => openEdit(row.original)}>
+          <Button
+            size="sm"
+            variant="ghost"
+            onClick={() => openDialog(row.original)}
+            title={t("actions.edit")}
+          >
             <Edit className="h-4 w-4" />
           </Button>
           <Button
@@ -144,6 +158,7 @@ export default function ServiceCategoriesPage() {
             variant="ghost"
             className="text-destructive hover:text-destructive/90"
             onClick={() => handleDelete(row.original.id)}
+            title={t("actions.delete")}
           >
             <Trash2 className="h-4 w-4" />
           </Button>
@@ -164,8 +179,8 @@ export default function ServiceCategoriesPage() {
 
   // ─── Mobile Card ───────────────────────────────────────────────────────────
   const CategoryCard = ({ category }: { category: ServiceCategory }) => (
-    <Card className="mb-4">
-      <CardContent className="pt-6">
+    <Card className="overflow-hidden border-none shadow-sm hover:shadow transition-shadow">
+      <CardContent className="p-5">
         <div className="flex justify-between items-start mb-4">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 rounded-full bg-muted flex items-center justify-center">
@@ -174,7 +189,7 @@ export default function ServiceCategoriesPage() {
             <div>
               <div className="font-medium text-lg">{category.name}</div>
               <div className="text-sm text-muted-foreground mt-0.5">
-                {category.services?.length || 0} услуг
+                {category.services?.length || 0} {t("table.services")}
               </div>
             </div>
           </div>
@@ -184,15 +199,15 @@ export default function ServiceCategoriesPage() {
           </Badge>
         </div>
 
-        <div className="flex gap-3 mt-4 flex-wrap">
+        <div className="flex gap-3">
           <Button
             variant="outline"
             size="sm"
             className="flex-1"
-            onClick={() => openEdit(category)}
+            onClick={() => openDialog(category)}
           >
-            <Edit className="h-4 w-4 mr-2" />
-            Редактировать
+            <Edit className="w-4 h-4 mr-2" />
+            {t("actions.edit")}
           </Button>
           <Button
             variant="outline"
@@ -200,8 +215,8 @@ export default function ServiceCategoriesPage() {
             className="flex-1 text-destructive hover:text-destructive/90 border-destructive/30"
             onClick={() => handleDelete(category.id)}
           >
-            <Trash2 className="h-4 w-4 mr-2" />
-            Удалить
+            <Trash2 className="w-4 h-4 mr-2" />
+            {t("actions.delete")}
           </Button>
         </div>
       </CardContent>
@@ -210,26 +225,28 @@ export default function ServiceCategoriesPage() {
 
   return (
     <ProtectedAdminRoute>
-      <div className="container mx-auto py-6 px-4">
-        <Card>
-          <CardHeader>
-            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-              <CardTitle className="text-2xl font-bold">Категории услуг</CardTitle>
+      <div className="container mx-auto py-6 px-4 max-w-5xl">
+        <Card className="border-none shadow-lg">
+          <CardHeader className="pb-4">
+            <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-5">
+              <CardTitle className="text-2xl md:text-3xl font-bold">
+                {t("title")}
+              </CardTitle>
 
-              <div className="flex flex-col sm:flex-row gap-3 w-full sm:w-auto">
-                <div className="relative flex-1 sm:flex-none">
+              <div className="flex flex-wrap items-center gap-3">
+                <div className="relative flex-1 md:flex-none md:w-72">
                   <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                   <Input
-                    placeholder="Поиск по названию..."
+                    placeholder={t("search.placeholder")}
                     value={globalFilter ?? ""}
                     onChange={(e) => setGlobalFilter(e.target.value)}
-                    className="pl-10 w-full sm:w-64"
+                    className="pl-10 w-full"
                   />
                 </div>
 
-                <Button onClick={() => openEdit()} className="gap-2 w-full sm:w-auto">
+                <Button onClick={() => openDialog()} className="gap-2 w-full md:w-auto">
                   <Plus className="w-4 h-4" />
-                  Новая категория
+                  {t("buttons.add_new")}
                 </Button>
               </div>
             </div>
@@ -239,13 +256,13 @@ export default function ServiceCategoriesPage() {
             {loading ? (
               <div className="space-y-4">
                 {[...Array(5)].map((_, i) => (
-                  <Skeleton key={i} className="h-32 w-full rounded-lg" />
+                  <Skeleton key={i} className="h-32 w-full rounded-xl" />
                 ))}
               </div>
             ) : (
               <>
                 {/* Desktop Table */}
-                <div className="hidden md:block rounded-md border">
+                <div className="hidden md:block rounded-xl border overflow-hidden">
                   <Table>
                     <TableHeader>
                       {table.getHeaderGroups().map((headerGroup) => (
@@ -271,7 +288,7 @@ export default function ServiceCategoriesPage() {
                     <TableBody>
                       {table.getRowModel().rows?.length ? (
                         table.getRowModel().rows.map((row) => (
-                          <TableRow key={row.id} className="hover:bg-muted/50">
+                          <TableRow key={row.id} className="hover:bg-muted/60">
                             {row.getVisibleCells().map((cell) => (
                               <TableCell key={cell.id}>
                                 {flexRender(cell.column.columnDef.cell, cell.getContext())}
@@ -283,9 +300,9 @@ export default function ServiceCategoriesPage() {
                         <TableRow>
                           <TableCell
                             colSpan={desktopColumns.length}
-                            className="h-32 text-center text-muted-foreground"
+                            className="h-48 text-center text-muted-foreground"
                           >
-                            Категорий пока нет
+                            {t("table.no_results")}
                           </TableCell>
                         </TableRow>
                       )}
@@ -298,56 +315,60 @@ export default function ServiceCategoriesPage() {
                   {categories.length > 0 ? (
                     categories
                       .filter((c) =>
-                        globalFilter === ""
-                          ? true
-                          : c.name.toLowerCase().includes(globalFilter.toLowerCase())
+                        !globalFilter || c.name.toLowerCase().includes(globalFilter.toLowerCase())
                       )
                       .map((category) => <CategoryCard key={category.id} category={category} />)
                   ) : (
-                    <div className="text-center py-12 text-muted-foreground">
-                      Категорий пока нет
+                    <div className="text-center py-16 text-muted-foreground">
+                      {t("table.no_results")}
                     </div>
                   )}
                 </div>
               </>
             )}
 
-            {!loading && (
+            {!loading && categories.length > 0 && (
               <div className="mt-6 text-sm text-muted-foreground text-center md:text-left">
-                Всего категорий: {categories.length}
+                {t("table.total", { count: categories.length })}
               </div>
             )}
           </CardContent>
         </Card>
 
-        {/* Модальное окно */}
-        <Dialog open={open} onOpenChange={setOpen}>
-          <DialogContent className="sm:max-w-[425px]">
+        {/* Модальное окно создания/редактирования */}
+        <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
+          <DialogContent className="sm:max-w-md">
             <DialogHeader>
               <DialogTitle>
-                {editingCategory ? "Редактировать категорию" : "Новая категория"}
+                {editingCategory ? t("dialog.edit_title") : t("dialog.new_title")}
               </DialogTitle>
             </DialogHeader>
 
-            <div className="grid gap-4 py-4">
+            <div className="grid gap-5 py-4">
               <div className="grid gap-2">
-                <Label htmlFor="name">Название категории</Label>
+                <Label htmlFor="name" className="text-base font-medium">
+                  {t("form.name.label")}
+                </Label>
                 <Input
                   id="name"
-                  placeholder="Например: Стрижки, Окрашивание, Уход"
+                  placeholder={t("form.name.placeholder")}
                   value={name}
                   onChange={(e) => setName(e.target.value)}
                   autoFocus
+                  className="h-12 rounded-xl text-base"
                 />
               </div>
             </div>
 
-            <DialogFooter>
-              <Button variant="outline" onClick={() => setOpen(false)}>
-                Отмена
+            <DialogFooter className="flex flex-col-reverse sm:flex-row sm:justify-end gap-3">
+              <Button variant="outline" onClick={() => setDialogOpen(false)}>
+                {t("buttons.cancel")}
               </Button>
-              <Button onClick={handleSave}>
-                {editingCategory ? "Сохранить" : "Создать"}
+              <Button
+                onClick={handleSave}
+                disabled={!name.trim()}
+              >
+                {editingCategory ? t("buttons.save") : t("buttons.create")}
               </Button>
             </DialogFooter>
           </DialogContent>

@@ -13,7 +13,7 @@ const Page = () => {
 
   return (
     <ProtectedAdminRoute>
-      <div>Page</div>
+      <div className="text-center">Redirecting...</div>
     </ProtectedAdminRoute>
   )
 }

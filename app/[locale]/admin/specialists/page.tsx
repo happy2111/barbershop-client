@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useTranslations } from "next-intl";
 import {
   ColumnDef,
   flexRender,
@@ -24,7 +25,6 @@ import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Badge } from "@/components/ui/badge";
-import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
 import {
   Dialog,
@@ -33,26 +33,30 @@ import {
   DialogTitle,
   DialogFooter,
 } from "@/components/ui/dialog";
+import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 
 import { specialistService, Role, Specialist } from "@/services/specialist.service";
 import {
   User, Phone, Shield, Edit, Trash2, Plus, Search, Image as ImageIcon,
-  Scissors, Camera, EyeOff, Eye
+  Scissors, Camera, Eye, EyeOff
 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import ProtectedAdminRoute from "@/components/Pretecters&Providers/ProtectedAdminRoute";
 
 export default function SpecialistsPage() {
-  const [showPassword, setShowPassword] = useState(false);
+  const t = useTranslations("admin.specialists");
+
   const router = useRouter();
+  const [showPassword, setShowPassword] = useState(false);
+
   const [specialists, setSpecialists] = useState<Specialist[]>([]);
   const [loading, setLoading] = useState(true);
   const [sorting, setSorting] = useState<SortingState>([]);
   const [globalFilter, setGlobalFilter] = useState("");
 
-  const [open, setOpen] = useState(false);
+  const [dialogOpen, setDialogOpen] = useState(false);
   const [editingSpecialist, setEditingSpecialist] = useState<Specialist | null>(null);
   const [photoPreview, setPhotoPreview] = useState<string | null>(null);
 
@@ -71,11 +75,12 @@ export default function SpecialistsPage() {
   }, []);
 
   const loadSpecialists = async () => {
+    setLoading(true);
     try {
       const data = await specialistService.getAllPrivate();
       setSpecialists(data);
     } catch {
-      toast.error("Не удалось загрузить специалистов");
+      toast.error(t("errors.load_failed"));
     } finally {
       setLoading(false);
     }
@@ -90,16 +95,15 @@ export default function SpecialistsPage() {
   };
 
   const handleSave = async () => {
-    if (!form.name.trim()) return toast.error("Введите имя");
-    if (!form.phone.trim()) return toast.error("Введите телефон");
-    if (!editingSpecialist && !form.password.trim()) return toast.error("Введите пароль");
+    if (!form.name.trim()) return toast.error(t("errors.name_required"));
+    if (!form.phone.trim()) return toast.error(t("errors.phone_required"));
+    if (!editingSpecialist && !form.password.trim()) return toast.error(t("errors.password_required"));
 
     const fd = new FormData();
     fd.append("name", form.name.trim());
     fd.append("phone", form.phone.trim());
-    if (!editingSpecialist) fd.append("password", form.password.trim());
-    if (editingSpecialist && form.password.trim() !== "") {
-      fd.append("password", form.password.trim())
+    if (!editingSpecialist || form.password.trim()) {
+      fd.append("password", form.password.trim());
     }
     fd.append("role", form.role);
     if (form.description.trim()) fd.append("description", form.description.trim());
@@ -109,33 +113,34 @@ export default function SpecialistsPage() {
     try {
       if (editingSpecialist) {
         await specialistService.update(editingSpecialist.id, fd);
-        toast.success("Специалист обновлён");
+        toast.success(t("toast.updated"));
       } else {
         await specialistService.create(fd);
-        toast.success("Специалист создан");
+        toast.success(t("toast.created"));
       }
 
-      setOpen(false);
+      setDialogOpen(false);
       resetForm();
       loadSpecialists();
     } catch (err: any) {
       const msg = err.response?.data?.message;
-      toast.error(Array.isArray(msg) ? msg.join(" • ") : msg || "Ошибка сохранения");
+      toast.error(Array.isArray(msg) ? msg.join(" • ") : msg || t("errors.save_failed"));
     }
   };
 
   const handleDelete = async (id: number) => {
-    if (!confirm("Удалить специалиста? Это действие нельзя отменить.")) return;
+    if (!confirm(t("confirm.delete"))) return;
+
     try {
       await specialistService.remove(id);
       setSpecialists((prev) => prev.filter((s) => s.id !== id));
-      toast.success("Специалист удалён");
+      toast.success(t("toast.deleted"));
     } catch {
-      toast.error("Не удалось удалить");
+      toast.error(t("errors.delete_failed"));
     }
   };
 
-  const openEdit = (spec?: Specialist) => {
+  const openDialog = (spec?: Specialist) => {
     if (spec) {
       setEditingSpecialist(spec);
       setForm({
@@ -151,7 +156,7 @@ export default function SpecialistsPage() {
     } else {
       resetForm();
     }
-    setOpen(true);
+    setDialogOpen(true);
   };
 
   const resetForm = () => {
@@ -172,10 +177,10 @@ export default function SpecialistsPage() {
   const desktopColumns: ColumnDef<Specialist>[] = [
     {
       accessorKey: "photo",
-      header: "Фото",
+      header: t("table.photo"),
       size: 90,
       cell: ({ row }) => (
-        <div className="w-14 h-14 rounded-full overflow-hidden border-2 border-background">
+        <div className="w-14 h-14 rounded-full overflow-hidden border-2 border-background shadow-sm">
           {row.original.photo ? (
             <img
               src={`${process.env.NEXT_PUBLIC_API_URL}${row.original.photo}`}
@@ -184,7 +189,7 @@ export default function SpecialistsPage() {
             />
           ) : (
             <div className="w-full h-full bg-muted flex items-center justify-center">
-              <User className="w-8 h-8 text-muted-foreground" />
+              <User className="w-8 h-8 text-muted-foreground/50" />
             </div>
           )}
         </div>
@@ -192,14 +197,14 @@ export default function SpecialistsPage() {
     },
     {
       accessorKey: "name",
-      header: "Имя",
+      header: t("table.name"),
       cell: ({ row }) => <div className="font-medium">{row.original.name}</div>,
     },
     {
       accessorKey: "phone",
-      header: "Телефон",
+      header: t("table.phone"),
       cell: ({ row }) => (
-        <div className="flex items-center gap-2 font-mono">
+        <div className="flex items-center gap-2 font-mono text-sm">
           <Phone className="w-4 h-4 text-muted-foreground" />
           {row.original.phone}
         </div>
@@ -207,17 +212,20 @@ export default function SpecialistsPage() {
     },
     {
       accessorKey: "role",
-      header: "Роль",
+      header: t("table.role"),
       cell: ({ row }) => (
-        <Badge variant={row.original.role === "ADMIN" ? "destructive" : "secondary"}>
-          <Shield className="w-3 h-3 mr-1" />
-          {row.original.role === "ADMIN" ? "Админ" : "Специалист"}
+        <Badge
+          variant={row.original.role === "ADMIN" ? "destructive" : "secondary"}
+          className="font-medium flex items-center gap-1"
+        >
+          <Shield className="w-3 h-3" />
+          {t(`roles.${row.original.role.toLowerCase()}`)}
         </Badge>
       ),
     },
     {
       accessorKey: "description",
-      header: "О себе",
+      header: t("table.description"),
       cell: ({ row }) => (
         <div className="max-w-xs text-sm text-muted-foreground line-clamp-2">
           {row.original.description || "—"}
@@ -231,26 +239,36 @@ export default function SpecialistsPage() {
         const spec = row.original;
         return (
           <div className="flex items-center gap-1">
-            <Button size="sm" variant="ghost" onClick={() => openEdit(spec)}>
+            <Button
+              size="sm"
+              variant="ghost"
+              onClick={() => openDialog(spec)}
+              title={t("actions.edit")}
+            >
               <Edit className="h-4 w-4" />
             </Button>
+
             <Button
               size="sm"
               variant="ghost"
               className="text-primary hover:text-primary/90"
               onClick={() => router.push(`/admin/specialists/${spec.id}/services`)}
-              title="Услуги специалиста"
+              title={t("actions.services")}
             >
               <Scissors className="h-4 w-4" />
             </Button>
+
+            {spec.role !== "ADMIN" && (
               <Button
                 size="sm"
                 variant="ghost"
                 className="text-destructive hover:text-destructive/90"
                 onClick={() => handleDelete(spec.id)}
+                title={t("actions.delete")}
               >
                 <Trash2 className="h-4 w-4" />
               </Button>
+            )}
           </div>
         );
       },
@@ -268,128 +286,124 @@ export default function SpecialistsPage() {
   });
 
   // ─── Mobile Card ───────────────────────────────────────────────────────────
-  const SpecialistCard = ({ specialist }: { specialist: Specialist }) => {
-    return (
-      <Card className="mb-4 overflow-hidden border-none shadow-sm hover:shadow-md transition-shadow">
-        <CardContent className="p-5">
-          {/* Верхний блок: Фото и Основная информация */}
-          <div className="flex items-start gap-4 mb-4">
-            <div className="relative flex-shrink-0">
-              <div className="w-20 h-20 rounded-2xl overflow-hidden border-2 border-muted shadow-sm">
-                {specialist.photo ? (
-                  <img
-                    src={`${process.env.NEXT_PUBLIC_API_URL}${specialist.photo}`}
-                    alt={specialist.name}
-                    className="w-full h-full object-cover"
-                  />
-                ) : (
-                  <div className="w-full h-full bg-muted flex items-center justify-center">
-                    <User className="w-8 h-8 text-muted-foreground/40" />
-                  </div>
-                )}
-              </div>
-              {/* Маленький индикатор роли поверх фото или рядом */}
-              <div className="absolute -bottom-1 -right-1">
-                <div className={`p-1 rounded-lg border shadow-sm ${
-                  specialist.role === "ADMIN" ? "bg-destructive text-white" : "bg-primary text-white"
-                }`}>
-                  <Shield className="w-3 h-3" />
+  const SpecialistCard = ({ specialist }: { specialist: Specialist }) => (
+    <Card className="overflow-hidden border-none shadow-sm hover:shadow transition-all">
+      <CardContent className="p-5">
+        <div className="flex flex-col sm:flex-row gap-5">
+          {/* Фото + роль */}
+          <div className="relative flex-shrink-0">
+            <div className="w-24 h-24 sm:w-28 sm:h-28 rounded-2xl overflow-hidden border-2 border-background shadow-sm">
+              {specialist.photo ? (
+                <img
+                  src={`${process.env.NEXT_PUBLIC_API_URL}${specialist.photo}`}
+                  alt={specialist.name}
+                  className="w-full h-full object-cover"
+                />
+              ) : (
+                <div className="w-full h-full bg-muted flex items-center justify-center">
+                  <User className="w-10 h-10 text-muted-foreground/50" />
                 </div>
-              </div>
+              )}
             </div>
 
-            <div className="flex-1 min-w-0 pt-1">
-              <div className="flex flex-col">
-                <h3 className="font-bold text-lg leading-tight truncate">
-                  {specialist.name}
-                </h3>
-                <div className="flex items-center gap-1.5 text-muted-foreground mt-1">
-                <span className="text-sm font-medium tracking-tight">
-                  {specialist.phone}
-                </span>
-                </div>
-                <div className="mt-1">
-                <span className={`text-[10px] font-bold uppercase tracking-widest px-2 py-0.5 rounded-full ${
-                  specialist.role === "ADMIN"
-                    ? "bg-destructive/10 text-destructive"
-                    : "bg-secondary text-muted-foreground"
-                }`}>
-                  {specialist.role === "ADMIN" ? "Администратор" : "Мастер"}
-                </span>
-                </div>
-              </div>
+            <div className={`absolute -bottom-2 -right-2 p-1.5 rounded-full border shadow-sm ${
+              specialist.role === "ADMIN" ? "bg-destructive" : "bg-primary"
+            }`}>
+              <Shield className="w-4 h-4 text-white" />
             </div>
           </div>
 
-          {/* Описание */}
-          {(specialist.description || specialist.skills) && (
-            <div className="mb-5 px-1">
-              <p className="text-sm text-muted-foreground line-clamp-2 italic leading-relaxed">
+          {/* Информация */}
+          <div className="flex-1 min-w-0">
+            <div className="flex flex-col gap-1">
+              <h3 className="font-bold text-lg truncate">
+                {specialist.name}
+              </h3>
+
+              <div className="flex items-center gap-2 text-sm text-muted-foreground font-mono">
+                <Phone className="w-4 h-4" />
+                {specialist.phone}
+              </div>
+
+              <div className="mt-1">
+                <Badge
+                  variant={specialist.role === "ADMIN" ? "destructive" : "secondary"}
+                  className="text-xs font-medium"
+                >
+                  {t(`roles.${specialist.role.toLowerCase()}`)}
+                </Badge>
+              </div>
+            </div>
+
+            {(specialist.description || specialist.skills) && (
+              <p className="mt-3 text-sm text-muted-foreground line-clamp-2 italic">
                 «{specialist.description || specialist.skills}»
               </p>
-            </div>
-          )}
-
-          {/* Сетка кнопок действий */}
-          <div className="grid grid-cols-2 sm:flex gap-2 pt-4 border-t border-dashed">
-            <Button
-              variant="secondary"
-              size="sm"
-              className="flex-1 h-9 rounded-xl"
-              onClick={() => openEdit(specialist)}
-            >
-              <Edit className="h-3.5 w-3.5 mr-2" />
-              Инфо
-            </Button>
-
-            <Button
-              variant="outline"
-              size="sm"
-              className="flex-1 h-9 rounded-xl border-primary/20 text-primary hover:bg-primary/5"
-              onClick={() => router.push(`/admin/specialists/${specialist.id}/services`)}
-            >
-              <Scissors className="h-3.5 w-3.5 mr-2" />
-              Услуги
-            </Button>
-
-            {specialist.role !== "ADMIN" && (
-              <Button
-                variant="ghost"
-                size="sm"
-                className="col-span-2 sm:flex-none h-9 rounded-xl text-destructive hover:bg-destructive/5 hover:text-destructive"
-                onClick={() => handleDelete(specialist.id)}
-              >
-                <Trash2 className="h-3.5 w-3.5 sm:mr-0" />
-                <span className="sm:hidden ml-2">Удалить специалиста</span>
-              </Button>
             )}
+
+            <div className="flex flex-wrap gap-2 mt-5">
+              <Button
+                variant="outline"
+                size="sm"
+                className="flex-1 h-9 rounded-xl"
+                onClick={() => openDialog(specialist)}
+              >
+                <Edit className="w-4 h-4 mr-2" />
+                {t("actions.edit")}
+              </Button>
+
+              <Button
+                variant="outline"
+                size="sm"
+                className="flex-1 h-9 rounded-xl border-primary/20 text-primary hover:bg-primary/5"
+                onClick={() => router.push(`/admin/specialists/${specialist.id}/services`)}
+              >
+                <Scissors className="w-4 h-4 mr-2" />
+                {t("actions.services")}
+              </Button>
+
+              {specialist.role !== "ADMIN" && (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="flex-1 h-9 rounded-xl text-destructive hover:text-destructive/90 border-destructive/30"
+                  onClick={() => handleDelete(specialist.id)}
+                >
+                  <Trash2 className="w-4 h-4 mr-2" />
+                  {t("actions.delete")}
+                </Button>
+              )}
+            </div>
           </div>
-        </CardContent>
-      </Card>
-    );
-  };
+        </div>
+      </CardContent>
+    </Card>
+  );
+
   return (
     <ProtectedAdminRoute>
-      <div className="container mx-auto py-6 px-4">
-        <Card>
-          <CardHeader>
-            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-              <CardTitle className="text-2xl font-bold">Специалисты</CardTitle>
+      <div className="container mx-auto py-6 px-4 max-w-6xl">
+        <Card className="border-none shadow-lg">
+          <CardHeader className="pb-4">
+            <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-5">
+              <CardTitle className="text-2xl md:text-3xl font-bold">
+                {t("title")}
+              </CardTitle>
 
-              <div className="flex flex-col sm:flex-row gap-3 w-full sm:w-auto">
-                <div className="relative flex-1 sm:flex-none">
+              <div className="flex flex-wrap items-center gap-3">
+                <div className="relative flex-1 md:flex-none md:w-72">
                   <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                   <Input
-                    placeholder="Поиск по имени или телефону..."
+                    placeholder={t("search.placeholder")}
                     value={globalFilter ?? ""}
                     onChange={(e) => setGlobalFilter(e.target.value)}
-                    className="pl-10 w-full sm:w-72"
+                    className="pl-10 w-full"
                   />
                 </div>
 
-                <Button onClick={() => openEdit()} className="gap-2 w-full sm:w-auto">
+                <Button onClick={() => openDialog()} className="gap-2 w-full md:w-auto">
                   <Plus className="w-4 h-4" />
-                  Новый специалист
+                  {t("buttons.add_new")}
                 </Button>
               </div>
             </div>
@@ -399,13 +413,13 @@ export default function SpecialistsPage() {
             {loading ? (
               <div className="space-y-4">
                 {[...Array(5)].map((_, i) => (
-                  <Skeleton key={i} className="h-48 w-full rounded-lg" />
+                  <Skeleton key={i} className="h-48 w-full rounded-xl" />
                 ))}
               </div>
             ) : (
               <>
                 {/* Desktop Table */}
-                <div className="hidden md:block rounded-md border overflow-x-auto">
+                <div className="hidden md:block rounded-xl border overflow-x-auto">
                   <Table>
                     <TableHeader>
                       {table.getHeaderGroups().map((headerGroup) => (
@@ -431,7 +445,7 @@ export default function SpecialistsPage() {
                     <TableBody>
                       {table.getRowModel().rows?.length ? (
                         table.getRowModel().rows.map((row) => (
-                          <TableRow key={row.id} className="hover:bg-muted/50">
+                          <TableRow key={row.id} className="hover:bg-muted/60">
                             {row.getVisibleCells().map((cell) => (
                               <TableCell key={cell.id}>
                                 {flexRender(cell.column.columnDef.cell, cell.getContext())}
@@ -443,9 +457,9 @@ export default function SpecialistsPage() {
                         <TableRow>
                           <TableCell
                             colSpan={desktopColumns.length}
-                            className="h-32 text-center text-muted-foreground"
+                            className="h-48 text-center text-muted-foreground"
                           >
-                            Специалистов пока нет
+                            {t("table.no_results")}
                           </TableCell>
                         </TableRow>
                       )}
@@ -459,7 +473,7 @@ export default function SpecialistsPage() {
                     specialists
                       .filter(
                         (s) =>
-                          globalFilter === "" ||
+                          !globalFilter ||
                           s.name.toLowerCase().includes(globalFilter.toLowerCase()) ||
                           s.phone.includes(globalFilter)
                       )
@@ -468,177 +482,185 @@ export default function SpecialistsPage() {
                       ))
                   ) : (
                     <div className="text-center py-12 text-muted-foreground">
-                      Специалистов пока нет
+                      {t("table.no_results")}
                     </div>
                   )}
                 </div>
               </>
             )}
 
-            {!loading && (
+            {!loading && specialists.length > 0 && (
               <div className="mt-6 text-sm text-muted-foreground text-center md:text-left">
-                Всего специалистов: {specialists.length}
+                {t("table.total", { count: specialists.length })}
               </div>
             )}
           </CardContent>
         </Card>
 
         {/* Модальное окно */}
-        <Dialog open={open} onOpenChange={setOpen}>
+        <Dialog open={dialogOpen} onOpenChange={(v) => {
+          if (!v) resetForm();
+          setDialogOpen(v);
+        }}>
           <DialogContent className="max-w-2xl w-[95vw] sm:w-full max-h-[90vh] flex flex-col p-0 overflow-hidden">
-            <DialogHeader className="p-6 pb-2">
+            <DialogHeader className="p-6 pb-2 border-b">
               <DialogTitle className="text-xl sm:text-2xl font-bold">
-                {editingSpecialist ? "Редактировать профиль" : "Новый специалист"}
+                {editingSpecialist ? t("dialog.edit_title") : t("dialog.new_title")}
               </DialogTitle>
             </DialogHeader>
 
             <div className="flex-1 overflow-y-auto p-6 pt-2">
               <div className="grid gap-6">
 
-                {/* Фото специалиста - Адаптивная раскладка */}
-                <div className="flex flex-col sm:flex-row items-center gap-6 p-4 rounded-2xl bg-muted/30 border border-dashed">
-                  <div className="relative group">
-                    <div className="w-28 h-28 sm:w-32 sm:h-32 rounded-2xl overflow-hidden border-4 border-background shadow-md bg-muted flex items-center justify-center">
+                {/* Фото */}
+                <div className="flex flex-col sm:flex-row items-center gap-6 p-5 rounded-2xl bg-muted/30 border border-dashed">
+                  <div className="relative group flex-shrink-0">
+                    <div className="w-32 h-32 sm:w-40 sm:h-40 rounded-2xl overflow-hidden border-4 border-background shadow-md bg-muted flex items-center justify-center">
                       {photoPreview ? (
                         <img src={photoPreview} alt="Preview" className="w-full h-full object-cover" />
                       ) : (
                         <User className="w-12 h-12 text-muted-foreground/40" />
                       )}
                     </div>
-                    <label className="absolute inset-0 flex items-center justify-center bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer rounded-2xl">
-                      <Camera className="w-8 h-8 text-white" />
+                    <label className="absolute inset-0 flex items-center justify-center bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer rounded-2xl">
+                      <Camera className="w-10 h-10 text-white" />
                       <input type="file" className="hidden" accept="image/*" onChange={handleFileChange} />
                     </label>
                   </div>
 
                   <div className="flex-1 text-center sm:text-left space-y-2">
-                    <Label className="text-sm font-semibold text-foreground">Фото профиля</Label>
+                    <Label className="text-base font-semibold">
+                      {t("form.photo.label")}
+                    </Label>
                     <Input
                       type="file"
                       accept="image/*"
                       onChange={handleFileChange}
-                      className="cursor-pointer bg-background"
+                      className="cursor-pointer bg-background h-11 rounded-xl"
                     />
-                    <p className="text-[11px] text-muted-foreground">
-                      PNG, JPG до 5MB. Рекомендуется квадратное фото.
+                    <p className="text-xs text-muted-foreground">
+                      {t("form.photo.hint")}
                     </p>
                   </div>
                 </div>
 
                 {/* Основные поля */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
                   <div className="space-y-2">
-                    <Label className="text-sm font-medium">Имя мастера *</Label>
+                    <Label className="text-sm font-medium ml-1">
+                      {t("form.name.label")} <span className="text-destructive">*</span>
+                    </Label>
                     <Input
-                      className="h-11 rounded-xl"
+                      className="h-12 rounded-xl text-base shadow-sm"
                       value={form.name}
                       onChange={(e) => setForm({ ...form, name: e.target.value })}
-                      placeholder="Напр: Алексей Иванов"
+                      placeholder={t("form.name.placeholder")}
                     />
                   </div>
 
                   <div className="space-y-2">
-                    <Label className="text-sm font-medium">Номер телефона *</Label>
+                    <Label className="text-sm font-medium ml-1">
+                      {t("form.phone.label")} <span className="text-destructive">*</span>
+                    </Label>
                     <Input
-                      className="h-11 rounded-xl"
+                      className="h-12 rounded-xl text-base shadow-sm"
                       value={form.phone}
                       onChange={(e) => setForm({ ...form, phone: e.target.value })}
-                      placeholder="+998 (99) 123-45-67"
+                      placeholder={t("form.phone.placeholder")}
                     />
                   </div>
 
-                  {/*{!editingSpecialist && (*/}
-                    <div className="space-y-2">
-                      {!editingSpecialist ?
-                        (
-                          <Label className="text-sm font-medium">Пароль для входа *</Label>
-                        ):
-                        (
-                          <Label className="text-sm font-medium">Изменить пароль</Label>
-                        )}
-                      <div className="relative">
-                        <Input
-                          type={showPassword ? "text" : "password"} // Переключаем тип поля
-                          className="h-11 rounded-xl pr-10" // Добавили отступ справа для иконки
-                          value={form.password}
-                          onChange={(e) => setForm({ ...form, password: e.target.value })}
-                          placeholder="••••••••"
-                        />
-                        <button
-                          type="button"
-                          onClick={() => setShowPassword(!showPassword)}
-                          className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
-                        >
-                          {showPassword ? (
-                            <EyeOff className="h-5 w-5" />
-                          ) : (
-                            <Eye className="h-5 w-5" />
-                          )}
-                        </button>
-                      </div>
+                  <div className="space-y-2">
+                    <Label className="text-sm font-medium ml-1">
+                      {editingSpecialist
+                        ? t("form.password.change_label")
+                        : t("form.password.new_label")}
+                      {!editingSpecialist && <span className="text-destructive">*</span>}
+                    </Label>
+                    <div className="relative">
+                      <Input
+                        type={showPassword ? "text" : "password"}
+                        className="h-12 rounded-xl pr-12 text-base shadow-sm"
+                        value={form.password}
+                        onChange={(e) => setForm({ ...form, password: e.target.value })}
+                        placeholder={t("form.password.placeholder")}
+                      />
+                      <button
+                        type="button"
+                        onClick={() => setShowPassword(!showPassword)}
+                        className="absolute right-4 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                      >
+                        {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+                      </button>
                     </div>
+                  </div>
 
                   <div className="space-y-2">
-                    <Label className="text-sm font-medium">Роль в системе</Label>
+                    <Label className="text-sm font-medium ml-1">
+                      {t("form.role.label")}
+                    </Label>
                     <Select
                       value={form.role}
                       onValueChange={(v) => setForm({ ...form, role: v as Role })}
                     >
-                      <SelectTrigger className="h-11 rounded-xl">
-                        <SelectValue placeholder="Выберите роль" />
+                      <SelectTrigger className="h-12 rounded-xl text-base shadow-sm">
+                        <SelectValue placeholder={t("form.role.placeholder")} />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="SPECIALIST">Специалист</SelectItem>
-                        <SelectItem value="ADMIN">Администратор (полный доступ)</SelectItem>
+                        <SelectItem value="SPECIALIST">{t("roles.specialist")}</SelectItem>
+                        <SelectItem value="ADMIN">{t("roles.admin")}</SelectItem>
                       </SelectContent>
                     </Select>
                   </div>
                 </div>
 
-                {/* Текстовые блоки */}
-                <div className="space-y-4">
+                {/* О себе и навыки */}
+                <div className="space-y-5">
                   <div className="space-y-2">
-                    <Label className="text-sm font-medium">О мастере (кратко)</Label>
+                    <Label className="text-sm font-medium ml-1">
+                      {t("form.description.label")}
+                    </Label>
                     <Textarea
-                      className="rounded-xl resize-none"
+                      className="rounded-xl resize-none min-h-[90px]"
                       value={form.description}
                       onChange={(e) => setForm({ ...form, description: e.target.value })}
-                      placeholder="Расскажите об опыте или стиле работы..."
-                      rows={3}
+                      placeholder={t("form.description.placeholder")}
                     />
                   </div>
 
                   <div className="space-y-2">
-                    <Label className="text-sm font-medium">Навыки (через запятую)</Label>
+                    <Label className="text-sm font-medium ml-1">
+                      {t("form.skills.label")}
+                    </Label>
                     <Textarea
-                      className="rounded-xl resize-none bg-muted/20"
+                      className="rounded-xl resize-none min-h-[70px]"
                       value={form.skills}
                       onChange={(e) => setForm({ ...form, skills: e.target.value })}
-                      placeholder="Стрижки, Окрашивание, Уход..."
-                      rows={2}
+                      placeholder={t("form.skills.placeholder")}
                     />
                   </div>
                 </div>
               </div>
             </div>
 
-            <DialogFooter className="p-6 border-t bg-muted/10 flex-col sm:flex-row gap-2">
+            <DialogFooter className="p-6 border-t bg-muted/10 flex-col sm:flex-row gap-3">
               <Button
-                variant="ghost"
-                onClick={() => setOpen(false)}
-                className="w-full sm:w-auto order-2 sm:order-1 rounded-xl"
+                variant="outline"
+                onClick={() => setDialogOpen(false)}
+                className="w-full sm:w-auto order-2 sm:order-1 rounded-xl h-12"
               >
-                Отмена
+                {t("buttons.cancel")}
               </Button>
               <Button
                 onClick={handleSave}
-                className="w-full sm:w-auto order-1 sm:order-2 rounded-xl px-8"
+                className="w-full sm:w-auto order-1 sm:order-2 rounded-xl h-12 px-8 font-semibold shadow-md shadow-primary/20"
               >
-                {editingSpecialist ? "Сохранить изменения" : "Создать специалиста"}
+                {editingSpecialist ? t("buttons.save") : t("buttons.create")}
               </Button>
             </DialogFooter>
           </DialogContent>
-        </Dialog>      </div>
+        </Dialog>
+      </div>
     </ProtectedAdminRoute>
   );
 }

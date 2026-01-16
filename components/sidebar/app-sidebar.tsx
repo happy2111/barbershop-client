@@ -20,16 +20,17 @@ import {
 import {Button} from "@/components/ui/button";
 import {useTranslations} from "next-intl";
 import {useRouter} from "@/i18n/navigation";
+import LocaleSwitcher from "@/components/LocaleSwitcher";
 
 export function AppSidebar(props: React.ComponentProps<typeof Sidebar>) {
   const navMain = [
-    { title: "Дашборд", url: "/admin/dashboard", icon: LayoutDashboard  },
-    { title: "Бронирование", url: "/admin/bookings", icon: NotebookPen },
-    { title: "Клиенты", url: "/admin/clients", icon: User },
-    { title: "Услуги", url: "/admin/services", icon: Frame },
-    { title: "Категории услуг", url: "/admin/services-categories", icon: Settings2 },
-    { title: "Специалисты", url: "/admin/specialists", icon: Scissors  },
-    { title: "Интеграции", url: "/admin/integrations", icon: Cable  },
+    { title: "dashboard", url: "/admin/dashboard", icon: LayoutDashboard },
+    { title: "bookings", url: "/admin/bookings", icon: NotebookPen },
+    { title: "clients", url: "/admin/clients", icon: User },
+    { title: "services", url: "/admin/services", icon: Frame },
+    { title: "categories", url: "/admin/services-categories", icon: Settings2 },
+    { title: "specialists", url: "/admin/specialists", icon: Scissors },
+    { title: "integrations", url: "/admin/integrations", icon: Cable },
 
   ]
 
@@ -50,6 +51,8 @@ export function AppSidebar(props: React.ComponentProps<typeof Sidebar>) {
       </SidebarContent>
 
       <SidebarFooter/>
+      <LocaleSwitcher isMobile={state === 'collapsed'}/>
+
       { state === 'expanded' ?
         (
           <Button onClick={() => {router.push('/')}} className='m-4'>

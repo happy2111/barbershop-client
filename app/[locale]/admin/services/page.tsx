@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useTranslations } from "next-intl";
 import {
   ColumnDef,
   flexRender,
@@ -24,7 +25,6 @@ import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Badge } from "@/components/ui/badge";
-import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
 import {
   Dialog,
@@ -40,13 +40,20 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 
 import { serviceService, Service } from "@/services/service.service";
 import { serviceCategoryService } from "@/services/service-category.service";
 import {
-  Clock, DollarSign, Edit, Trash2, Plus, Image as ImageIcon, Search,
-  Camera
+  Clock,
+  DollarSign,
+  Edit,
+  Trash2,
+  Plus,
+  Image as ImageIcon,
+  Search,
+  Camera,
 } from "lucide-react";
 import ProtectedAdminRoute from "@/components/Pretecters&Providers/ProtectedAdminRoute";
 
@@ -56,13 +63,15 @@ interface ServiceCategory {
 }
 
 export default function ServicesPage() {
+  const t = useTranslations("admin.services");
+
   const [services, setServices] = useState<Service[]>([]);
   const [categories, setCategories] = useState<ServiceCategory[]>([]);
   const [loading, setLoading] = useState(true);
   const [sorting, setSorting] = useState<SortingState>([]);
   const [globalFilter, setGlobalFilter] = useState("");
 
-  const [open, setOpen] = useState(false);
+  const [dialogOpen, setDialogOpen] = useState(false);
   const [editingService, setEditingService] = useState<Service | null>(null);
   const [photoPreview, setPhotoPreview] = useState<string | null>(null);
 
@@ -79,6 +88,7 @@ export default function ServicesPage() {
   }, []);
 
   const loadData = async () => {
+    setLoading(true);
     try {
       const [servicesData, categoriesData] = await Promise.all([
         serviceService.getAll(),
@@ -87,7 +97,7 @@ export default function ServicesPage() {
       setServices(servicesData);
       setCategories(categoriesData);
     } catch {
-      toast.error("Не удалось загрузить данные");
+      toast.error(t("errors.load_failed"));
     } finally {
       setLoading(false);
     }
@@ -102,10 +112,10 @@ export default function ServicesPage() {
   };
 
   const handleSave = async () => {
-    if (!form.name.trim()) return toast.error("Введите название");
-    if (!form.price || Number(form.price) <= 0) return toast.error("Укажите корректную цену");
-    if (!form.duration_min || Number(form.duration_min) < 1) return toast.error("Длительность ≥ 1 мин");
-    if (!form.categoryId) return toast.error("Выберите категорию");
+    if (!form.name.trim()) return toast.error(t("errors.name_required"));
+    if (!form.price || Number(form.price) <= 0) return toast.error(t("errors.price_invalid"));
+    if (!form.duration_min || Number(form.duration_min) < 1) return toast.error(t("errors.duration_invalid"));
+    if (!form.categoryId) return toast.error(t("errors.category_required"));
 
     const payload = {
       name: form.name.trim(),
@@ -124,7 +134,7 @@ export default function ServicesPage() {
         } else {
           await serviceService.update(editingService.id, payload);
         }
-        toast.success("Услуга обновлена");
+        toast.success(t("toast.updated"));
       } else {
         const fd = new FormData();
         fd.append("name", payload.name);
@@ -134,30 +144,31 @@ export default function ServicesPage() {
         if (form.photo) fd.append("photo", form.photo);
 
         await serviceService.create(fd);
-        toast.success("Услуга создана");
+        toast.success(t("toast.created"));
       }
 
-      setOpen(false);
+      setDialogOpen(false);
       resetForm();
       loadData();
     } catch (err: any) {
       const msg = err.response?.data?.message;
-      toast.error(Array.isArray(msg) ? msg.join(" • ") : msg || "Ошибка сохранения");
+      toast.error(Array.isArray(msg) ? msg.join(" • ") : msg || t("errors.save_failed"));
     }
   };
 
   const handleDelete = async (id: number) => {
-    if (!confirm("Удалить услугу?")) return;
+    if (!confirm(t("confirm.delete"))) return;
+
     try {
       await serviceService.remove(id);
       setServices((prev) => prev.filter((s) => s.id !== id));
-      toast.success("Услуга удалена");
+      toast.success(t("toast.deleted"));
     } catch {
-      toast.error("Не удалось удалить");
+      toast.error(t("errors.delete_failed"));
     }
   };
 
-  const openEdit = (service?: Service) => {
+  const openDialog = (service?: Service) => {
     if (service) {
       setEditingService(service);
       setForm({
@@ -171,7 +182,7 @@ export default function ServicesPage() {
     } else {
       resetForm();
     }
-    setOpen(true);
+    setDialogOpen(true);
   };
 
   const resetForm = () => {
@@ -184,10 +195,10 @@ export default function ServicesPage() {
   const desktopColumns: ColumnDef<Service>[] = [
     {
       accessorKey: "photo",
-      header: "Фото",
-      size: 90,
+      header: t("table.photo"),
+      size: 100,
       cell: ({ row }) => (
-        <div className="w-16 h-16 rounded-md overflow-hidden border">
+        <div className="w-16 h-16 rounded-lg overflow-hidden border bg-muted/30 flex items-center justify-center">
           {row.original.photo ? (
             <img
               src={`${process.env.NEXT_PUBLIC_API_URL}${row.original.photo}`}
@@ -195,48 +206,55 @@ export default function ServicesPage() {
               className="w-full h-full object-cover"
             />
           ) : (
-            <div className="w-full h-full bg-muted flex items-center justify-center">
-              <ImageIcon className="w-6 h-6 text-muted-foreground" />
-            </div>
+            <ImageIcon className="w-8 h-8 text-muted-foreground/40" />
           )}
         </div>
       ),
     },
     {
       accessorKey: "name",
-      header: "Название",
+      header: t("table.name"),
       cell: ({ row }) => <div className="font-medium">{row.original.name}</div>,
     },
     {
-      accessorKey: "category",
-      header: "Категория",
+      accessorKey: "category.name",
+      header: t("table.category"),
       cell: ({ row }) => (
-        <Badge variant="secondary">{row.original.category?.name || "—"}</Badge>
+        <Badge variant="secondary" className="font-medium">
+          {row.original.category?.name || t("table.no_category")}
+        </Badge>
       ),
     },
     {
       accessorKey: "price",
-      header: "Цена",
+      header: t("table.price"),
       cell: ({ row }) => (
-        <div className="font-medium">{row.original.price.toLocaleString()} сум</div>
+        <div className="font-medium">
+          {row.original.price.toLocaleString()} {t("common.sum")}
+        </div>
       ),
     },
     {
       accessorKey: "duration_min",
-      header: "Длительность",
+      header: t("table.duration"),
       cell: ({ row }) => (
-        <div className="flex items-center gap-1">
+        <div className="flex items-center gap-2">
           <Clock className="w-4 h-4 text-muted-foreground" />
-          {row.original.duration_min} мин
+          {row.original.duration_min} {t("common.minutes")}
         </div>
       ),
     },
     {
       id: "actions",
-      size: 100,
+      size: 120,
       cell: ({ row }) => (
         <div className="flex gap-1">
-          <Button size="sm" variant="ghost" onClick={() => openEdit(row.original)}>
+          <Button
+            size="sm"
+            variant="ghost"
+            onClick={() => openDialog(row.original)}
+            title={t("actions.edit")}
+          >
             <Edit className="h-4 w-4" />
           </Button>
           <Button
@@ -244,6 +262,7 @@ export default function ServicesPage() {
             variant="ghost"
             className="text-destructive hover:text-destructive/90"
             onClick={() => handleDelete(row.original.id)}
+            title={t("actions.delete")}
           >
             <Trash2 className="h-4 w-4" />
           </Button>
@@ -264,94 +283,95 @@ export default function ServicesPage() {
 
   // ─── Mobile Card ───────────────────────────────────────────────────────────
   const ServiceCard = ({ service }: { service: Service }) => (
-    <Card className="mb-4">
-      <CardContent className="pt-6">
-        <div className="flex gap-4">
-          {/* Фото слева */}
-          <div className="flex-shrink-0">
-            <div className="w-24 h-24 rounded-lg overflow-hidden border">
-              {service.photo ? (
-                <img
-                  src={`${process.env.NEXT_PUBLIC_API_URL}${service.photo}`}
-                  alt={service.name}
-                  className="w-full h-full object-cover"
-                />
-              ) : (
-                <div className="w-full h-full bg-muted flex items-center justify-center">
-                  <ImageIcon className="w-8 h-8 text-muted-foreground" />
-                </div>
-              )}
-            </div>
+    <Card className="overflow-hidden border-none shadow-sm hover:shadow transition-shadow">
+      <CardContent className="p-5">
+        <div className="flex flex-col sm:flex-row gap-5">
+          {/* Фото */}
+          <div className="w-28 h-28 sm:w-32 sm:h-32 rounded-xl overflow-hidden border bg-muted/30 flex-shrink-0">
+            {service.photo ? (
+              <img
+                src={`${process.env.NEXT_PUBLIC_API_URL}${service.photo}`}
+                alt={service.name}
+                className="w-full h-full object-cover"
+              />
+            ) : (
+              <div className="w-full h-full flex items-center justify-center">
+                <ImageIcon className="w-10 h-10 text-muted-foreground/40" />
+              </div>
+            )}
           </div>
 
-          {/* Основная информация */}
+          {/* Информация */}
           <div className="flex-1 min-w-0">
-            <div className="font-medium text-lg mb-1 line-clamp-2">{service.name}</div>
+            <h3 className="font-semibold text-lg mb-1 line-clamp-2">
+              {service.name}
+            </h3>
 
-            <div className="text-sm text-muted-foreground mb-2">
-              {service.category?.name || "Без категории"}
+            <div className="text-sm text-muted-foreground mb-3">
+              {service.category?.name || t("table.no_category")}
             </div>
 
             <div className="grid grid-cols-2 gap-3 text-sm mb-4">
-              <div className="flex items-center gap-1.5">
-                <span>{service.price.toLocaleString()} сум</span>
+              <div className="flex items-center gap-2">
+                <DollarSign className="w-4 h-4 text-muted-foreground" />
+                <span>{service.price.toLocaleString()} {t("common.sum")}</span>
               </div>
-              <div className="flex items-center gap-1.5">
+              <div className="flex items-center gap-2">
                 <Clock className="w-4 h-4 text-muted-foreground" />
-                <span>{service.duration_min} мин</span>
+                <span>{service.duration_min} {t("common.minutes")}</span>
               </div>
             </div>
 
-
+            <div className="flex flex-wrap gap-3">
+              <Button
+                variant="outline"
+                size="sm"
+                className="flex-1"
+                onClick={() => openDialog(service)}
+              >
+                <Edit className="w-4 h-4 mr-2" />
+                {t("actions.edit")}
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                className="flex-1 text-destructive hover:text-destructive/90 border-destructive/30"
+                onClick={() => handleDelete(service.id)}
+              >
+                <Trash2 className="w-4 h-4 mr-2" />
+                {t("actions.delete")}
+              </Button>
+            </div>
           </div>
         </div>
-        <div className="flex flex-wrap gap-2 mt-2">
-          <Button
-            variant="outline"
-            size="sm"
-            className="flex-1"
-            onClick={() => openEdit(service)}
-          >
-            <Edit className="h-3.5 w-3.5 mr-1.5" />
-            Редактировать
-          </Button>
-          <Button
-            variant="outline"
-            size="sm"
-            className="flex-1 text-destructive hover:text-destructive/90 border-destructive/30"
-            onClick={() => handleDelete(service.id)}
-          >
-            <Trash2 className="h-3.5 w-3.5 mr-1.5" />
-            Удалить
-          </Button>
-        </div>
-
       </CardContent>
     </Card>
   );
 
   return (
     <ProtectedAdminRoute>
-      <div className="container mx-auto py-6 px-4">
-        <Card>
-          <CardHeader>
-            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-              <CardTitle className="text-2xl font-bold">Услуги</CardTitle>
+      <div className="container mx-auto py-6 px-4 max-w-6xl">
+        <Card className="border-none shadow-lg">
+          <CardHeader className="pb-4">
+            <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-5">
+              <CardTitle className="text-2xl md:text-3xl font-bold">
+                {t("title")}
+              </CardTitle>
 
-              <div className="flex flex-col sm:flex-row gap-3 w-full sm:w-auto">
-                <div className="relative flex-1 sm:flex-none">
+              <div className="flex flex-wrap items-center gap-3">
+                <div className="relative flex-1 md:flex-none md:w-72">
                   <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                   <Input
-                    placeholder="Поиск по названию..."
+                    placeholder={t("search.placeholder")}
                     value={globalFilter ?? ""}
                     onChange={(e) => setGlobalFilter(e.target.value)}
-                    className="pl-10 w-full sm:w-64"
+                    className="pl-10 w-full"
                   />
                 </div>
 
-                <Button onClick={() => openEdit()} className="gap-2 w-full sm:w-auto">
+                <Button onClick={() => openDialog()} className="gap-2 w-full md:w-auto">
                   <Plus className="w-4 h-4" />
-                  Новая услуга
+                  {t("buttons.add_new")}
                 </Button>
               </div>
             </div>
@@ -360,14 +380,14 @@ export default function ServicesPage() {
           <CardContent>
             {loading ? (
               <div className="space-y-4">
-                {[...Array(5)].map((_, i) => (
-                  <Skeleton key={i} className="h-40 w-full rounded-lg" />
+                {[...Array(6)].map((_, i) => (
+                  <Skeleton key={i} className="h-40 md:h-32 w-full rounded-xl" />
                 ))}
               </div>
             ) : (
               <>
                 {/* Desktop Table */}
-                <div className="hidden md:block rounded-md border">
+                <div className="hidden md:block rounded-xl border overflow-hidden">
                   <Table>
                     <TableHeader>
                       {table.getHeaderGroups().map((headerGroup) => (
@@ -381,7 +401,7 @@ export default function ServicesPage() {
                             >
                               {flexRender(header.column.columnDef.header, header.getContext())}
                               {header.column.getIsSorted() && (
-                                <span className="ml-1">
+                                <span className="ml-2">
                                   {header.column.getIsSorted() === "asc" ? "↑" : "↓"}
                                 </span>
                               )}
@@ -393,7 +413,7 @@ export default function ServicesPage() {
                     <TableBody>
                       {table.getRowModel().rows?.length ? (
                         table.getRowModel().rows.map((row) => (
-                          <TableRow key={row.id} className="hover:bg-muted/50">
+                          <TableRow key={row.id} className="hover:bg-muted/60">
                             {row.getVisibleCells().map((cell) => (
                               <TableCell key={cell.id}>
                                 {flexRender(cell.column.columnDef.cell, cell.getContext())}
@@ -405,9 +425,9 @@ export default function ServicesPage() {
                         <TableRow>
                           <TableCell
                             colSpan={desktopColumns.length}
-                            className="h-32 text-center text-muted-foreground"
+                            className="h-48 text-center text-muted-foreground"
                           >
-                            Услуг пока нет
+                            {t("table.no_results")}
                           </TableCell>
                         </TableRow>
                       )}
@@ -420,124 +440,133 @@ export default function ServicesPage() {
                   {services.length > 0 ? (
                     services
                       .filter((s) =>
-                        globalFilter === ""
-                          ? true
-                          : s.name.toLowerCase().includes(globalFilter.toLowerCase())
+                        !globalFilter || s.name.toLowerCase().includes(globalFilter.toLowerCase())
                       )
                       .map((service) => <ServiceCard key={service.id} service={service} />)
                   ) : (
-                    <div className="text-center py-12 text-muted-foreground">
-                      Услуг пока нет
+                    <div className="text-center py-16 text-muted-foreground">
+                      {t("table.no_results")}
                     </div>
                   )}
                 </div>
               </>
             )}
 
-            {!loading && (
+            {!loading && services.length > 0 && (
               <div className="mt-6 text-sm text-muted-foreground text-center md:text-left">
-                Всего услуг: {services.length}
+                {t("table.total", { count: services.length })}
               </div>
             )}
           </CardContent>
         </Card>
 
-        <Dialog open={open} onOpenChange={(v) => {
+        {/* Модальное окно создания/редактирования */}
+        <Dialog open={dialogOpen} onOpenChange={(v) => {
           if (!v) resetForm();
-          setOpen(v);
+          setDialogOpen(v);
         }}>
           <DialogContent className="max-w-2xl w-[95vw] sm:w-full max-h-[90vh] flex flex-col p-0 overflow-hidden">
-            <DialogHeader className="p-6 pb-2">
+            <DialogHeader className="p-6 pb-2 border-b">
               <DialogTitle className="text-xl sm:text-2xl font-bold">
-                {editingService ? "Редактировать услугу" : "Добавить новую услугу"}
+                {editingService ? t("dialog.edit_title") : t("dialog.new_title")}
               </DialogTitle>
             </DialogHeader>
 
             <div className="flex-1 overflow-y-auto p-6 pt-2">
               <div className="grid gap-6">
 
-                {/* Фото услуги - Адаптивный блок */}
-                <div className="flex flex-col sm:flex-row items-center gap-6 p-4 rounded-2xl bg-muted/30 border border-dashed border-muted-foreground/20">
+                {/* Фото услуги */}
+                <div className="flex flex-col sm:flex-row items-center gap-6 p-5 rounded-2xl bg-muted/30 border border-dashed border-muted-foreground/20">
                   <div className="relative group flex-shrink-0">
-                    <div className="w-28 h-28 sm:w-32 sm:h-32 rounded-2xl overflow-hidden border-4 border-background shadow-md bg-muted flex items-center justify-center">
+                    <div className="w-32 h-32 sm:w-40 sm:h-40 rounded-2xl overflow-hidden border-4 border-background shadow-md bg-muted flex items-center justify-center">
                       {photoPreview ? (
                         <img src={photoPreview} alt="Preview" className="w-full h-full object-cover" />
                       ) : (
-                        <ImageIcon className="w-10 h-10 text-muted-foreground/30" />
+                        <ImageIcon className="w-12 h-12 text-muted-foreground/30" />
                       )}
                     </div>
-                    <label className="absolute inset-0 flex items-center justify-center bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer rounded-2xl">
-                      <Camera className="w-8 h-8 text-white" />
+                    <label className="absolute inset-0 flex items-center justify-center bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer rounded-2xl">
+                      <Camera className="w-10 h-10 text-white" />
                       <input type="file" className="hidden" accept="image/*" onChange={handleFileChange} />
                     </label>
                   </div>
 
-                  <div className="flex-1 text-center sm:text-left space-y-2">
-                    <Label className="text-sm font-semibold text-foreground">Изображение услуги</Label>
+                  <div className="flex-1 text-center sm:text-left space-y-3">
+                    <Label className="text-base font-semibold">
+                      {t("form.photo.label")}
+                    </Label>
                     <Input
                       type="file"
                       accept="image/*"
                       onChange={handleFileChange}
-                      className="cursor-pointer bg-background h-10 rounded-xl"
+                      className="cursor-pointer bg-background h-11 rounded-xl"
                     />
-                    <p className="text-[11px] text-muted-foreground">
-                      Это фото увидят клиенты при записи. Рекомендуем 400x400px.
+                    <p className="text-xs text-muted-foreground">
+                      {t("form.photo.hint")}
                     </p>
                   </div>
                 </div>
 
                 {/* Основные поля */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
                   <div className="space-y-2 sm:col-span-2">
-                    <Label className="text-sm font-medium ml-1">Название услуги *</Label>
+                    <Label className="text-sm font-medium ml-1">
+                      {t("form.name.label")} <span className="text-destructive">*</span>
+                    </Label>
                     <Input
                       className="h-12 rounded-xl text-base shadow-sm focus-visible:ring-primary/20"
                       value={form.name}
                       onChange={(e) => setForm({ ...form, name: e.target.value })}
-                      placeholder="Напр: Стрижка мужская (Fade)"
+                      placeholder={t("form.name.placeholder")}
                     />
                   </div>
 
                   <div className="space-y-2">
-                    <Label className="text-sm font-medium ml-1">Стоимость (сум) *</Label>
+                    <Label className="text-sm font-medium ml-1">
+                      {t("form.price.label")} <span className="text-destructive">*</span>
+                    </Label>
                     <div className="relative">
                       <Input
                         type="number"
                         min="1"
-                        className="h-12 rounded-xl pl-4 pr-12 text-base shadow-sm"
+                        className="h-12 rounded-xl pl-4 pr-16 text-base shadow-sm"
                         value={form.price}
                         onChange={(e) => setForm({ ...form, price: e.target.value })}
                       />
                       <span className="absolute right-4 top-1/2 -translate-y-1/2 text-sm text-muted-foreground font-medium pointer-events-none">
-                UZS
-              </span>
+                        {t("common.sum")}
+                      </span>
                     </div>
                   </div>
 
                   <div className="space-y-2">
-                    <Label className="text-sm font-medium ml-1">Длительность *</Label>
+                    <Label className="text-sm font-medium ml-1">
+                      {t("form.duration.label")} <span className="text-destructive">*</span>
+                    </Label>
                     <div className="relative">
                       <Input
                         type="number"
                         min="1"
-                        className="h-12 rounded-xl pl-4 pr-12 text-base shadow-sm"
+                        className="h-12 rounded-xl pl-4 pr-16 text-base shadow-sm"
                         value={form.duration_min}
                         onChange={(e) => setForm({ ...form, duration_min: e.target.value })}
                       />
                       <span className="absolute right-4 top-1/2 -translate-y-1/2 text-sm text-muted-foreground font-medium pointer-events-none">
-                мин
-              </span>
+                        {t("common.minutes")}
+                      </span>
                     </div>
                   </div>
 
                   <div className="space-y-2 sm:col-span-2">
-                    <Label className="text-sm font-medium ml-1">Категория *</Label>
+                    <Label className="text-sm font-medium ml-1">
+                      {t("form.category.label")} <span className="text-destructive">*</span>
+                    </Label>
                     <Select
                       value={form.categoryId}
                       onValueChange={(v) => setForm({ ...form, categoryId: v })}
                     >
                       <SelectTrigger className="h-12 rounded-xl text-base shadow-sm">
-                        <SelectValue placeholder="Выберите категорию услуги" />
+                        <SelectValue placeholder={t("form.category.placeholder")} />
                       </SelectTrigger>
                       <SelectContent className="rounded-xl shadow-lg">
                         {categories.map((cat) => (
@@ -552,19 +581,19 @@ export default function ServicesPage() {
               </div>
             </div>
 
-            <DialogFooter className="p-6 border-t bg-muted/10 flex-col sm:flex-row gap-2">
+            <DialogFooter className="p-6 border-t bg-muted/10 flex-col sm:flex-row gap-3">
               <Button
-                variant="ghost"
-                onClick={() => setOpen(false)}
+                variant="outline"
+                onClick={() => setDialogOpen(false)}
                 className="w-full sm:w-auto order-2 sm:order-1 rounded-xl h-12"
               >
-                Отмена
+                {t("buttons.cancel")}
               </Button>
               <Button
                 onClick={handleSave}
                 className="w-full sm:w-auto order-1 sm:order-2 rounded-xl h-12 px-8 font-semibold shadow-md shadow-primary/20"
               >
-                {editingService ? "Сохранить изменения" : "Добавить услугу"}
+                {editingService ? t("buttons.save") : t("buttons.create")}
               </Button>
             </DialogFooter>
           </DialogContent>

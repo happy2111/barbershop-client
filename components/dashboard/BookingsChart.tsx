@@ -1,16 +1,25 @@
+"use client";
+
 import { useMemo } from "react";
+import { useTranslations, useLocale } from "next-intl";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell } from "recharts";
+import {
+  BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer,
+  CartesianGrid, Cell
+} from "recharts";
 import { useDashboardStore } from "@/stores/dashboard.store";
 import { Skeleton } from "@/components/ui/skeleton";
 import { format, parseISO } from "date-fns";
-import { ru } from "date-fns/locale";
+import { ru, uz } from "date-fns/locale";
 
 export function BookingsChart() {
+  const t = useTranslations("admin.dashboard");
+  const locale = useLocale();
+  const dateLocale = locale === 'uz' ? uz : ru;
+
   const { bookingsGraph, isLoading } = useDashboardStore();
   const isGraphLoading = isLoading["bookingsGraph_30"];
 
-  // Вычисляем общую сумму броней и среднее значение
   const stats = useMemo(() => {
     if (!bookingsGraph?.length) return { total: 0, avg: 0 };
     const total = bookingsGraph.reduce((acc, curr) => acc + curr.value, 0);
@@ -22,28 +31,25 @@ export function BookingsChart() {
     <Card className="col-span-1 md:col-span-2 lg:col-span-4 shadow-sm border-border/60">
       <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-7">
         <div className="space-y-1">
-          <CardTitle className="text-xl font-bold">Количество бронирований</CardTitle>
-          <CardDescription>Активность клиентов за 30 дней</CardDescription>
+          <CardTitle className="text-xl font-bold">{t('charts.bookings_title')}</CardTitle>
+          <CardDescription>{t('charts.bookings_description')}</CardDescription>
         </div>
         {!isGraphLoading && (
           <div className="flex gap-4">
             <div className="text-right">
               <div className="text-2xl font-bold text-chart-2">{stats.total}</div>
-              <p className="text-[10px] uppercase tracking-wider text-muted-foreground">Всего</p>
+              <p className="text-[10px] uppercase tracking-wider text-muted-foreground">{t('stats.total')}</p>
             </div>
             <div className="text-right border-l pl-4">
               <div className="text-2xl font-bold text-muted-foreground">{stats.avg}</div>
-              <p className="text-[10px] uppercase tracking-wider text-muted-foreground">В день</p>
+              <p className="text-[10px] uppercase tracking-wider text-muted-foreground">{t('stats.per_day')}</p>
             </div>
           </div>
         )}
       </CardHeader>
-
       <CardContent className="h-[350px] w-full pl-0">
         {isGraphLoading || !bookingsGraph ? (
-          <div className="px-6 h-full w-full">
-            <Skeleton className="w-full h-full rounded-xl" />
-          </div>
+          <div className="px-6 h-full w-full"><Skeleton className="w-full h-full rounded-xl" /></div>
         ) : (
           <ResponsiveContainer width="100%" height="100%">
             <BarChart
@@ -63,17 +69,7 @@ export function BookingsChart() {
                 tickLine={false}
                 tickMargin={10}
                 minTickGap={25}
-                tickFormatter={(value) => format(parseISO(value), "d MMM", { locale: ru })}
-                stroke="var(--muted-foreground)"
-                fontSize={12}
-              />
-              <YAxis
-                axisLine={false}
-                tickLine={false}
-                tickMargin={10}
-                fontSize={12}
-                stroke="var(--muted-foreground)"
-                allowDecimals={false}
+                tickFormatter={(val) => format(parseISO(val), "d MMM", { locale: dateLocale })}
               />
               <Tooltip
                 cursor={{ fill: "var(--muted)", opacity: 0.4 }}
@@ -83,8 +79,8 @@ export function BookingsChart() {
                   borderRadius: "var(--radius)",
                   boxShadow: "0 4px 12px rgba(0,0,0,0.1)"
                 }}
-                labelFormatter={(label) => format(parseISO(label), "d MMMM yyyy (EEEE)", { locale: ru })}
-                formatter={(value: any) => [`${value} записей`, "Бронирования"]}
+                labelFormatter={(label) => format(parseISO(label), "d MMMM yyyy (EEEE)", { locale: dateLocale })}
+                formatter={(value: any) => [t('charts.tooltip_bookings', { value }), t('stats.bookings')]}
               />
               <Bar
                 dataKey="value"

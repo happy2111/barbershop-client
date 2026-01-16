@@ -9,6 +9,7 @@ import {
   useSidebar, // 1. Импортируем хук
 } from "@/components/ui/sidebar"
 import Link from "next/link";
+import {useTranslations} from "next-intl";
 
 export function NavMain({
                           items,
@@ -19,6 +20,8 @@ export function NavMain({
     icon: React.ComponentType<any>
   }[]
 }) {
+
+  const t = useTranslations('sidebar')
   // 2. Получаем функцию управления мобильным сайдбаром
   const { isMobile, setOpenMobile } = useSidebar()
 
@@ -28,6 +31,7 @@ export function NavMain({
       setOpenMobile(false)
     }
   }
+
 
   return (
     <SidebarGroup>
@@ -39,10 +43,10 @@ export function NavMain({
                 <Link
                   href={item.url}
                   className='font-semibold text-[17px]'
-                  onClick={handleClick} // 4. Добавляем обработчик
+                  onClick={handleClick}
                 >
                   {item.icon && <item.icon />}
-                  <span>{item.title}</span>
+                  <span>{t(`${item.title}`)}</span>
                 </Link>
               </SidebarMenuButton>
             </SidebarMenuItem>

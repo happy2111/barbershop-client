@@ -13,7 +13,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 
-export default function LocaleSwitcher() {
+export default function LocaleSwitcher(props: { isMobile: boolean }) {
   const locale = useLocale()
   const router = useRouter()
   const pathname = usePathname()
@@ -34,13 +34,16 @@ export default function LocaleSwitcher() {
           className="rounded-full h-9 px-3 gap-2 hover:bg-accent/50 transition-all active:scale-95"
         >
           <Languages className="h-4 w-4 opacity-70" />
-          <span className="text-xs font-bold uppercase tracking-wider">
-            {locale}
-          </span>
+          {!props.isMobile && (
+            <span className={`${props.isMobile && '!hidden'}` + "text-xs font-bold uppercase tracking-wider"}>
+              {locale}
+            </span>
+          )}
+
+
         </Button>
       </DropdownMenuTrigger>
 
-      {/* Контент меню в стиле iOS/Liquid */}
       <DropdownMenuContent
         align="end"
         sideOffset={8}
