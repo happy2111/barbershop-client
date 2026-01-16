@@ -22,6 +22,12 @@ import {useTelegram} from "@/context/TelegramContext";
 
 import { useTranslations } from 'next-intl';
 
+type CategoryGroup = {
+  id: number;
+  name: string;
+  services: typeof serviceStore.services;
+};
+
 
 type Step = 1 | 2 | 3 | 4 | 5;
 
@@ -48,6 +54,16 @@ export default observer(function BookingPage() {
 
   const [errors, setErrors] = useState<{ name?: string; phone?: string }>({});
   const [createLoading, setCreateLoading] = useState(false)
+  const [openCategories, setOpenCategories] = useState<Record<number, boolean>>({});
+
+  const toggleCategory = (id: number) => {
+    setOpenCategories(prev => ({
+      ...prev,
+      [id]: !prev[id],
+    }));
+  };
+
+
 
   const { user, webApp, initData } = useTelegram();
 
@@ -90,6 +106,14 @@ export default observer(function BookingPage() {
   }, [selectedService]);
 
   useEffect(() => {
+    window.scrollTo({
+      top: 0,
+      behavior: "smooth",
+    });
+  }, [step]);
+
+  useEffect(() => {
+
     if (selectedSpecialist && selectedService && selectedDate) {
       setLoadingSlots(true);
       bookingService
@@ -148,6 +172,28 @@ export default observer(function BookingPage() {
   const nextStep = () => setStep((prev) => (prev < 5 ? ((prev + 1) as Step) : prev));
   const prevStep = () => setStep((prev) => (prev > 1 ? ((prev - 1) as Step) : prev));
 
+  const groupedServices = serviceStore.services.reduce<Record<number, CategoryGroup>>(
+    (acc, service) => {
+      const cat = service.category;
+      if (cat) {
+        if (!acc[cat.id]) {
+          acc[cat.id] = {
+            id: cat.id,
+            name: cat.name,
+            services: [],
+          };
+        }
+        acc[cat.id].services.push(service);
+      }
+
+      return acc;
+    },
+    {}
+  );
+
+  const categories = Object.values(groupedServices);
+
+
   return (
     <div className="min-h-screen bg-background py-8 px-4 text-foreground transition-colors">
       <div className="max-w-2xl mx-auto">
@@ -174,36 +220,83 @@ export default observer(function BookingPage() {
         </div>
 
         {step === 1 && (
-          <Card className="p-6 shadow-xl bg-card border-border animate-in fade-in zoom-in-98 duration-500 ease-out">
-            <h2 className="text-2xl font-semibold mb-6">{t("booking.home.step1.title")}</h2>
-            <div className="grid grid-cols-1 gap-4">
-              {serviceStore.services.map((s) => (
-                <div
-                  key={s.id}
-                  onClick={() => {
-                    setSelectedService(s.id);
-                    nextStep();
-                  }}
-                  className={`border rounded-xl overflow-hidden cursor-pointer transition-all duration-300
-                ${selectedService === s.id
-                    ? "border-primary shadow-xl ring-2 ring-primary/30"
-                    : "border-border hover:border-primary/50"}`}
-                >
-                  <img src={`${process.env.NEXT_PUBLIC_API_URL}${s.photo}`} alt={s.name} className="w-full h-48 object-cover" />
-                  <div className="p-4">
-                    <h3 className="font-medium text-lg">{s.name}</h3>
-                    <p className="text-sm text-muted-foreground">
-                      {t("common.duration", { minutes: s.duration_min })}
-                    </p>
-                    <p className="text-primary font-bold text-xl mt-2">
-                      {t("common.price", { amount: s.price })}
-                    </p>
+          <Card className="p-6 shadow-xl bg-card border-border animate-in fade-in zoom-in-98 duration-500">
+            <h2 className="text-2xl font-semibold mb-6">
+              {t("booking.home.step1.title")}
+            </h2>
+
+            <div className="space-y-4">
+              {categories.map((category) => {
+                const isOpen = openCategories[category.id];
+
+                return (
+                  <div
+                    key={category.id}
+                    className="border rounded-xl overflow-hidden border-border"
+                  >
+                    {/* Заголовок категории */}
+                    <button
+                      onClick={() => toggleCategory(category.id)}
+                      className="w-full flex items-center justify-between px-4 py-3 bg-muted hover:bg-muted/70 transition"
+                    >
+              <span className="font-semibold text-lg capitalize">
+                {category.name}
+              </span>
+                      <ChevronRight
+                        className={`transition-transform duration-300 ${
+                          isOpen ? "rotate-90" : ""
+                        }`}
+                      />
+                    </button>
+
+                    {/* Контент */}
+                    <div
+                      className={`grid gap-4 transition-all duration-300 px-4 ${
+                        isOpen
+                          ? "grid-rows-[1fr] py-4 opacity-100"
+                          : "grid-rows-[0fr] py-0 opacity-0 pointer-events-none"
+                      }`}
+                    >
+                      <div className="grid grid-cols-1 gap-4 overflow-hidden">
+                        {category.services.map((s) => (
+                          <div
+                            key={s.id}
+                            onClick={() => {
+                              setSelectedService(s.id);
+                              nextStep();
+                            }}
+                            className={`border rounded-xl overflow-hidden cursor-pointer transition-all
+                      ${
+                              selectedService === s.id
+                                ? "border-primary shadow-xl ring-2 ring-primary/30"
+                                : "border-border hover:border-primary/50"
+                            }`}
+                          >
+                            <img
+                              src={`${process.env.NEXT_PUBLIC_API_URL}${s.photo}`}
+                              alt={s.name}
+                              className="w-full h-40 object-cover"
+                            />
+                            <div className="p-4">
+                              <h3 className="font-medium text-lg">{s.name}</h3>
+                              <p className="text-sm text-muted-foreground">
+                                {t("common.duration", { minutes: s.duration_min })}
+                              </p>
+                              <p className="text-primary font-bold text-xl mt-2">
+                                {t("common.price", { amount: s.price })}
+                              </p>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
                   </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
           </Card>
         )}
+
 
         {step === 2 && selectedService && (
           <Card className="p-6 shadow-xl bg-card border-border animate-in fade-in zoom-in-98 duration-500 ease-out">
