@@ -1,112 +1,41 @@
-import axios, { AxiosError, InternalAxiosRequestConfig } from "axios";
+import axios, { AxiosError } from "axios";
 import { authStore } from "@/stores/auth.store";
 import { toast } from "sonner";
-
-// ==========================================
-// Normalize error messages
-// ==========================================
-function toErrorMessage(payload: any): string {
-  function asString(v: any): string | null {
-    if (v == null) return null;
-    if (typeof v === "string") return v.trim() || null;
-
-    if (Array.isArray(v)) {
-      const parts = v
-        .map((x) => asString(x))
-        .filter((x): x is string => Boolean(x));
-      return parts.length ? Array.from(new Set(parts)).join(", ") : null;
-    }
-
-    if (typeof v === "object") {
-      const keysToTry = ["message", "error", "detail", "description", "statusText"];
-      for (const k of keysToTry) {
-        const got = asString(v[k]);
-        if (got) return got;
-      }
-
-      // Handle nested { message: { message: "..."} }
-      if (v.message && typeof v.message === "object") {
-        const nested =
-          asString(v.message.message) || asString(v.message.error);
-        if (nested) return nested;
-      }
-    }
-
-    try {
-      return JSON.stringify(v);
-    } catch {}
-
-    return "Server error";
-  }
-
-  return asString(payload) || "Server error";
-}
-
-function getLocaleFromPathname() {
-  if (typeof window === 'undefined') return 'ru';
-
-  const match = window.location.pathname.match(/^\/(ru|uz)(\/|$)/);
-  return match?.[1] ?? 'ru';
-}
+import {toErrorMessage, getLocaleFromPathname} from "@/lib/utils";
 
 
-// ==========================================
-// Axios instance
-// ==========================================
 const api = axios.create({
   baseURL: process.env.NEXT_PUBLIC_API_URL,
   withCredentials: true,
 });
 
-// ==========================================
-// Request interceptor: attach access token
-// ==========================================
-api.interceptors.request.use((config: InternalAxiosRequestConfig) => {
-  const token = authStore.getState().accessToken;
-  const initData = window.Telegram?.WebApp?.initData;
-  const locale = getLocaleFromPathname();
 
-  config.headers['x-client-local'] = locale;
+api.interceptors.request.use((config) => {
+  const locale = getLocaleFromPathname();
+  const initData = window.Telegram?.WebApp?.initData;
+
+  config.headers["x-client-locale"] = locale;
 
   if (initData) {
-    config.headers['x-telegram-init-data'] = initData;
-  }
-
-  if (token) {
-    config.headers.Authorization = `Bearer ${token}`;
+    config.headers["x-telegram-init-data"] = initData;
   }
 
   return config;
 });
 
-// ==========================================
-// Response interceptor (errors + refresh)
-// ==========================================
-// api.ts
 
 api.interceptors.response.use(
   (res) => res,
   async (error: AxiosError<any>) => {
     const originalRequest: any = error.config;
+    const msg = toErrorMessage(error.response?.data);
 
-    // 1. Извлекаем сообщение об ошибке
-    const data = error.response?.data;
-    const msg = toErrorMessage(data);
-
-    // 2. Если это ошибка логина — просто выводим тост и выходим
-    // Добавьте проверку на URL логина
     if (originalRequest?.url?.includes("/auth/login")) {
       toast.error(msg);
       return Promise.reject(error);
     }
 
-    if (originalRequest?.url !== "/auth/refresh") {
-      toast.error(msg);
-    }
-
-    // 3. REFRESH TOKEN LOGIC
-    // Добавляем условие: не пытаться рефрешить, если мы и так на странице логина
-    // или если это сам запрос рефреша
+    // 401 → пробуем refresh
     if (
       error.response?.status === 401 &&
       !originalRequest?._retry &&
@@ -119,11 +48,12 @@ api.interceptors.response.use(
         if (ok) {
           return api(originalRequest);
         }
-      } catch (e) {
+      } catch {
         authStore.getState().logout();
       }
     }
 
+    toast.error(msg);
     return Promise.reject(error);
   }
 );

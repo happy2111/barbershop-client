@@ -39,6 +39,12 @@ export function NavUser() {
     user.name?.slice(0, 2).toUpperCase() ||
     user.phone.slice(-2)
 
+  const handleLogout = () => {
+    logout();
+    window.location.href = '/';
+  };
+
+
   return (
     <SidebarMenu>
       <SidebarMenuItem>
@@ -49,7 +55,10 @@ export function NavUser() {
               className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
             >
               <Avatar className="h-8 w-8 rounded-lg">
-                <AvatarImage src={`http:localhost:5000${user.name}`} alt={`http:localhost:5000${user.name}` || "User"} />
+                <AvatarImage
+                  src={user.photo ? `http://localhost:5000${user.photo}` : undefined}
+                  alt={user.name || "User"}
+                />
                 <AvatarFallback className="rounded-lg">
                   {initials}
                 </AvatarFallback>
@@ -85,7 +94,7 @@ export function NavUser() {
 
             <DropdownMenuSeparator />
 
-            <DropdownMenuItem onClick={logout} className="cursor-pointer">
+            <DropdownMenuItem onClick={handleLogout} className="cursor-pointer">
               <LogOut />
               Log out
             </DropdownMenuItem>

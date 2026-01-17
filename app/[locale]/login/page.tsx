@@ -6,7 +6,7 @@ import { toast } from "sonner";
 import { authStore } from "@/stores/auth.store";
 import { Eye, EyeOff, Phone, Lock, LogIn } from "lucide-react";
 import { useTranslations } from "next-intl";
-import { PatternFormat } from "react-number-format"; // Импортируем маску
+import { PatternFormat } from "react-number-format";
 
 import {
   Card,
@@ -24,7 +24,7 @@ export default function SpecialistLoginPage() {
   const router = useRouter();
 
   const login = authStore((state) => state.login);
-  const { isLoading, accessToken, user } = authStore();
+  const { isLoading, user } = authStore();
 
   const [phone, setPhone] = useState(""); // Здесь будут только цифры (998...)
   const [password, setPassword] = useState("");
@@ -32,21 +32,20 @@ export default function SpecialistLoginPage() {
   const [showPassword, setShowPassword] = useState(false);
 
   useEffect(() => {
-    if (!isLoading && accessToken) {
-      if (user?.role === "ADMIN") {
-        router.replace("/admin");
-      } else {
-        router.replace("/specialist/profile");
-      }
+    if (isLoading) return;
+
+    if (user) {
+      router.replace(
+        user.role === "ADMIN" ? "/admin" : "/specialist/profile"
+      );
     }
-  }, [isLoading, accessToken, user, router]);
+  }, [isLoading, user, router]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
 
-    const formattedPhone = `+998${phone}`
-
+    const formattedPhone = `+998${phone}`;
     const ok = await login(formattedPhone, password);
 
     setLoading(false);
@@ -57,15 +56,8 @@ export default function SpecialistLoginPage() {
     }
 
     toast.success(t("toast.login_success"));
-
-    const { user: updatedUser } = authStore.getState();
-
-    if (updatedUser?.role === "ADMIN") {
-      router.replace("/admin");
-    } else {
-      router.replace("/specialist/profile");
-    }
   };
+
 
   return (
     <div className="min-h-[100dvh] flex items-center justify-center bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-primary/10 via-background to-background p-4">

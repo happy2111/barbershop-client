@@ -2,7 +2,6 @@ import type {Metadata} from "next";
 import "./globals.css";
 import {Toaster} from "@/components/ui/sonner"
 import {ThemeProvider} from "@/components/Pretecters&Providers/theme-provider";
-import {ModeToggle} from "@/components/ModeToggle";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import {TelegramProvider} from "@/context/TelegramContext";
@@ -12,6 +11,7 @@ import {hasLocale, NextIntlClientProvider} from 'next-intl';
 import {setRequestLocale} from 'next-intl/server';
 import {notFound} from 'next/navigation';
 import {routing} from '@/i18n/routing';
+import {Providers} from "@/app/[locale]/providers";
 
 export const metadata: Metadata = {
   title: process.env.NEXT_PUBLIC_TITLE || "Название по умолчанию",
@@ -61,23 +61,25 @@ export default async function RootLayout({
       />
     </head>
     <body className="antialiased" suppressHydrationWarning>
-    <NextIntlClientProvider>
-      <TelegramProvider>
-        <ThemeProvider
-          attribute="class"
-          defaultTheme="system"
-          enableSystem
-          disableTransitionOnChange
-        >
-          <div className="w-full mb-8 tg-safe-top">
-            <Navbar/>
-            {children}
-            <Footer/>
-          </div>
-          <Toaster />
-        </ThemeProvider>
-      </TelegramProvider>
-    </NextIntlClientProvider>
+      <Providers>
+        <NextIntlClientProvider>
+          <TelegramProvider>
+            <ThemeProvider
+              attribute="class"
+              defaultTheme="system"
+              enableSystem
+              disableTransitionOnChange
+            >
+              <div className="w-full mb-8 tg-safe-top">
+                <Navbar/>
+                {children}
+                <Footer/>
+              </div>
+              <Toaster />
+            </ThemeProvider>
+          </TelegramProvider>
+        </NextIntlClientProvider>
+      </Providers>
     </body>
     </html>
   );

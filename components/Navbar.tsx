@@ -50,21 +50,20 @@ const Navbar = () => {
     return () => window.removeEventListener('scroll', handleScroll)
   }, [isMenuOpen])
 
-  const isAuthenticated = authStore(state => state.isAuth())
-  const logout = authStore(state => state.logout)
 
   const user = authStore(state => state.user)
+  const isAuthenticated = !!user
+  const logout = authStore(state => state.logout)
+
 
   const pathname = usePathname()
   const segments = pathname.split('/').filter(Boolean)
   const locale = segments[0]
-
   const secondSeg = segments[1]
-  const isHome = segments.length === 1
-  const isSpecialist = secondSeg === 'specialist'
-  const isLogin = secondSeg === 'login'
 
-  if (!isHome && !isSpecialist && !isLogin) return null
+  const visiblePages = ['','specialist','login']
+  if (!visiblePages.includes(secondSeg || '')) return null
+
 
   const handleNavigation = (path: string) => {
     router.push(path)
@@ -141,7 +140,6 @@ const Navbar = () => {
                     />
                   )}
 
-
                   {isAuthenticated ? (
                     <>
                       <MenuButton
@@ -172,13 +170,14 @@ const Navbar = () => {
                     </Button>
                   )}
 
+
                   <div className="h-px bg-border my-2 mx-3" /> {/* Разделитель */}
 
-                  <div className="flex items-center justify-between px-4 py-2 bg-muted/50 rounded-[1.5rem] mt-1">
+                  <div className="flex items-center justify-between px-4 py-0 bg-muted/50 rounded-[1.5rem] mt-1">
                     <span className="text-sm font-medium text-muted-foreground">
                       {t('navbar.menu.theme') || 'Тема'}
                     </span>
-                    <div className="flex bg-background/50 p-1 rounded-full border border-border">
+                    <div className="flex bg-background/50 my-2 rounded-full border border-border">
                       <ThemeButton
                         active={theme === 'light'}
                         onClick={() => setTheme('light')}
@@ -228,7 +227,7 @@ const ThemeButton = ({ active, onClick, icon }: { active: boolean, onClick: () =
   <button
     onClick={onClick}
     className={`
-      p-2 rounded-full transition-all duration-200
+      h-7 w-7 m-1 flex items-center justify-center rounded-full transition-all duration-200
       ${active
       ? 'bg-primary text-primary-foreground shadow-sm scale-110'
       : 'text-muted-foreground hover:text-foreground'}

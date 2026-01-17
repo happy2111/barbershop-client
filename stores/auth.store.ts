@@ -1,124 +1,104 @@
 import { create } from "zustand";
-import Cookies from "js-cookie";
 import { authService } from "@/services/auth.service";
-import {number} from "zod";
 
-interface User {
+export interface User {
   id: number;
   phone: string;
   name: string | null;
-  role: string;
-  companyId: number | null;
+  role: "ADMIN" | "SPECIALIST";
+  companyId: number;
+  photo?: string;
 }
 
 interface AuthState {
-  accessToken: string | null;
   user: User | null;
   isLoading: boolean;
-  companyId: number | null;
 
-  setAccessToken: (token: string | null) => void;
+  // state setters
   setUser: (user: User | null) => void;
-  setAuthData: (token: string | null, user: User | null) => void;
 
+  // derived state
   isAuth: () => boolean;
   isAdmin: () => boolean;
   isSpecialist: () => boolean;
 
+  // actions
+  initialize: () => Promise<void>;
   login: (phone: string, password: string) => Promise<boolean>;
   refresh: () => Promise<boolean>;
-  logout: () => void;
-  initialize: () => Promise<void>;
-  initializeCompanyId: () => void;
+  logout: () => Promise<void>;
 }
 
 export const authStore = create<AuthState>((set, get) => ({
-  accessToken: null,
   user: null,
   isLoading: true,
-  companyId: null,
 
-  setAccessToken: (token) => set({ accessToken: token }),
+  /* =======================
+     Setters
+  ======================= */
   setUser: (user) => set({ user }),
-  setAuthData: (token, user) => {
-    set({
-      accessToken: token,
-      user,
-      companyId: user?.companyId ?? null,
-      isLoading: false
-    });
 
-    if (user?.companyId) {
-      localStorage.setItem("companyId", user.companyId.toString());
-    }
-  },
-  isAuth: () => !!get().accessToken,
+  /* =======================
+     Derived state
+  ======================= */
+  isAuth: () => get().user !== null,
   isAdmin: () => get().user?.role === "ADMIN",
   isSpecialist: () => get().user?.role === "SPECIALIST",
 
+  /* =======================
+     Init (on app start)
+  ======================= */
   async initialize() {
-    const refreshToken = Cookies.get("refreshToken");
-    if (!refreshToken) {
-      set({ isLoading: false });
-      return;
-    }
+    set({ isLoading: true });
 
-    await get().refresh(); // refresh сам проставит user и token
+    try {
+      const user = await authService.me();
+      set({ user, isLoading: false });
+    } catch {
+      set({ user: null, isLoading: false });
+    }
   },
 
+  /* =======================
+     Login
+  ======================= */
   async login(phone, password) {
     try {
       const hostname = window.location.hostname;
-
       const res = await authService.login({ phone, password, hostname });
-      const { accessToken, user } = res.data;
+      const { user } = res.data;
 
-      get().setAuthData(accessToken, user);
-
+      set({ user });
       return true;
-    } catch (e) {
-      set({ isLoading: false });
+    } catch {
       return false;
     }
   },
 
-  // Внутри authStore
+  /* =======================
+     Refresh session
+  ======================= */
   async refresh() {
-    if (get().isLoading && get().accessToken) return false; // Защита
-
     try {
       const res = await authService.refresh();
-      const { accessToken, user } = res.data;
-      get().setAuthData(accessToken, user);
+      const { user } = res.data;
+
+      set({ user });
       return true;
-    } catch (e) {
-      Cookies.remove("refresh_token");
-      // Сбрасываем всё, чтобы Middleware понял: сессия мертва
-      set({ accessToken: null, user: null, isLoading: false });
+    } catch {
+      set({ user: null });
       return false;
     }
   },
 
-  logout() {
-    authService.logout().finally(() => {
-      // Очищаем всё разом
-      set({ accessToken: null, user: null, companyId: null, isLoading: false });
-      localStorage.removeItem("companyId");
-    });
-  },
-
-  requireAdmin: () => {
-    const state = get();
-    if (!state.accessToken || state.user?.role !== "ADMIN") {
-      return false;
+  /* =======================
+     Logout
+  ======================= */
+  async logout() {
+    try {
+      await authService.logout();
+    } finally {
+      set({ user: null });
     }
-    return true;
   },
-  getRole: () => get().user?.role ?? null,
-
-  initializeCompanyId: () => {
-    const saved = localStorage.getItem("companyId");
-    if (saved) set({ companyId: parseInt(saved, 10) });
-  }
-
 }));
