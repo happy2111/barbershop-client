@@ -6,6 +6,7 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { Drawer, DrawerContent, DrawerTrigger } from "@/components/ui/drawer";
 import { useMediaQuery } from "@/hooks/use-media-query";
 import {Service} from "@/services/service.service";
+import {DialogTitle} from "@/components/ui/dialog";
 
 
 
@@ -148,6 +149,8 @@ export function ServiceSelector({
     <Drawer open={open} onOpenChange={setOpen}>
       <DrawerTrigger asChild>{TriggerButton}</DrawerTrigger>
       <DrawerContent className="max-h-[85vh]">
+        <DialogTitle className="hidden"/>
+
         <div className="mx-auto w-full max-w-lg mt-4">
           {ListContent}
         </div>

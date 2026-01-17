@@ -6,6 +6,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Drawer, DrawerContent, DrawerTrigger } from "@/components/ui/drawer";
 import { useMediaQuery } from "@/hooks/use-media-query";
+import {DialogTitle} from "@/components/ui/dialog";
 
 interface Specialist {
   id: number;
@@ -37,8 +38,8 @@ export function SpecialistSelector({
   );
 
   const ListContent = (
-    <div className="flex flex-col h-full bg-popover">
-      <div className="flex items-center px-3 border-b sticky top-0 bg-popover z-10">
+    <div className="flex flex-col h-full bg-popover rounded-md">
+      <div className="flex items-center px-3 border-b sticky top-0 bg-popover z-10 rounded-md">
         <Search className="mr-2 h-4 w-4 shrink-0 opacity-50" />
         <input
           className="flex h-11 w-full rounded-md bg-transparent py-3 text-sm outline-none placeholder:text-muted-foreground"
@@ -124,7 +125,8 @@ export function SpecialistSelector({
     <Drawer open={open} onOpenChange={setOpen}>
       <DrawerTrigger asChild>{TriggerButton}</DrawerTrigger>
       <DrawerContent>
-        <div className="mt-4 pb-10 px-2">{ListContent}</div>
+        <DialogTitle className="px-6 my-2 text-center"></DialogTitle>
+        <div className="mt-4 pb-10 px-2 rounded-2xl">{ListContent}</div>
       </DrawerContent>
     </Drawer>
   );

@@ -240,7 +240,9 @@
         "select_specialist": "Mutaxassisni tanlang",
         "search_specialist": "Mutaxassisni qidirish...",
         "select_service": "Xizmatni tanlang",
-        "search_service": "Xizmatni qidirish..."
+        "search_service": "Xizmatni qidirish...",
+        "start_typing": "Yozishni boshlang..."
+
       },
       "search": {
         "no_results": "Hech narsa topilmadi",
@@ -252,7 +254,8 @@
       "buttons": {
         "cancel": "Bekor qilish",
         "create": "Yozuv yaratish",
-        "creating": "Yaratilmoqda..."
+        "creating": "Yaratilmoqda...",
+        "done": "Qo'shish"
       },
       "success": {
         "created": "Yozuv muvaffaqiyatli yaratildi"

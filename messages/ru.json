@@ -249,7 +249,8 @@
         "select_specialist": "Выберите специалиста",
         "search_specialist": "Поиск специалиста...",
         "select_service": "Выберите услугу",
-        "search_service": "Поиск услуги..."
+        "search_service": "Поиск услуги...",
+        "start_typing": "Начните вводить..."
       },
 
       "search": {
@@ -264,8 +265,11 @@
       "buttons": {
         "cancel": "Отмена",
         "create": "Создать запись",
-        "creating": "Создание..."
+        "creating": "Создание...",
+        "done": "Добавить"
       },
+
+
 
       "success": {
         "created": "Запись успешно создана"
