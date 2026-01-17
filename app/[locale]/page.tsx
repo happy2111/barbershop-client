@@ -345,7 +345,7 @@ export default observer(function BookingPage() {
                     setSelectedSpecialist(sp.id);
                     nextStep();
                   }}
-                  className={`border rounded-xl cursor-pointer transition-all duration-300 overflow-hidden
+                  className={`border rounded-xl cursor-pointer transition-all duration-300 overflow-hidden active:scale-95
                 ${selectedSpecialist === sp.id
                     ? "border-primary shadow-2xl scale-[1.02] ring-4 ring-primary/30"
                     : "border-border hover:border-primary/50 hover:shadow-lg"}`}
@@ -427,7 +427,7 @@ export default observer(function BookingPage() {
                       setSelectedTime({ ...slot, date: selectedDate });
                       nextStep();
                     }}
-                    className="h-14 text-base"
+                    className="h-14 text-base transition-transform active:scale-95"
                   >
                     {slot.start} – {slot.end}
                   </Button>

@@ -215,7 +215,7 @@ export default function ClientsPage() {
 
   // ─── Mobile Card ───────────────────────────────────────────────────────────
   const ClientCard = ({ client }: { client: Client }) => (
-    <Card className="overflow-hidden border-none shadow-sm hover:shadow transition-shadow">
+    <Card className="overflow-hidden  shadow-sm hover:shadow transition-shadow">
       <CardContent className="p-5">
         <div className="flex flex-col gap-4">
           <div className="flex justify-between items-start">
@@ -233,10 +233,10 @@ export default function ClientsPage() {
             </Badge>
           </div>
 
-          <div className="flex gap-3">
+          <div className="flex max-sm:flex-col gap-3">
             <Button
               variant="outline"
-              size="sm"
+              size="default"
               className="flex-1"
               onClick={() => openDialog(client)}
             >
@@ -245,7 +245,7 @@ export default function ClientsPage() {
             </Button>
             <Button
               variant="outline"
-              size="sm"
+              size="default"
               className="flex-1 text-destructive hover:text-destructive/90 border-destructive/30"
               onClick={() => handleDelete(client.id)}
             >

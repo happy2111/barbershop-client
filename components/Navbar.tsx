@@ -25,27 +25,22 @@ const Navbar = () => {
   const { setTheme, theme } = useTheme()
 
 
-  // Состояния для скрытия при скролле
   const [isVisible, setIsVisible] = useState(true)
   const lastScrollY = useRef(0)
 
-  // Эффект для отслеживания направления скролла
   useEffect(() => {
     const handleScroll = () => {
       const currentScrollY = window.scrollY
 
-      // Если открыто бургер-меню, навбар всегда виден
       if (isMenuOpen) {
         setIsVisible(true)
         return
       }
 
-      // Если скроллим вверх (current < last) — показываем
-      // Если скроллим вниз (current > last) — скрываем
       if (currentScrollY > lastScrollY.current && currentScrollY > 70) {
-        setIsVisible(false) // Скрываем при скролле вниз
+        setIsVisible(false)
       } else {
-        setIsVisible(true) // Показываем при скролле вверх
+        setIsVisible(true)
       }
 
       lastScrollY.current = currentScrollY
