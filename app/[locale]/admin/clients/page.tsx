@@ -38,9 +38,15 @@ import { Label } from "@/components/ui/label";
 import { clientService, Client } from "@/services/client.service";
 import { Phone, User, Search, Edit, Trash2, Plus } from "lucide-react";
 import ProtectedAdminRoute from "@/components/Pretecters&Providers/ProtectedAdminRoute";
+import {PaginationMeta} from "@/services/booking.service";
+import {PaginationCustom} from "@/components/PaginationCustom";
 
 export default function ClientsPage() {
   const t = useTranslations("admin.clients");
+
+  const [meta, setMeta] = useState<PaginationMeta | null>(null);
+  const [page, setPage] = useState(1);
+  const limit = 10;
 
   const [clients, setClients] = useState<Client[]>([]);
   const [loading, setLoading] = useState(true);
@@ -52,14 +58,16 @@ export default function ClientsPage() {
   const [formData, setFormData] = useState({ name: "", phone: "" });
 
   useEffect(() => {
-    loadClients();
-  }, []);
+    loadClients(page);
+  }, [page]);
 
-  const loadClients = async () => {
+  const loadClients = async (targetPage: number = 1) => {
     setLoading(true);
     try {
-      const data = await clientService.getAll();
-      setClients(data);
+      // ВАЖНО: Получаем объект с data и meta
+      const response = await clientService.getAll(targetPage, limit);
+      setClients(response.data);
+      setMeta(response.meta);
     } catch (error: any) {
       toast.error(error.response?.data?.message || t("errors.load_failed"));
     } finally {
@@ -287,6 +295,15 @@ export default function ClientsPage() {
               </div>
             ) : (
               <>
+
+                {meta && (
+                  <PaginationCustom
+                    currentPage={page}
+                    lastPage={meta.lastPage}
+                    total={meta.total}
+                    onPageChange={(newPage) => setPage(newPage)}
+                  />
+                )}
                 {/* Desktop Table */}
                 <div className="hidden md:block rounded-xl border overflow-hidden">
                   <Table>
@@ -353,6 +370,15 @@ export default function ClientsPage() {
                     </div>
                   )}
                 </div>
+
+                {meta && (
+                  <PaginationCustom
+                    currentPage={page}
+                    lastPage={meta.lastPage}
+                    total={meta.total}
+                    onPageChange={(newPage) => setPage(newPage)}
+                  />
+                )}
               </>
             )}
 

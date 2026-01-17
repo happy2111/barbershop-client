@@ -44,7 +44,12 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { toast } from "sonner";
 
-import { bookingService, Booking, BookingStatus } from "@/services/booking.service";
+import {
+  bookingService,
+  Booking,
+  BookingStatus,
+  PaginationMeta
+} from "@/services/booking.service";
 import {
   MoreHorizontal,
   Search,
@@ -57,11 +62,17 @@ import {
 } from "lucide-react";
 import ProtectedAdminRoute from "@/components/Pretecters&Providers/ProtectedAdminRoute";
 import { AdminBookingModal } from "@/components/BookingModal";
+import SlideToTop from "@/components/SlideToTop";
+import {PaginationCustom} from "@/components/PaginationCustom";
 
 export default function BookingsPage() {
   const t = useTranslations("admin.bookings");
 
   const [bookings, setBookings] = useState<Booking[]>([]);
+  const [meta, setMeta] = useState<PaginationMeta | null>(null);
+  const [page, setPage] = useState(1);
+  const [limit, setLimit] = useState(10);
+
   const [loading, setLoading] = useState(true);
   const [sorting, setSorting] = useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
@@ -69,14 +80,16 @@ export default function BookingsPage() {
   const [showModal, setShowModal] = useState(false);
 
   useEffect(() => {
-    loadBookings();
-  }, []);
+    loadBookings(page, limit);
+  }, [page, limit]);
 
-  const loadBookings = async () => {
+  const loadBookings = async (targetPage: number, targetLimit: number) => {
     setLoading(true);
     try {
-      const data = await bookingService.getAll();
-      setBookings(data);
+      const response = await bookingService.getAll(targetPage, targetLimit);
+
+      setBookings(response.data);
+      setMeta(response.meta);
     } catch (error) {
       toast.error(t("errors.load_failed"));
     } finally {
@@ -423,6 +436,14 @@ export default function BookingsPage() {
               </div>
             ) : (
               <>
+                {meta && (
+                  <PaginationCustom
+                    currentPage={page}
+                    lastPage={meta.lastPage}
+                    total={meta.total}
+                    onPageChange={(newPage: number) => setPage(newPage)}
+                  />
+                )}
                 {/* Desktop Table */}
                 <div className="hidden md:block rounded-xl border overflow-hidden">
                   <Table>
@@ -485,9 +506,20 @@ export default function BookingsPage() {
                     </div>
                   )}
                 </div>
+
+                {meta && (
+                  <PaginationCustom
+                    currentPage={page}
+                    lastPage={meta.lastPage}
+                    total={meta.total}
+                    onPageChange={(newPage: number) => setPage(newPage)}
+                  />
+                )}
               </>
             )}
           </CardContent>
+
+
         </Card>
       </div>
 
@@ -495,9 +527,13 @@ export default function BookingsPage() {
         isOpen={showModal}
         onClose={() => {
           setShowModal(false);
-          loadBookings(); // перезагружаем список после создания
+        }}
+        onCreated={() => {
+          loadBookings(page, limit);
         }}
       />
+
+      <SlideToTop/>
     </ProtectedAdminRoute>
   );
 }

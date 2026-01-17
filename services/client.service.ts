@@ -1,16 +1,23 @@
 import api from "./axiosInstance";
+import {PaginatedResponse} from "@/services/booking.service";
 
 export interface Client {
   id: number;
   name?: string;
   phone: string;
+  local: 'ru' | 'uz';
+  telegramId?: string | number;
+  lastMarketingSentAt?: string;
+  createdAt: string;
+  _count?: {
+    bookings: number;
+  };
   bookings?: any[];
 }
 
 export interface CreateClientDto {
   name?: string;
   phone: string;
-  // Добавляем поля Telegram
   telegramId?: string;
   telegramUsername?: string;
   telegramFirstName?: string;
@@ -25,10 +32,16 @@ export interface UpdateClientDto {
 
 export const clientService = {
   // Получить всех клиентов
-  getAll() {
-    return api.get<Client[]>("/client").then(res => res.data);
+  getAll(page: number = 1, limit: number = 10) {
+    return api
+      .get<PaginatedResponse<Client>>("/client", {
+        params: {
+          page,
+          limit
+        }
+      })
+      .then(res => res.data);
   },
-
   // Получить одного клиента по ID
   getById(id: number) {
     return api.get<Client>(`/client/${id}`).then(res => res.data);

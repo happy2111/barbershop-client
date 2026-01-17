@@ -7,13 +7,25 @@ export enum BookingStatus {
   COMPLETED = "COMPLETED",
 }
 
+export interface PaginationMeta {
+  total: number;
+  page: number;
+  lastPage: number;
+  limit: number;
+}
+
+export interface PaginatedResponse<T> {
+  data: T[];
+  meta: PaginationMeta;
+}
+
 export interface Booking {
   id: number;
-  clientId: number;
+  clientId: number | null;
   specialistId: number;
-  date: string;       // ISO string
-  start_time: string; // "HH:MM"
-  end_time: string;   // "HH:MM"
+  date: string;
+  start_time: string;
+  end_time: string;
   status: BookingStatus;
   isSystem: boolean;
   reason?: string;
@@ -21,10 +33,8 @@ export interface Booking {
   specialist?: any;
   services?: Array<{
     service: {
-      id: number;
       name: string;
       price: number;
-      duration_min: number;
     };
   }>;
 }
@@ -53,9 +63,16 @@ export interface CreateBookingDto {
 
 
 export const bookingService = {
-  getAll() {
+  getAll(page: number = 1, limit: number = 10) {
     const hostname: string = window.location.hostname;
-    return api.get<Booking[]>("/booking", {params: {hostname}}).then(res => res.data);
+
+    return api.get<PaginatedResponse<Booking>>("/booking", {
+      params: {
+        hostname,
+        page,
+        limit
+      }
+    }).then(res => res.data);
   },
 
   getById(id: number) {
