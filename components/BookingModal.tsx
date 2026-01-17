@@ -16,7 +16,7 @@ import {
 import { Service, serviceService } from "@/services/service.service";
 import { Client, clientService } from "@/services/client.service";
 import { bookingService, BookingStatus } from "@/services/booking.service";
-import { Check, ChevronsUpDown, UserPlus, Phone } from "lucide-react";
+import {Check, ChevronsUpDown, UserPlus, Phone, User} from "lucide-react";
 import { cn } from "@/lib/utils";
 import {
   Command,
@@ -32,6 +32,10 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { toast } from "sonner";
+import {ClientSelector} from "@/components/admin/ClientSelector";
+import {ServiceSelector} from "@/components/admin/ServiceSelector";
+import {Avatar, AvatarFallback, AvatarImage} from "@/components/ui/avatar";
+import {SpecialistSelector} from "@/components/admin/SpecialistSelector";
 
 interface AdminBookingModalProps {
   isOpen: boolean;
@@ -39,6 +43,8 @@ interface AdminBookingModalProps {
   specialistId?: number;
   onCreated?: () => void;
 }
+
+
 
 const addMinutesToTime = (time: string, minutes: number): string => {
   if (!time) return "";
@@ -234,82 +240,16 @@ export const AdminBookingModal: React.FC<AdminBookingModalProps> = ({
 
         <div className="space-y-5 mt-2">
           {/* Клиент (поиск по телефону) */}
-          <div className="space-y-2">
+          <div className="space-y-2 ">
             <label className="text-sm font-medium">{t("fields.client")}</label>
-            <Popover open={openPhone} onOpenChange={setOpenPhone}>
-              <PopoverTrigger asChild>
-                <Button
-                  variant="outline"
-                  role="combobox"
-                  aria-expanded={openPhone}
-                  className="w-full justify-between h-auto py-2.5 px-3 text-left font-normal"
-                >
-                  {clientPhone ? (
-                    <span className="flex items-center gap-2">
-                      <Phone className="h-4 w-4 shrink-0" />
-                      {clientPhone}
-                    </span>
-                  ) : (
-                    <span className="text-muted-foreground">
-                      {t("placeholders.client_phone")}
-                    </span>
-                  )}
-                  <ChevronsUpDown className="ml-2 h-4 w-4 opacity-50 shrink-0" />
-                </Button>
-              </PopoverTrigger>
-
-              <PopoverContent className="p-0 w-full" align="start">
-                <Command shouldFilter={false}>
-                  <CommandInput
-                    placeholder={t("placeholders.search_phone")}
-                    value={clientPhone}
-                    onValueChange={handlePhoneSearch}
-                  />
-                  <CommandList className="max-h-60">
-                    <CommandEmpty>{t("search.no_results")}</CommandEmpty>
-
-                    {foundClients.length > 0 && (
-                      <CommandGroup heading={t("search.found_clients")}>
-                        {foundClients.map((client) => (
-                          <CommandItem
-                            key={client.id}
-                            value={client.phone}
-                            onSelect={() => handleSelectExistingClient(client)}
-                          >
-                            <Check
-                              className={cn(
-                                "mr-2 h-4 w-4",
-                                clientPhone === client.phone ? "opacity-100" : "opacity-0"
-                              )}
-                            />
-                            <div className="flex flex-col">
-                              <span>{client.phone}</span>
-                              {client.name && (
-                                <span className="text-xs text-muted-foreground">
-                                  {client.name}
-                                </span>
-                              )}
-                            </div>
-                          </CommandItem>
-                        ))}
-                      </CommandGroup>
-                    )}
-
-                    {clientPhone.trim().length >= 7 && (
-                      <CommandGroup heading={t("search.add_new")}>
-                        <CommandItem
-                          onSelect={handleAddNewClient}
-                          className="text-primary"
-                        >
-                          <UserPlus className="mr-2 h-4 w-4" />
-                          {t("search.create_new", { phone: clientPhone })}
-                        </CommandItem>
-                      </CommandGroup>
-                    )}
-                  </CommandList>
-                </Command>
-              </PopoverContent>
-            </Popover>
+            <ClientSelector
+              clientPhone={clientPhone}
+              foundClients={foundClients}
+              handlePhoneSearch={handlePhoneSearch}
+              handleSelectExistingClient={handleSelectExistingClient}
+              handleAddNewClient={handleAddNewClient}
+              t={t}
+            />
           </div>
 
           {/* Имя клиента (показываем только при создании нового или если уже есть) */}
@@ -336,87 +276,39 @@ export const AdminBookingModal: React.FC<AdminBookingModalProps> = ({
             </div>
           ) : (
             <div className="space-y-2">
-              <label className="text-sm font-medium">{t("fields.specialist")}</label>
-              <Popover>
-                <PopoverTrigger asChild>
-                  <Button variant="outline" className="w-full justify-between">
-                    {selectedSpecialist
-                      ? selectedSpecialist.name
-                      : t("placeholders.select_specialist")}
-                    <ChevronsUpDown className="ml-2 h-4 w-4 opacity-50" />
-                  </Button>
-                </PopoverTrigger>
-                <PopoverContent className="p-0">
-                  <Command>
-                    <CommandInput placeholder={t("placeholders.search_specialist")} />
-                    <CommandList>
-                      <CommandEmpty>{t("search.no_results")}</CommandEmpty>
-                      <CommandGroup>
-                        {specialists.map((spec) => (
-                          <CommandItem
-                            key={spec.id}
-                            value={spec.name}
-                            onSelect={() => setSelectedSpecialist(spec)}
-                          >
-                            {spec.name}
-                          </CommandItem>
-                        ))}
-                      </CommandGroup>
-                    </CommandList>
-                  </Command>
-                </PopoverContent>
-              </Popover>
+              <label className="text-sm font-medium">
+                {t("fields.specialist")}
+              </label>
+
+              {isSpecialistFixed ? (
+                // Если специалист зафиксирован (например, зашли с его страницы)
+                <div className="flex items-center gap-3 border rounded-md px-3 py-2 bg-muted/50 text-base font-medium">
+                  <Avatar className="h-7 w-7">
+                    <AvatarImage src={selectedSpecialist?.photo ?? undefined} />
+                    <AvatarFallback><User className="h-4 w-4" /></AvatarFallback>
+                  </Avatar>
+                  {selectedSpecialist ? selectedSpecialist.name : t("loading")}
+                </div>
+              ) : (
+                <SpecialistSelector
+                  specialists={specialists}
+                  selectedSpecialist={selectedSpecialist}
+                  setSelectedSpecialist={setSelectedSpecialist}
+                  t={t}
+                />
+              )}
             </div>
           )}
 
           {/* Услуга */}
           <div className="space-y-2">
             <label className="text-sm font-medium">{t("fields.service")}</label>
-            <Popover open={openServ} onOpenChange={setOpenServ}>
-              <PopoverTrigger asChild>
-                <Button variant="outline" className="w-full justify-between">
-                  {selectedService.length > 0
-                    ? selectedService.length === 1
-                      ? `${selectedService[0].name} (${selectedService[0].duration_min} ${t("common.minutes")})`
-                      : `${selectedService.length} ${t("common.services_selected")}`
-                    : t("placeholders.select_service")}
-                  <ChevronsUpDown className="ml-2 h-4 w-4 opacity-50" />
-                </Button>
-              </PopoverTrigger>
-              {selectedService.length > 0 && (
-                <div className="text-xs text-muted-foreground">
-                  {selectedService.map(s => s.name).join(", ")}
-                </div>
-              )}
-              <PopoverContent className="p-0">
-                <Command>
-                  <CommandInput placeholder={t("placeholders.search_service")} />
-                  <CommandList>
-                    <CommandEmpty>{t("search.no_results")}</CommandEmpty>
-
-                    <CommandGroup>
-                      {services.map((s) => (
-                        <CommandItem
-                          key={s.id}
-                          value={s.name}
-                          onSelect={() => toggleService(s)}
-                        >
-                          <Check
-                            className={cn(
-                              "mr-2 h-4 w-4",
-                              selectedService.some((x) => x.id === s.id)
-                                ? "opacity-100"
-                                : "opacity-0"
-                            )}
-                          />
-                          {s.name}
-                        </CommandItem>
-                      ))}
-                    </CommandGroup>
-                  </CommandList>
-                </Command>
-              </PopoverContent>
-            </Popover>
+            <ServiceSelector
+              services={services}
+              selectedServices={selectedService}
+              toggleService={toggleService}
+              t={t}
+            />
           </div>
 
           {/* Дата и время */}

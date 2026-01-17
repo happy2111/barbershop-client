@@ -16,13 +16,14 @@ import Link from "next/link"
 import { authStore } from "@/stores/auth.store"
 import LocaleSwitcher from "@/components/LocaleSwitcher"
 import { useTranslations } from 'next-intl'
-import {ModeToggle} from "@/components/ModeToggle";
 import {useTheme} from "next-themes";
 
 const Navbar = () => {
   const t = useTranslations()
   const router = useRouter()
   const [isMenuOpen, setIsMenuOpen] = useState(false)
+  const { setTheme, theme } = useTheme()
+
 
   // Состояния для скрытия при скролле
   const [isVisible, setIsVisible] = useState(true)
@@ -75,7 +76,6 @@ const Navbar = () => {
     setIsMenuOpen(false)
   }
 
-  const { setTheme, theme } = useTheme()
 
 
   return (

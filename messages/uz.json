@@ -307,13 +307,16 @@
       "actions": {
         "confirm": "Tasdiqlash",
         "complete": "Yakunlash",
-        "cancel": "Bekor qilish"
+        "cancel": "Bekor qilish",
+        "delete": "O'chirish"
       },
 
       "toast": {
         "status_updated": "Holat muvaffaqiyatli yangilandi",
         "status_update_failed": "Holatni yangilab bo'lmadi",
-        "load_failed": "Bronlar ro'yxatini yuklashda xatolik yuz berdi"
+        "load_failed": "Bronlar ro'yxatini yuklashda xatolik yuz berdi",
+        "delete_failed": "Bronni o'chirib bo'lmadi",
+        "deleted": "Bron muvaffaqiyatli o'chirildi"
       },
       "common" : {
         "minutes": "min"

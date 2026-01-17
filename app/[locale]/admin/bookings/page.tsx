@@ -58,12 +58,13 @@ import {
   User,
   Scissors,
   Phone,
-  Plus,
+  Plus, Trash2,
 } from "lucide-react";
 import ProtectedAdminRoute from "@/components/Pretecters&Providers/ProtectedAdminRoute";
 import { AdminBookingModal } from "@/components/BookingModal";
 import SlideToTop from "@/components/SlideToTop";
 import {PaginationCustom} from "@/components/PaginationCustom";
+import {clientService} from "@/services/client.service";
 
 export default function BookingsPage() {
   const t = useTranslations("admin.bookings");
@@ -122,6 +123,18 @@ export default function BookingsPage() {
 
     const { labelKey, variant } = variants[status];
     return <Badge variant={variant}>{t(labelKey)}</Badge>;
+  };
+
+  const handleDelete = async (id: number) => {
+    if (!confirm(t("confirm.delete"))) return;
+
+    try {
+      await bookingService.remove(id);
+      setBookings((prev) => prev.filter((c) => c.id !== id));
+      toast.success(t("toast.deleted"));
+    } catch (error: any) {
+      toast.error(error.response?.data?.message || t("errors.delete_failed"));
+    }
   };
 
   // ─── Desktop Columns ───────────────────────────────────────────────────────
@@ -230,45 +243,56 @@ export default function BookingsPage() {
         const booking = row.original;
 
         return (
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="ghost" className="h-8 w-8 p-0">
-                <MoreHorizontal className="h-4 w-4" />
-              </Button>
-            </DropdownMenuTrigger>
+          <div className="flex items-center gap-1">
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost" className="h-8 w-8 p-0">
+                  <MoreHorizontal className="h-4 w-4" />
+                </Button>
+              </DropdownMenuTrigger>
 
-            <DropdownMenuContent align="end">
-              <DropdownMenuItem
-                onClick={() =>
-                  updateStatus(booking.id, BookingStatus.CONFIRMED)
-                }
-                disabled={booking.status === BookingStatus.CONFIRMED}
-              >
-                {t("actions.confirm")}
-              </DropdownMenuItem>
+              <DropdownMenuContent align="end">
+                <DropdownMenuItem
+                  onClick={() =>
+                    updateStatus(booking.id, BookingStatus.CONFIRMED)
+                  }
+                  disabled={booking.status === BookingStatus.CONFIRMED}
+                >
+                  {t("actions.confirm")}
+                </DropdownMenuItem>
 
-              <DropdownMenuItem
-                onClick={() =>
-                  updateStatus(booking.id, BookingStatus.COMPLETED)
-                }
-                disabled={booking.status === BookingStatus.COMPLETED}
-              >
-                {t("actions.complete")}
-              </DropdownMenuItem>
+                <DropdownMenuItem
+                  onClick={() =>
+                    updateStatus(booking.id, BookingStatus.COMPLETED)
+                  }
+                  disabled={booking.status === BookingStatus.COMPLETED}
+                >
+                  {t("actions.complete")}
+                </DropdownMenuItem>
 
-              <DropdownMenuSeparator />
+                <DropdownMenuSeparator />
 
-              <DropdownMenuItem
-                onClick={() =>
-                  updateStatus(booking.id, BookingStatus.CANCELLED)
-                }
-                className="text-destructive focus:bg-destructive/10"
-                disabled={booking.status === BookingStatus.CANCELLED}
-              >
-                {t("actions.cancel")}
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
+                <DropdownMenuItem
+                  onClick={() =>
+                    updateStatus(booking.id, BookingStatus.CANCELLED)
+                  }
+                  className="text-destructive focus:bg-destructive/10"
+                  disabled={booking.status === BookingStatus.CANCELLED}
+                >
+                  {t("actions.cancel")}
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+            <Button
+              size="sm"
+              variant="ghost"
+              className="text-destructive hover:text-destructive/90"
+              onClick={() => handleDelete(booking.id)}
+              title={t("actions.delete")}
+            >
+              <Trash2 className="h-4 w-4" />
+            </Button>
+          </div>
         );
       },
     },
@@ -518,7 +542,6 @@ export default function BookingsPage() {
               </>
             )}
           </CardContent>
-
 
         </Card>
       </div>

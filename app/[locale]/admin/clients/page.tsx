@@ -40,6 +40,7 @@ import { Phone, User, Search, Edit, Trash2, Plus } from "lucide-react";
 import ProtectedAdminRoute from "@/components/Pretecters&Providers/ProtectedAdminRoute";
 import {PaginationMeta} from "@/services/booking.service";
 import {PaginationCustom} from "@/components/PaginationCustom";
+import SlideToTop from "@/components/SlideToTop";
 
 export default function ClientsPage() {
   const t = useTranslations("admin.clients");
@@ -434,6 +435,8 @@ export default function ClientsPage() {
           </DialogContent>
         </Dialog>
       </div>
+
+      <SlideToTop/>
     </ProtectedAdminRoute>
   );
 }

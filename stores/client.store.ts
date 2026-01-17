@@ -9,17 +9,17 @@ class ClientStore {
     makeAutoObservable(this);
   }
 
-  async fetchAll() {
-    this.loading = true;
-    try {
-      const data = await clientService.getAll();
-      runInAction(() => {
-        this.clients = data;
-      });
-    } finally {
-      this.loading = false;
-    }
-  }
+  // async fetchAll() {
+  //   this.loading = true;
+  //   try {
+  //     const data = await clientService.getAll();
+  //     runInAction(() => {
+  //       this.clients = data;
+  //     });
+  //   } finally {
+  //     this.loading = false;
+  //   }
+  // }
 
   async create(dto: CreateClientDto): Promise<Client> {
     try {
