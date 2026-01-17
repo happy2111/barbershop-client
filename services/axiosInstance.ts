@@ -42,6 +42,14 @@ function toErrorMessage(payload: any): string {
   return asString(payload) || "Server error";
 }
 
+function getLocaleFromPathname() {
+  if (typeof window === 'undefined') return 'ru';
+
+  const match = window.location.pathname.match(/^\/(ru|uz)(\/|$)/);
+  return match?.[1] ?? 'ru';
+}
+
+
 // ==========================================
 // Axios instance
 // ==========================================
@@ -56,6 +64,9 @@ const api = axios.create({
 api.interceptors.request.use((config: InternalAxiosRequestConfig) => {
   const token = authStore.getState().accessToken;
   const initData = window.Telegram?.WebApp?.initData;
+  const locale = getLocaleFromPathname();
+
+  config.headers['x-client-local'] = locale;
 
   if (initData) {
     config.headers['x-telegram-init-data'] = initData;
