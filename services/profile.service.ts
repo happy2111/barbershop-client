@@ -22,6 +22,8 @@ export interface SpecialistProfile {
     start_time: string;
     end_time: string;
   }>;
+  role: "ADMIN" | "SPECIALIST";
+  companyId: number;
   bookings: Booking[];
 }
 

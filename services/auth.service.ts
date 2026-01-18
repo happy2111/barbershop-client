@@ -12,4 +12,8 @@ export const authService = {
   logout() {
     return api.post("/auth/logout");
   },
+
+  async me() {
+    return api.get("/auth/me").then((res) => res.data);
+  }
 };
