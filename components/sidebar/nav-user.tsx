@@ -33,11 +33,12 @@ export function NavUser() {
   const user = authStore((state) => state.user)
   const logout = authStore((state) => state.logout)
 
+  console.log(user)
   if (!user) return null
 
   const initials =
     user.name?.slice(0, 2).toUpperCase() ||
-    user.phone.slice(-2)
+    user.phone?.slice(-2)
 
   const handleLogout = () => {
     logout();
