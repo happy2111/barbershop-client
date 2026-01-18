@@ -199,10 +199,10 @@ export default function ServiceCategoriesPage() {
           </Badge>
         </div>
 
-        <div className="flex gap-3">
+        <div className="flex max-sm:flex-col gap-3">
           <Button
             variant="outline"
-            size="sm"
+            size="default"
             className="flex-1"
             onClick={() => openDialog(category)}
           >
@@ -211,7 +211,7 @@ export default function ServiceCategoriesPage() {
           </Button>
           <Button
             variant="outline"
-            size="sm"
+            size="default"
             className="flex-1 text-destructive hover:text-destructive/90 border-destructive/30"
             onClick={() => handleDelete(category.id)}
           >

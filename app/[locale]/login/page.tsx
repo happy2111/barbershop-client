@@ -60,7 +60,7 @@ export default function SpecialistLoginPage() {
 
 
   return (
-    <div className="min-h-[100dvh] flex items-center justify-center bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-primary/10 via-background to-background p-4">
+    <div className="min-h-[80dvh] flex items-center justify-center bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-primary/10 via-background to-background p-4">
       <Card className="w-full max-w-[400px] shadow-xl border-border/50 backdrop-blur-sm bg-card/95 rounded-[2rem]">
         <CardHeader className="space-y-1 pb-6 text-center">
           <CardTitle className="text-2xl font-bold tracking-tight">

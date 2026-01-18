@@ -7,7 +7,7 @@ export interface User {
   name: string | null;
   role: "ADMIN" | "SPECIALIST";
   companyId: number;
-  photo?: string;
+  photo: string;
 }
 
 interface AuthState {

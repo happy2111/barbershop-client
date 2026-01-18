@@ -398,6 +398,16 @@ export default function BookingsPage() {
                   </span>
                 </div>
               </div>
+
+              <Button
+                variant="outline"
+                size="default"
+                className="w-full mt-2 text-destructive hover:text-destructive/90 border-destructive/30"
+                onClick={() => handleDelete(booking.id)}
+              >
+                <Trash2 className="w-4 h-4 mr-2" />
+                {t("actions.delete")}
+              </Button>
             </div>
           </div>
         </CardContent>

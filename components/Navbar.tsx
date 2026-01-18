@@ -28,6 +28,28 @@ const Navbar = () => {
   const [isVisible, setIsVisible] = useState(true)
   const lastScrollY = useRef(0)
 
+  const navRef = useRef<HTMLDivElement>(null)
+
+  const [mounted, setMounted] = useState(false)
+
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (isMenuOpen && navRef.current && !navRef.current.contains(event.target as Node)) {
+        setIsMenuOpen(false)
+      }
+    }
+
+    document.addEventListener('mousedown', handleClickOutside)
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside)
+    }
+  }, [isMenuOpen])
+
+  useEffect(() => {
+    setMounted(true)
+  }, [])
+
   useEffect(() => {
     const handleScroll = () => {
       const currentScrollY = window.scrollY
@@ -82,8 +104,11 @@ const Navbar = () => {
           ${isVisible ? 'translate-y-0 opacity-100' : '-translate-y-full opacity-0'}
         `}
       >
-        <div className="max-w-2xl mx-auto pointer-events-auto">
+        <div ref={navRef}
+             suppressHydrationWarning={true}
+             className="max-w-2xl mx-auto pointer-events-auto">
           <div
+            suppressHydrationWarning={true}
             className={`
             transition-all duration-300 ease-in-out border
             bg-card/80 backdrop-blur-md border-border shadow-sm overflow-hidden
@@ -95,7 +120,7 @@ const Navbar = () => {
             <div className="flex items-center justify-between px-5 py-2 h-12">
               <Link
                 href={`/${locale || ''}`}
-                className="text-lg font-bold tracking-tight hover:text-muted-foreground transition-colors ml-1"
+                className="text-lg font-bold leading-4 tracking-tight hover:text-muted-foreground transition-colors ml-1"
               >
                 {process.env.NEXT_PUBLIC_TITLE || t('navbar.title')}
               </Link>
@@ -179,17 +204,17 @@ const Navbar = () => {
                     </span>
                     <div className="flex bg-background/50 my-2 rounded-full border border-border">
                       <ThemeButton
-                        active={theme === 'light'}
+                        active={mounted && theme === 'light'}
                         onClick={() => setTheme('light')}
                         icon={<Sun className="h-4 w-4" />}
                       />
                       <ThemeButton
-                        active={theme === 'dark'}
+                        active={mounted && theme === 'dark'}
                         onClick={() => setTheme('dark')}
                         icon={<Moon className="h-4 w-4" />}
                       />
                       <ThemeButton
-                        active={theme === 'system'}
+                        active={mounted && theme === 'system'}
                         onClick={() => setTheme('system')}
                         icon={<span className="text-[10px] font-bold">AS</span>}
                       />

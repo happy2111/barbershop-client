@@ -14,6 +14,7 @@ import {routing} from '@/i18n/routing';
 import {Providers} from "@/app/[locale]/providers";
 
 export const metadata: Metadata = {
+  metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'),
   title: process.env.NEXT_PUBLIC_TITLE || "Название по умолчанию",
   description: process.env.NEXT_PUBLIC_DESCRIPTION,
   openGraph: {
@@ -22,7 +23,7 @@ export const metadata: Metadata = {
     url: process.env.NEXT_PUBLIC_OG_URL,
     images: [
       {
-        url: process.env.NEXT_PUBLIC_OG_IMAGE || "/default-og.png",
+        url: '/default-og.png', // Теперь корректно превратится в полную ссылку
         width: 1200,
         height: 630,
       },
@@ -70,7 +71,7 @@ export default async function RootLayout({
               enableSystem
               disableTransitionOnChange
             >
-              <div className="w-full mb-8 tg-safe-top">
+              <div className="w-full mb-8 tg-safe-top" suppressHydrationWarning>
                 <Navbar/>
                 {children}
                 <Footer/>

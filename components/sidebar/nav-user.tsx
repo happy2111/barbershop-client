@@ -26,14 +26,17 @@ import {
 } from "@/components/ui/sidebar"
 
 import { authStore } from "@/stores/auth.store"
+import {usePathname, useRouter} from "next/navigation";
 
 export function NavUser() {
   const { isMobile } = useSidebar()
+  const router = useRouter()
+
+
+  const logout = authStore(state => state.logout)
 
   const user = authStore((state) => state.user)
-  const logout = authStore((state) => state.logout)
 
-  console.log(user)
   if (!user) return null
 
   const initials =
@@ -45,6 +48,14 @@ export function NavUser() {
     window.location.href = '/';
   };
 
+  const currentPhoto = user?.photo
+    ? `${process.env.NEXT_PUBLIC_API_URL}${user.photo}`
+    : undefined;
+
+
+  const pathname = usePathname()
+  const segments = pathname.split('/').filter(Boolean)
+  const locale = segments[0]
 
   return (
     <SidebarMenu>
@@ -57,8 +68,9 @@ export function NavUser() {
             >
               <Avatar className="h-8 w-8 rounded-lg">
                 <AvatarImage
-                  src={user.photo ? `http://localhost:5000${user.photo}` : undefined}
+                  src={currentPhoto}
                   alt={user.name || "User"}
+                  className={"w-full h-full object-cover"}
                 />
                 <AvatarFallback className="rounded-lg">
                   {initials}
@@ -83,7 +95,11 @@ export function NavUser() {
             <DropdownMenuLabel className="p-0 font-normal">
               <div className="flex items-center gap-2 px-1 py-1.5 text-left text-sm">
                 <Avatar className="h-8 w-8 rounded-lg">
-                  <AvatarImage src="/avatar.png" alt={user.name || "User"} />
+                  <AvatarImage
+                    src={currentPhoto}
+                    alt={user.name || "User"}
+                    className={"w-full h-full object-cover"}
+                  />
                   <AvatarFallback className="rounded-lg">{initials}</AvatarFallback>
                 </Avatar>
                 <div className="grid flex-1">
@@ -95,7 +111,12 @@ export function NavUser() {
 
             <DropdownMenuSeparator />
 
-            <DropdownMenuItem onClick={handleLogout} className="cursor-pointer">
+            <DropdownMenuItem
+              onClick={() => {
+                logout()
+                router.push(`/${locale}`)
+              }}
+                               className="cursor-pointer">
               <LogOut />
               Log out
             </DropdownMenuItem>

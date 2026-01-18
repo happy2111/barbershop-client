@@ -21,6 +21,7 @@ import {toast} from "sonner";
 import {useTelegram} from "@/context/TelegramContext";
 
 import { useTranslations } from 'next-intl';
+import {printMe} from "@/lib/utils";
 
 type CategoryGroup = {
   id: number;
@@ -65,13 +66,14 @@ export default observer(function BookingPage() {
 
 
 
+
   const { user, webApp, initData } = useTelegram();
 
   useEffect(() => {
     if (initData) {
-      console.log("Данные получены:", user, webApp, initData);
+      // console.log("Данные получены:", user, webApp, initData);
     } else {
-      console.log("Ждем инициализации Telegram...");
+      // console.log("Ждем инициализации Telegram...");
     }
   }, [initData, user, webApp]); // Следим за изменениями
 
@@ -201,11 +203,11 @@ export default observer(function BookingPage() {
     <div className="min-h-screen bg-background py-8 px-4 text-foreground transition-colors">
       <div className="max-w-2xl mx-auto">
         <div className="mb-8 flex justify-center">
-          <div className="flex items-center w-full max-w-md">
-            {[1, 2, 3, 4, 5].map((s, idx) => (
-              <div key={s} className="flex items-center flex-1">
+          <div className="flex items-center w-full px-5">
+            {[1, 2, 3, 4,].map((s, idx) => (
+              <div key={s} className="flex items-center w-full  ">
                 <div
-                  className={`w-10 h-10 rounded-full flex items-center justify-center text-primary-foreground font-bold transition-all shadow
+                  className={`w-10 ${s === 5 && '!w-10'} h-10 rounded-full flex items-center justify-center text-primary-foreground font-bold transition-all shadow
                 ${step >= s ? "bg-primary" : "bg-primary/20"}`}
                 >
                   {s}
@@ -217,8 +219,17 @@ export default observer(function BookingPage() {
                   ${step > s ? "bg-primary" : "bg-primary/20"}`}
                   />
                 )}
+
               </div>
+
             ))}
+
+            <div
+              className={`!w-40  !h-10 rounded-full flex items-center justify-center text-primary-foreground font-bold transition-all shadow
+                ${step >= 5 ? "bg-primary" : "bg-primary/20"}`}
+            >
+              5
+            </div>
           </div>
         </div>
 

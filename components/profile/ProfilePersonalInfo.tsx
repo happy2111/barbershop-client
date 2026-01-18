@@ -81,8 +81,11 @@ const ProfilePersonalInfo = ({
       <CardContent className="space-y-6">
         <div className="flex items-center gap-6">
           <div className="relative">
-            <Avatar className="w-28 h-28 border-4 border-background">
-              <AvatarImage src={currentPhoto || undefined} />
+            <Avatar className="w-28 h-28 border-4 ">
+              <AvatarImage
+                src={currentPhoto || undefined}
+                className="object-cover w-full h-full"
+              />
               <AvatarFallback className="text-3xl">
                 {profile.name[0]?.toUpperCase() || "S"}
               </AvatarFallback>

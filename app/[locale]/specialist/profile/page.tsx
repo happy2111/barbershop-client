@@ -216,9 +216,226 @@ export default function SpecialistProfilePage() {
           isUploadingPhoto={isUploadingPhoto}
         />
 
+        <Tabs defaultValue="upcoming" className="w-full">
+          {/* Кнопка создания записи */}
+          <div className="mb-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+            <h2 className="text-xl font-semibold">{t('profile.bookings.section_title')}</h2>
+            <Button
+              onClick={() => setShowModal(true)}
+              className="whitespace-nowrap"
+            >
+              <Plus className="w-4 h-4 mr-2" />
+              {t('profile.create_booking')}
+            </Button>
+          </div>
+
+          {/* Переключатель вкладок */}
+          <TabsList className="grid w-full grid-cols-2 mb-6">
+            <TabsTrigger value="upcoming">
+              {t('profile.bookings.upcoming.title')}
+              {upcoming.length > 0 && (
+                <span className="ml-2 bg-primary/10 text-primary text-xs px-2 py-0.5 rounded-full">
+          {upcoming.length}
+        </span>
+              )}
+            </TabsTrigger>
+            <TabsTrigger value="past">
+              {t('profile.bookings.past.title')}
+              {past.length > 0 && (
+                <span className="ml-2 bg-muted text-muted-foreground text-xs px-2 py-0.5 rounded-full">
+          {past.length}
+        </span>
+              )}
+            </TabsTrigger>
+          </TabsList>
+
+          {/* Предстоящие записи */}
+          <TabsContent value="upcoming">
+            <Card>
+              <CardHeader className="pb-4">
+                <CardTitle className="flex items-center gap-2">
+                  <Calendar className="w-5 h-5 text-primary" />
+                  {t('profile.bookings.upcoming.title')}
+                </CardTitle>
+              </CardHeader>
+
+              <CardContent>
+                {upcoming.length === 0 ? (
+                  <div className="text-center py-12 text-muted-foreground">
+                    <Calendar className="w-12 h-12 mx-auto mb-4 opacity-40" />
+                    <p className="text-lg font-medium mb-1">
+                      {t('profile.bookings.upcoming.no_bookings')}
+                    </p>
+                    <p className="text-sm">
+                      {t('profile.bookings.upcoming.no_bookings_hint')}
+                    </p>
+                  </div>
+                ) : (
+                  <div className="grid gap-4">
+                    {upcoming.map((b) => (
+                      <div
+                        key={b.id}
+                        className="group relative border border-border rounded-[var(--radius)] p-5 bg-card text-card-foreground hover:shadow-lg hover:shadow-primary/5 transition-all duration-300"
+                      >
+                        <div className="flex flex-col md:flex-row md:items-start justify-between gap-6">
+
+                          {/* Инфо о клиенте и услугах */}
+                          <div className="flex-1 space-y-4">
+                            <div className="flex items-center justify-between">
+                              <div>
+                                <h3 className="font-bold text-xl tracking-tight">
+                                  {b.client?.name || t('common.unknown_client')}
+                                </h3>
+                                <p className="text-sm font-medium text-muted-foreground">
+                                  {b.client?.phone}
+                                </p>
+                              </div>
+                              <div className="shrink-0">
+                                {renderBookingStatus(b.status)}
+                              </div>
+                            </div>
+
+                            {/* Список услуг с ценами */}
+                            <div className="space-y-2 rounded-lg bg-muted/30 p-3">
+                              <div className="flex flex-col gap-1.5">
+                                {b.services.map((bs: any, idx: number) => (
+                                  <div
+                                    key={idx}
+                                    className="flex justify-between text-sm"
+                                  >
+                                  <span className="text-muted-foreground">
+                                    <span className="text-primary mr-2">•</span>
+                                    {bs.service.name}
+                                  </span>
+                                    <span className="font-medium whitespace-nowrap ml-4">
+                                    {bs.service.price.toLocaleString()} сум
+                                  </span>
+                                  </div>
+                                ))}
+                              </div>
+
+                              <div className="pt-2 mt-2 border-t border-border flex justify-between items-center">
+                                <span className="text-xs uppercase tracking-wider font-semibold text-muted-foreground">
+                                  Итого
+                                </span>
+                                <span className="text-lg font-bold text-primary">
+                                  {b.services.reduce((sum: number, s: any) => sum + s.service.price, 0).toLocaleString()} сум
+                                </span>
+                              </div>
+                            </div>
+
+                            {/* Дата и время */}
+                            <div className="flex flex-wrap items-center gap-4 text-sm font-medium">
+                              <div className="flex items-center gap-2 px-2.5 py-1 rounded-md bg-secondary text-secondary-foreground">
+                                <Calendar className="w-4 h-4 opacity-70" />
+                                {format(new Date(b.date), "dd MMM yyyy", {locale: ru})}
+                              </div>
+                              <div className="flex items-center gap-2 px-2.5 py-1 rounded-md bg-secondary text-secondary-foreground">
+                                <Clock className="w-4 h-4 opacity-70" />
+                                {b.start_time} – {b.end_time}
+                              </div>
+                            </div>
+                          </div>
+
+                          {/* Секция действий */}
+                          <div className="flex flex-row sm:flex-col gap-2 min-w-full sm:min-w-[160px]">
+                            {b.status === "PENDING" && (
+                              <>
+                                <Button
+                                  size="default"
+                                  className="flex-1 bg-primary text-primary-foreground hover:opacity-90 shadow-sm"
+                                  onClick={() => updateBooking(b.id, BookingStatus.CONFIRMED)}
+                                >
+                                  {t('profile.bookings.actions.confirm')}
+                                </Button>
+                                <Button
+                                  size="default"
+                                  variant="outline"
+                                  className="flex-1 border-destructive/20 text-destructive hover:bg-destructive hover:text-white transition-colors"
+                                  onClick={() => updateBooking(b.id, BookingStatus.CANCELLED)}
+                                >
+                                  {t('profile.bookings.actions.cancel')}
+                                </Button>
+                              </>
+                            )}
+
+                            {b.status === "CONFIRMED" && (
+                              <Button
+                                size="default"
+                                className="w-full bg-blue-600 hover:bg-blue-700 text-white shadow-md"
+                                onClick={() => updateBooking(b.id, BookingStatus.COMPLETED)}
+                              >
+                                {t('profile.bookings.actions.complete')}
+                              </Button>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          {/* Прошедшие записи */}
+          <TabsContent value="past">
+            <Card>
+              <CardHeader className="pb-4">
+                <CardTitle className="flex items-center gap-2">
+                  <History className="w-5 h-5 text-muted-foreground" />
+                  {t('profile.bookings.past.title')}
+                </CardTitle>
+              </CardHeader>
+
+              <CardContent>
+                {past.length === 0 ? (
+                  <div className="text-center py-12 text-muted-foreground">
+                    <History className="w-12 h-12 mx-auto mb-4 opacity-40" />
+                    <p className="text-lg font-medium">
+                      {t('profile.bookings.past.no_bookings')}
+                    </p>
+                  </div>
+                ) : (
+                  <div className="space-y-4">
+                    {past.map((b) => (
+                      <div
+                        key={b.id}
+                        className="border rounded-xl p-5 bg-muted/30"
+                      >
+                        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                          <div className="space-y-1.5 flex-1">
+                            <div className="flex items-center justify-between">
+                              <h3 className="font-semibold">
+                                {b.client?.name || t('common.unknown_client')}
+                              </h3>
+                              {renderBookingStatus(b.status)}
+                            </div>
+
+                            <p className="text-sm text-muted-foreground">
+                              {b.service?.name}
+                            </p>
+
+                            <p className="text-sm text-muted-foreground flex items-center gap-2">
+                              <Calendar className="w-4 h-4" />
+                              {format(new Date(b.date), "dd MMMM yyyy", { locale: ru })}
+                              <span className="mx-1">•</span>
+                              <Clock className="w-4 h-4" />
+                              {b.start_time} – {b.end_time}
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          </TabsContent>
+        </Tabs>
+
         <ProfileServices profile={profile} />
 
-        <ChangePassword />
 
         <ProfileBlockedTime />
 
@@ -367,224 +584,8 @@ export default function SpecialistProfilePage() {
           </CardContent>
         </Card>
 
-        {/* Записи */}
-        <Tabs defaultValue="upcoming" className="w-full">
-          {/* Кнопка создания записи */}
-          <div className="mb-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-            <h2 className="text-xl font-semibold">{t('profile.bookings.section_title')}</h2>
-            <Button
-              onClick={() => setShowModal(true)}
-              className="whitespace-nowrap"
-            >
-              <Plus className="w-4 h-4 mr-2" />
-              {t('profile.create_booking')}
-            </Button>
-          </div>
+        <ChangePassword />
 
-          {/* Переключатель вкладок */}
-          <TabsList className="grid w-full grid-cols-2 mb-6">
-            <TabsTrigger value="upcoming">
-              {t('profile.bookings.upcoming.title')}
-              {upcoming.length > 0 && (
-                <span className="ml-2 bg-primary/10 text-primary text-xs px-2 py-0.5 rounded-full">
-          {upcoming.length}
-        </span>
-              )}
-            </TabsTrigger>
-            <TabsTrigger value="past">
-              {t('profile.bookings.past.title')}
-              {past.length > 0 && (
-                <span className="ml-2 bg-muted text-muted-foreground text-xs px-2 py-0.5 rounded-full">
-          {past.length}
-        </span>
-              )}
-            </TabsTrigger>
-          </TabsList>
-
-          {/* Предстоящие записи */}
-          <TabsContent value="upcoming">
-            <Card>
-              <CardHeader className="pb-4">
-                <CardTitle className="flex items-center gap-2">
-                  <Calendar className="w-5 h-5 text-primary" />
-                  {t('profile.bookings.upcoming.title')}
-                </CardTitle>
-              </CardHeader>
-
-              <CardContent>
-                {upcoming.length === 0 ? (
-                  <div className="text-center py-12 text-muted-foreground">
-                    <Calendar className="w-12 h-12 mx-auto mb-4 opacity-40" />
-                    <p className="text-lg font-medium mb-1">
-                      {t('profile.bookings.upcoming.no_bookings')}
-                    </p>
-                    <p className="text-sm">
-                      {t('profile.bookings.upcoming.no_bookings_hint')}
-                    </p>
-                  </div>
-                ) : (
-                  <div className="grid gap-4">
-                    {upcoming.map((b) => (
-                      <div
-                        key={b.id}
-                        className="group relative border border-border rounded-[var(--radius)] p-5 bg-card text-card-foreground hover:shadow-lg hover:shadow-primary/5 transition-all duration-300"
-                      >
-                        <div className="flex flex-col md:flex-row md:items-start justify-between gap-6">
-
-                          {/* Инфо о клиенте и услугах */}
-                          <div className="flex-1 space-y-4">
-                            <div className="flex items-center justify-between">
-                              <div>
-                                <h3 className="font-bold text-xl tracking-tight">
-                                  {b.client?.name || t('common.unknown_client')}
-                                </h3>
-                                <p className="text-sm font-medium text-muted-foreground">
-                                  {b.client?.phone}
-                                </p>
-                              </div>
-                              <div className="shrink-0">
-                                {renderBookingStatus(b.status)}
-                              </div>
-                            </div>
-
-                            {/* Список услуг с ценами */}
-                            <div className="space-y-2 rounded-lg bg-muted/30 p-3">
-                              <div className="flex flex-col gap-1.5">
-                                {b.services.map((bs: any, idx: number) => (
-                                  <div
-                                    key={idx}
-                                    className="flex justify-between text-sm"
-                                  >
-                                  <span className="text-muted-foreground">
-                                    <span className="text-primary mr-2">•</span>
-                                    {bs.service.name}
-                                  </span>
-                                                    <span className="font-medium whitespace-nowrap ml-4">
-                                    {bs.service.price.toLocaleString()} сум
-                                  </span>
-                                  </div>
-                                ))}
-                              </div>
-
-                              <div className="pt-2 mt-2 border-t border-border flex justify-between items-center">
-                                <span className="text-xs uppercase tracking-wider font-semibold text-muted-foreground">
-                                  Итого
-                                </span>
-                                 <span className="text-lg font-bold text-primary">
-                                  {b.services.reduce((sum: number, s: any) => sum + s.service.price, 0).toLocaleString()} сум
-                                </span>
-                              </div>
-                            </div>
-
-                            {/* Дата и время */}
-                            <div className="flex flex-wrap items-center gap-4 text-sm font-medium">
-                              <div className="flex items-center gap-2 px-2.5 py-1 rounded-md bg-secondary text-secondary-foreground">
-                                <Calendar className="w-4 h-4 opacity-70" />
-                                {format(new Date(b.date), "dd MMM yyyy", {locale: ru})}
-                              </div>
-                              <div className="flex items-center gap-2 px-2.5 py-1 rounded-md bg-secondary text-secondary-foreground">
-                                <Clock className="w-4 h-4 opacity-70" />
-                                {b.start_time} – {b.end_time}
-                              </div>
-                            </div>
-                          </div>
-
-                          {/* Секция действий */}
-                          <div className="flex flex-row sm:flex-col gap-2 min-w-full sm:min-w-[160px]">
-                            {b.status === "PENDING" && (
-                              <>
-                                <Button
-                                  size="default"
-                                  className="flex-1 bg-primary text-primary-foreground hover:opacity-90 shadow-sm"
-                                  onClick={() => updateBooking(b.id, BookingStatus.CONFIRMED)}
-                                >
-                                  {t('profile.bookings.actions.confirm')}
-                                </Button>
-                                <Button
-                                  size="default"
-                                  variant="outline"
-                                  className="flex-1 border-destructive/20 text-destructive hover:bg-destructive hover:text-white transition-colors"
-                                  onClick={() => updateBooking(b.id, BookingStatus.CANCELLED)}
-                                >
-                                  {t('profile.bookings.actions.cancel')}
-                                </Button>
-                              </>
-                            )}
-
-                            {b.status === "CONFIRMED" && (
-                              <Button
-                                size="default"
-                                className="w-full bg-blue-600 hover:bg-blue-700 text-white shadow-md"
-                                onClick={() => updateBooking(b.id, BookingStatus.COMPLETED)}
-                              >
-                                {t('profile.bookings.actions.complete')}
-                              </Button>
-                            )}
-                          </div>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                )}
-              </CardContent>
-            </Card>
-          </TabsContent>
-
-          {/* Прошедшие записи */}
-          <TabsContent value="past">
-            <Card>
-              <CardHeader className="pb-4">
-                <CardTitle className="flex items-center gap-2">
-                  <History className="w-5 h-5 text-muted-foreground" />
-                  {t('profile.bookings.past.title')}
-                </CardTitle>
-              </CardHeader>
-
-              <CardContent>
-                {past.length === 0 ? (
-                  <div className="text-center py-12 text-muted-foreground">
-                    <History className="w-12 h-12 mx-auto mb-4 opacity-40" />
-                    <p className="text-lg font-medium">
-                      {t('profile.bookings.past.no_bookings')}
-                    </p>
-                  </div>
-                ) : (
-                  <div className="space-y-4">
-                    {past.map((b) => (
-                      <div
-                        key={b.id}
-                        className="border rounded-xl p-5 bg-muted/30"
-                      >
-                        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-                          <div className="space-y-1.5 flex-1">
-                            <div className="flex items-center justify-between">
-                              <h3 className="font-semibold">
-                                {b.client?.name || t('common.unknown_client')}
-                              </h3>
-                              {renderBookingStatus(b.status)}
-                            </div>
-
-                            <p className="text-sm text-muted-foreground">
-                              {b.service?.name}
-                            </p>
-
-                            <p className="text-sm text-muted-foreground flex items-center gap-2">
-                              <Calendar className="w-4 h-4" />
-                              {format(new Date(b.date), "dd MMMM yyyy", { locale: ru })}
-                              <span className="mx-1">•</span>
-                              <Clock className="w-4 h-4" />
-                              {b.start_time} – {b.end_time}
-                            </p>
-                          </div>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                )}
-              </CardContent>
-            </Card>
-          </TabsContent>
-        </Tabs>
       </div>
       {
         showModal && <AdminBookingModal isOpen={showModal} onClose={() => setShowModal(false)} specialistId={profile.id} onCreated={() => loadData()} />
